@@ -2,6 +2,15 @@ const userModel = require("../models/userModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 
+const sendData = (user, statusCode, res) => {
+    const token = user.getJWTToken();
+  
+    res.status(statusCode).json({
+      user,
+      token,
+    });
+  };
+
 exports.login = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
 

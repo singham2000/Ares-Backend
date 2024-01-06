@@ -13,8 +13,10 @@ connectDB();
 
 
 const userRoute = require("./src/routes/userRoute");
+const adminRoute = require('./src/routes/adminRoute.js');
 
 app.use("/api/user", userRoute);
+app.use("/api/admin", adminRoute);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
@@ -29,4 +31,4 @@ try {
 }
 
 
-// app.use(errorMiddleware);
+app.use(errorMiddleware);
