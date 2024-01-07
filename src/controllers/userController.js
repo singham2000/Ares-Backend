@@ -143,3 +143,48 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
     await user.save();
     res.status(203).json({ message: "Password Updated Successfully." });
 });
+
+exports.registerClient = catchAsyncError(async (req, res, next) => {
+    const {
+        first_name,
+        last_name,
+        suffix,
+        birthday,
+        gender,
+        email,
+        phone_number,
+        address,
+        city,
+        state,
+        zip
+    } = req.body;
+
+    if (!first_name || !last_name || !suffix || !birthday || !gender || !email || !phone_number || !address || !city || !state || !zip) {
+        return next(new ErrorHandler("Please fill all fields", 400));
+    }
+
+    let user = await clientModal.findOne({ email });
+    if (user)
+        return next(new ErrorHandler("User already exists with this email", 400));
+
+    client = await clientModal.create({
+        first_name,
+        last_name,
+        suffix,
+        birthday,
+        gender,
+        email,
+        phone_number,
+        address,
+        city,
+        state,
+        zip
+    });
+
+    await client.save();
+    res.status(200).json({
+        success: true,
+        message: "Client Created Successfully.",
+        user,
+    });
+});

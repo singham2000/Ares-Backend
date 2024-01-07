@@ -7,7 +7,8 @@ const {
     validateForgotPasswordCode,
     resetPassword,
     updateProfile,
-    updatePassword
+    updatePassword,
+    registerClient
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.get("/get-profile", auth, getProfile);
 
 router.put("/update-profile", auth, updateProfile);
 router.put("/update-password", auth, updatePassword);
+router.put("/new-client-registration", auth, registerClient);
 
 module.exports = router;
