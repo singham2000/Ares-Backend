@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "Athelete",
   },
+  temp_code: {
+    type: String,
+  },
 });
 
 userSchema.pre("save", async function (next) {

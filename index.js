@@ -3,19 +3,20 @@ const cors = require('cors');
 const errorMiddleware = require('./src/middlewares/error.js');
 const connectDB = require("./src/config/database.js");
 const dotenv = require("dotenv");
+const morgan = require('morgan')
 const app = express();
 
-dotenv.config({ path: "./src/config/config.env" });
+dotenv.config({ path: "./src/config/.env" });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "PUT"] }));
 connectDB();
-
+app.use(morgan('dev'));
 
 const userRoute = require("./src/routes/userRoute");
 const adminRoute = require('./src/routes/adminRoute.js');
 
-app.use("/api/user", userRoute);
+app.use("/api/doctor", userRoute);
 app.use("/api/admin", adminRoute);
 
 app.get("/", (req, res) =>
