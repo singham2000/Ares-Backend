@@ -15,7 +15,9 @@ const sendData = (user, statusCode, res) => {
 };
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
-    const user = await userModel.findById(req.body.userId);
+    const { email } = req.body;
+    const user = await userModel.findOne({ email });
+
     if (!user) {
         return next(new ErrorHandler("User not found.", 400));
     }
