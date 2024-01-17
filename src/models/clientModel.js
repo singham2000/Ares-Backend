@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-
-first_name, last_name, suffix, birthday, gender, email, phone_number, address, city, state, zip
-
-
 const clientScheme = new mongoose.Schema({
-
+    client_id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     first_name: {
         type: String,
         trim: true,
@@ -22,7 +22,7 @@ const clientScheme = new mongoose.Schema({
         trim: true,
     },
     birthday: {
-        type: Date,
+        type: String,
         required: [true, "Your birthday is required"]
     },
     gender: {
@@ -52,10 +52,13 @@ const clientScheme = new mongoose.Schema({
         type: String,
         required: [true, "Your State is Required"]
     },
-    zip_code: {
+    zip: {
         type: String,
         required: [true, "Your zip code is required"],
-    }
-})
+    },
+},
+    {
+        timestamps: true,
+    })
 
 module.exports = mongoose.model("Client", clientScheme);

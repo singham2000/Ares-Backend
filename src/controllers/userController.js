@@ -1,8 +1,12 @@
 const userModel = require("../models/userModel");
+const clientModel = require('../models/clientModel');
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
+const { generateClientId } = require("../utils/generateId");
+const appointmentModel = require("../models/appointmentModel");
+const { query } = require("express");
 
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
@@ -163,15 +167,17 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
         zip
     } = req.body;
 
+    let clientid = generateClientId();
+
     if (!first_name || !last_name || !suffix || !birthday || !gender || !email || !phone_number || !address || !city || !state || !zip) {
         return next(new ErrorHandler("Please fill all fields", 400));
     }
 
-    let user = await clientModal.findOne({ email });
-    if (user)
+    let client = await clientModel.findOne({ email });
+    if (client)
         return next(new ErrorHandler("User already exists with this email", 400));
 
-    client = await clientModal.create({
+    client = await clientModel.create({
         first_name,
         last_name,
         suffix,
@@ -182,13 +188,111 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
         address,
         city,
         state,
-        zip
+        zip,
+        client_id: clientid
     });
 
     await client.save();
+
     res.status(200).json({
         success: true,
         message: "Client Created Successfully.",
-        user,
+        client,
     });
+});
+
+exports.checkClient = catchAsyncError(async (req, res, next) => {
+    const {
+        email,
+    } = req.body;
+
+    if (!email) {
+        return next(new ErrorHandler("Please provide a email", 400));
+    }
+
+    let user = await clientModel.findOne({ email });
+    if (!user)
+        return next(new ErrorHandler("User does not exists with this email", 400));
+
+    res.status(200).json({
+        success: true,
+        client_id: user.client_id
+    });
+});
+
+exports.bookAppointment = catchAsyncError(async (req, res, next) => {
+    const {
+        service_type,
+        app_date,
+        app_time,
+        doctor_trainer,
+        location
+    } = req.body;
+    const app_id = generateClientId();
+    const client_id = req.params.id;
+    console.log(client_id);
+    if (!client_id) {
+        return next(new ErrorHandler("Please provide a client_id", 400));
+    }
+    const client = await clientModel.findOne({ client_id: client_id });
+    if (!client) {
+        return next(new ErrorHandler("Client does not exist", 400));
+    }
+    const appointment = await appointmentModel.create({
+        appointment_id: app_id,
+        service_type,
+        app_date,
+        app_time,
+        doctor_trainer,
+        location,
+        status: 'pending'
+    });
+    res.status(200).json({
+        success: true,
+        message: `Appointment booked. Your Appointment ID: ${app_id}.`,
+        appointment,
+    });
+});
+
+exports.recentBookings = catchAsyncError(async (req, res, next) => {
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 10;
+
+    const appointments = await appointmentModel.find()
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+
+    const totalRecords = await appointmentModel.countDocuments();
+
+    res.json({
+        data: appointments,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    });
+
+});
+
+exports.recentPrescriptions = catchAsyncError(async (req, res, next) => {
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 10;
+
+    const query = {};
+    query.status = 'paid';
+
+    const appointments = await appointmentModel.find(query)
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+
+    const totalRecords = await appointmentModel.countDocuments(query);
+
+    res.json({
+        data: appointments,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    });
+
 });

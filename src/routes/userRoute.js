@@ -8,7 +8,11 @@ const {
     resetPassword,
     updateProfile,
     updatePassword,
-    registerClient
+    registerClient,
+    checkClient,
+    bookAppointment,
+    recentBookings,
+    recentPrescriptions
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -22,6 +26,10 @@ router.get("/get-profile", auth, getProfile);
 
 router.put("/update-profile", auth, updateProfile);
 router.put("/update-password", auth, updatePassword);
-router.put("/new-client-registration", auth, registerClient);
+router.post("/new-client-registration", auth, registerClient);
+router.post("/existing-client-verification", auth, checkClient);
+router.post("/book-appointment/:id", auth, bookAppointment);
+router.get("/recent-bookings", auth, recentBookings);
+router.get("/recent-prescriptions", auth, recentPrescriptions);
 
 module.exports = router;
