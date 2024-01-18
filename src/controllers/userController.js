@@ -1,12 +1,11 @@
 const userModel = require("../models/userModel");
 const clientModel = require('../models/clientModel');
+const appointmentModel = require("../models/appointmentModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
-const { generateClientId } = require("../utils/generateId");
-const appointmentModel = require("../models/appointmentModel");
-const { query } = require("express");
+const { generateClientId, generateAppointmentId } = require("../utils/generateId");
 
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
@@ -221,6 +220,8 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
 });
 
 exports.bookAppointment = catchAsyncError(async (req, res, next) => {
+    const client_id = req.params.id;
+    console.log(client_id);
     const {
         service_type,
         app_date,
@@ -228,9 +229,9 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         doctor_trainer,
         location
     } = req.body;
-    const app_id = generateClientId();
-    const client_id = req.params.id;
-    console.log(client_id);
+
+    const app_id = generateAppointmentId();
+
     if (!client_id) {
         return next(new ErrorHandler("Please provide a client_id", 400));
     }
@@ -247,6 +248,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location,
         status: 'pending'
     });
+    await appointment.save();
     res.status(200).json({
         success: true,
         message: `Appointment booked. Your Appointment ID: ${app_id}.`,
@@ -254,7 +256,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.recentBookings = catchAsyncError(async (req, res, next) => {
+exports.recentBookings = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
 
@@ -274,7 +276,7 @@ exports.recentBookings = catchAsyncError(async (req, res, next) => {
 
 });
 
-exports.recentPrescriptions = catchAsyncError(async (req, res, next) => {
+exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
 
@@ -295,4 +297,28 @@ exports.recentPrescriptions = catchAsyncError(async (req, res, next) => {
         currentPage: page,
     });
 
+});
+
+exports.inQueueRequests = catchAsyncError(async (req, res) => {
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 10;
+
+    const query = {};
+
+    query.status = 'paid';
+
+    query.service_type = { $in: ['evaluation', 'sportsVision'] };
+    const appointments = await appointmentModel.find(query)
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+
+    const totalRecords = await appointmentModel.countDocuments(query);
+
+    res.json({
+        data: appointments,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    });
 });

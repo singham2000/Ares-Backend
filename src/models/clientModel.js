@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+const planEnum = ['novice', 'intermediate', 'advanced', 'elite'];
+
 const clientScheme = new mongoose.Schema({
     client_id: {
         type: String,
@@ -20,6 +22,11 @@ const clientScheme = new mongoose.Schema({
     suffix: {
         type: String,
         trim: true,
+    },
+    plan: {
+        type: String,
+        enum: planEnum,
+        default: null
     },
     birthday: {
         type: String,
