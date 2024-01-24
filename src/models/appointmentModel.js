@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const appointmentServiceEnum = ['MedicalOfficeVisit', 'SportsVision', 'Consultation', 'TrainingSessions', 'ConcussionEval'];
-const appointmentStatus = ['paid','pending','failed'];
+const appointmentStatus = ['paid', 'pending', 'failed'];
 
 const appointmentSchema = new mongoose.Schema({
-    appointment_id:{
+    appointment_id: {
         type: String,
         required: true,
         unique: true,
@@ -13,6 +13,10 @@ const appointmentSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: appointmentServiceEnum
+    },
+    client: {
+        type: String,
+        required: true,
     },
     app_date: {
         type: String,
@@ -29,9 +33,9 @@ const appointmentSchema = new mongoose.Schema({
     location: {
         type: String,
     },
-    status:{
-        type:String,
-        required:true,
+    status: {
+        type: String,
+        required: true,
         enum: appointmentStatus
     }
 },

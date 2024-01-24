@@ -363,4 +363,7 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
     }
 });
 
+exports.getAppointment = catchAsyncError(async (req, res) => {
+    const date = req.params.date;
+})
 
