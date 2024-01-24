@@ -365,9 +365,11 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
     const date = req.params.date;
-    var parsedDate = new Date(date);
-    const appointments = await appointmentModel.find()
-        .sort({ createdAt: 'desc' })
-        .exec();
+    if (!date) {
+        return res.status(400).json({ error: 'Date parameter is required.' });
+    }
+    const startDate = new Date(date);
+    const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0] } });
+    res.json(appointments);
 })
 

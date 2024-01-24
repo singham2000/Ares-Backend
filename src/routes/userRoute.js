@@ -15,7 +15,8 @@ const {
     recentPrescriptions,
     inQueueRequests,
     selectPlan,
-    getEvalForm
+    getEvalForm,
+    getAppointment
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -33,6 +34,7 @@ router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
 router.get("/in-queue-requests", auth, inQueueRequests);
 router.get("/get-eval-form", auth, getEvalForm);
+router.get("/appointments/:date", auth, getAppointment);
 
 router.put("/reset-password", resetPassword);
 router.put("/update-profile", auth, updateProfile);
