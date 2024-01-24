@@ -15,7 +15,7 @@ const appointmentSchema = new mongoose.Schema({
         enum: appointmentServiceEnum
     },
     client: {
-        type: String,
+        type: Object,
         required: true,
     },
     app_date: {

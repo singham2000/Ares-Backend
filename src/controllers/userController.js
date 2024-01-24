@@ -284,7 +284,7 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
 
     const query = {};
     query.status = 'paid';
-
+    query.service_type = { $in: ["MedicalOfficeVisit"] };
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
@@ -365,5 +365,9 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
     const date = req.params.date;
+    var parsedDate = new Date(date);
+    const appointments = await appointmentModel.find()
+        .sort({ createdAt: 'desc' })
+        .exec();
 })
 
