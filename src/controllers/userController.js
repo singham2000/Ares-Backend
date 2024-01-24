@@ -242,6 +242,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     }
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
+        client: client,
         service_type,
         app_date,
         app_time,
