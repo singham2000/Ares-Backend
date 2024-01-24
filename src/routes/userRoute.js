@@ -13,7 +13,9 @@ const {
     bookAppointment,
     recentBookings,
     recentPrescriptions,
-    inQueueRequests
+    inQueueRequests,
+    selectPlan,
+    getEvalForm
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -24,11 +26,13 @@ router.post("/validate-code", validateForgotPasswordCode);
 router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
 router.post("/book-appointment/:id", auth, bookAppointment);
+router.post("/select-plan", auth, selectPlan);
 
 router.get("/get-profile", auth, getProfile);
 router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
 router.get("/in-queue-requests", auth, inQueueRequests);
+router.get("/get-eval-form", auth, getEvalForm);
 
 router.put("/reset-password", resetPassword);
 router.put("/update-profile", auth, updateProfile);

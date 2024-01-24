@@ -1,6 +1,8 @@
 const userModel = require("../models/userModel");
 const clientModel = require('../models/clientModel');
 const appointmentModel = require("../models/appointmentModel");
+const evaluationModel = require("../models/evaluationModel");
+const evaluationSchema = require("../models/evaluationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
@@ -221,7 +223,6 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
 
 exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     const client_id = req.params.id;
-    console.log(client_id);
     const {
         service_type,
         app_date,
@@ -307,7 +308,7 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
 
     query.status = 'paid';
 
-    query.service_type = { $in: ['evaluation', 'sportsVision'] };
+    query.service_type = { $in: ['ConcussionEval', 'SportsVision'] };
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
@@ -322,3 +323,43 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
         currentPage: page,
     });
 });
+
+exports.selectPlan = catchAsyncError(async (req, res) => {
+    const client_id = req.body.id;
+    const plan = req.body.plan;
+
+    if (!client_id) {
+        return next(new ErrorHandler("Please provide a client_id", 400));
+    }
+    const client = await clientModel.findOne({ client_id: client_id });
+    if (!client) {
+        return next(new ErrorHandler("Client does not exist", 400));
+    }
+    client.plan = plan;
+    await client.save();
+    res.status(200).json({
+        success: true,
+        message: `Plan updated, your plan is: ${client.plan}.`,
+        client,
+    });
+});
+
+exports.getEvalForm = catchAsyncError(async (req, res) => {
+    try {
+        const paths = Object.keys(evaluationModel.schema.paths);
+
+        const fieldsAndEnums = paths.reduce((result, path) => {
+            const schemaType = evaluationModel.schema.paths[path];
+            if (schemaType.enumValues) {
+                result.push({ field: path, enumValues: schemaType.enumValues });
+            }
+            return result;
+        }, []);
+        res.json(fieldsAndEnums);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+

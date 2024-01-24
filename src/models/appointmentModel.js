@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const appointmentServiceEnum = ['consultation', 'sportsVision', 'online', 'glasses', 'evaluation'];
+const appointmentServiceEnum = ['MedicalOfficeVisit', 'SportsVision', 'Consultation', 'TrainingSessions', 'ConcussionEval'];
 const appointmentStatus = ['paid','pending','failed'];
 
 const appointmentSchema = new mongoose.Schema({

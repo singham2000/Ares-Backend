@@ -1,15 +1,18 @@
 const userModel = require("../models/userModel");
+const fs = require('fs');
+const path = require('path');
+// const evaluationModel = require("../models/evaluationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
-
+const baseSchemaPath = path.resolve(__dirname, '../models/evaluationModel');
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
-  
+
     res.status(statusCode).json({
-      user,
-      token,
+        user,
+        token,
     });
-  };
+};
 
 exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     const {
@@ -37,4 +40,26 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
 
     user.password = undefined;
     sendData(user, 200, res);
+});
+
+exports.evaluationFormMake = catchAsyncError(async (req, res) => {
+    const { fieldName, values } = req.body;
+    try {
+        const existingSchemaCode = fs.readFileSync(baseSchemaPath, 'utf-8');
+
+        const updatedSchemaCode = existingSchemaCode.replace(
+            /const evaluationModel = new mongoose\.Schema\({/,
+            `const evaluationModel = new mongoose.Schema({
+                         [${fieldName}]: String,
+                         required: true,
+                         enum: ${values}`
+        );
+        fs.writeFileSync(baseSchemaPath, updatedSchemaCode, 'utf-8');
+        res.status(200).json({
+            success: true,
+            message: `Schema updated successfully.`,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err, 400));
+    }
 });
