@@ -2,7 +2,7 @@ const userModel = require("../models/userModel");
 const clientModel = require('../models/clientModel');
 const appointmentModel = require("../models/appointmentModel");
 const evaluationModel = require("../models/evaluationModel");
-const evaluationSchema = require("../models/evaluationModel");
+const prescriptionModel = require("../models/prescriptionModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
@@ -363,6 +363,24 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
     }
 });
 
+exports.getPresForm = catchAsyncError(async (req, res) => {
+    try {
+        const paths = Object.keys(prescriptionModel.schema.paths);
+
+        const fieldsAndEnums = paths.reduce((result, path) => {
+            const schemaType = prescriptionModel.schema.paths[path];
+            if (schemaType.enumValues) {
+                result.push({ field: path, enumValues: schemaType.enumValues });
+            }
+            return result;
+        }, []);
+        res.json(fieldsAndEnums);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 exports.getAppointment = catchAsyncError(async (req, res) => {
     const date = req.params.date;
     if (!date) {
@@ -371,5 +389,5 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
     const startDate = new Date(date);
     const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0] } });
     res.json(appointments);
-})
+});
 

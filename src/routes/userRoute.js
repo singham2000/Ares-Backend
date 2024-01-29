@@ -16,6 +16,7 @@ const {
     inQueueRequests,
     selectPlan,
     getEvalForm,
+    getPresForm,
     getAppointment
 } = require('../controllers/userController');
 
@@ -34,6 +35,7 @@ router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
 router.get("/in-queue-requests", auth, inQueueRequests);
 router.get("/get-eval-form", auth, getEvalForm);
+router.get("/get-pres-form", auth, getPresForm);
 router.get("/appointments/:date", auth, getAppointment);
 
 router.put("/reset-password", resetPassword);
