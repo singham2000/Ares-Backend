@@ -4,8 +4,8 @@ const path = require('path');
 // const evaluationModel = require("../models/evaluationModel");
 const catchAsyncError = require('../utils/catchAsyncError');
 const ErrorHandler = require('../utils/errorHandler');
-const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel');
-const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel');
+const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
+const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken()
 
@@ -82,13 +82,12 @@ exports.login = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler('Please enter your email and password', 400))
 
     const user = await userModel.findOne({ email }).select('+password')
-
-    if (user.role !== 'admin')
-        return next(new ErrorHandler('Unauthorized user login.', 401))
-
     if (!user) {
         return next(new ErrorHandler('Invalid email or password', 401))
     }
+    if (user.role !== 'admin')
+        return next(new ErrorHandler('Unauthorized user login.', 401))
+
 
     const isPasswordMatched = await user.comparePassword(password)
     if (!isPasswordMatched)
@@ -98,19 +97,23 @@ exports.login = catchAsyncError(async (req, res, next) => {
     sendData(user, 200, res)
 })
 
-exports.evaluationFormMake = catchAsyncError(async (req, res) => {
-    const { fieldName, values } = req.body
+exports.evaluationFormMake = catchAsyncError(async (req, res, next) => {
+    const { fieldName, values } = req.body;
+    if (!fieldName) {
+        return next(new ErrorHandler('Enter field Name', 400))
+    }
     try {
         const existingSchemaCode = fs.readFileSync(baseSchemaPathEval, 'utf-8')
 
         const updatedSchemaCode = existingSchemaCode.replace(
             /const evaluationSchema = new mongoose\.Schema\({/,
             `const evaluationSchema = new mongoose.Schema({
-                         [${fieldName}]: String,
-                         required: true,
-                         enum: ${values}`
-        )
-        fs.writeFileSync(baseSchemaPath, updatedSchemaCode, 'utf-8')
+                ${fieldName}:{
+                   type:String,
+                   required: [true, "Required"],
+                   ${values ? `enum: ${values}` : ''}
+                }, `)
+        fs.writeFileSync(baseSchemaPathEval, updatedSchemaCode, 'utf-8')
         res.status(200).json({
             success: true,
             message: `Schema updated successfully.`,
@@ -120,19 +123,23 @@ exports.evaluationFormMake = catchAsyncError(async (req, res) => {
     }
 })
 
-exports.prescriptionFormMake = catchAsyncError(async (req, res) => {
-    const { fieldName, values } = req.body
+exports.prescriptionFormMake = catchAsyncError(async (req, res, next) => {
+    const { fieldName, values } = req.body;
+    if (!fieldName) {
+        return next(new ErrorHandler('Enter field Name', 400))
+    }
     try {
         const existingSchemaCode = fs.readFileSync(baseSchemaPathPres, 'utf-8')
 
         const updatedSchemaCode = existingSchemaCode.replace(
             /const prescriptionSchema = new mongoose\.Schema\({/,
             `const prescriptionSchema = new mongoose.Schema({
-                         [${fieldName}]: String,
-                         required: true,
-                         enum: ${values}`
-        )
-        fs.writeFileSync(basePath, updatedSchemaCode, 'utf-8')
+                         ${fieldName}:{
+                            type:String,
+                            required: [true, "Required"],
+                            ${values ? `enum: ${values}` : ''}
+                         }, `)
+        fs.writeFileSync(baseSchemaPathPres, updatedSchemaCode, 'utf-8')
         res.status(200).json({
             success: true,
             message: `Schema updated successfully.`,
@@ -160,6 +167,10 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     })
+})
+
+exports.createSlot = catchAsyncError(async (req,res)=>{
+    
 })
 
 

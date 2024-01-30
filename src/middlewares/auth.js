@@ -37,15 +37,13 @@ exports.isAdmin = async (req, res, next) => {
   try {
     const userId = req.userId;
     const user = await userModel.findById(userId).select("+password");
-
     if (!user)
       return next(new ErrorHandler("Invalid token. User not found.", 401));
 
-    if (user.role !== "doctor")
+    if (user.role !== "admin")
       return next(new ErrorHandler("Restricted: Admin Only", 401));
 
     req.user = user;
-
     next();
   } catch (error) {
     console.log(error);

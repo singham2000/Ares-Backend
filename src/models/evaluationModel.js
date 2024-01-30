@@ -131,6 +131,11 @@ const dryRefractionODAddEnum = [
 const dryRefractionODAxisEnum = Array.from({ length: 180 }, (_, i) => (i + 1).toString().padStart(3, '0'));
 
 const evaluationSchema = new mongoose.Schema({
+    evalId: {
+        type: String,
+        unique: true,
+        required: true
+    },
     accommodativeFacilityOD: {
         type: String,
         enum: accommodativeFacilityEnum,

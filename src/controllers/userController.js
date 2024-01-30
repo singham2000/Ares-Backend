@@ -391,3 +391,6 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
     res.json(appointments);
 });
 
+exports.completedEvalReq = catchAsyncError(async (req, res) => {
+    
+});

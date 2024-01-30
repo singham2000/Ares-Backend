@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
-
+const roleEnum = ['admin', 'doctor', 'athelete'];
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: roleEnum,
     default: "Athelete",
   },
   temp_code: {
