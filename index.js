@@ -1,17 +1,30 @@
 const express = require("express");
 const cors = require('cors');
+const Log = require('./src/models/logModel.js');
 const errorMiddleware = require('./src/middlewares/error.js');
 const connectDB = require("./src/config/database.js");
 const dotenv = require("dotenv");
-const morgan = require('morgan')
+const morgan = require('morgan');
 const app = express();
 
 dotenv.config({ path: "./src/config/.env" });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "PUT"] }));
+
 connectDB();
-app.use(morgan('dev'));
+app.use(morgan('combined'));
+
+app.use((req, res, next) => {
+  const logEntry = new Log({ message: `${req.method} ${req.url}` });
+
+  logEntry.save()
+    .then(() => next())
+    .catch((err) => {
+      console.error('Error saving log:', err);
+      next();
+    });
+});
 
 const userRoute = require("./src/routes/userRoute");
 const adminRoute = require('./src/routes/adminRoute.js');

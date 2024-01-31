@@ -1,4 +1,5 @@
 const userModel = require('../models/userModel');
+const clinicModel = require('../models/clinicModel');
 const fs = require('fs');
 const path = require('path');
 // const evaluationModel = require("../models/evaluationModel");
@@ -13,6 +14,12 @@ const sendData = (user, statusCode, res) => {
         user,
         token,
     })
+}
+
+function toCamelCase(inputString) {
+    return inputString.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
 }
 
 exports.registerDoctor = catchAsyncError(async (req, res, next) => {
@@ -42,6 +49,30 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
 
     user.password = undefined
     sendData(user, 200, res)
+})
+
+exports.registerClinic = catchAsyncError(async (req, res, next) => {
+    const { name, address } = req.body
+
+    if (!name || !address) {
+        return next(new ErrorHandler('Please fill all fields', 400))
+    }
+
+    let clinic = await clinicModel.findOne({ name })
+
+    if (clinic)
+        return next(new ErrorHandler('Clinic already exists with this name', 400))
+
+    clinic = await clinicModel.create({
+        name,
+        address
+    })
+
+    await clinic.save()
+    res.status(200).json({
+        success: true,
+        message: `${name} is added`,
+    })
 })
 
 exports.registerAdmin = catchAsyncError(async (req, res, next) => {
@@ -108,10 +139,10 @@ exports.evaluationFormMake = catchAsyncError(async (req, res, next) => {
         const updatedSchemaCode = existingSchemaCode.replace(
             /const evaluationSchema = new mongoose\.Schema\({/,
             `const evaluationSchema = new mongoose.Schema({
-                ${fieldName}:{
+                ${toCamelCase(fieldName)}:{
                    type:String,
                    required: [true, "Required"],
-                   ${values ? `enum: ${values}` : ''}
+                   ${values ? `enum: ${JSON.stringify(values)}` : ''}
                 }, `)
         fs.writeFileSync(baseSchemaPathEval, updatedSchemaCode, 'utf-8')
         res.status(200).json({
@@ -134,10 +165,10 @@ exports.prescriptionFormMake = catchAsyncError(async (req, res, next) => {
         const updatedSchemaCode = existingSchemaCode.replace(
             /const prescriptionSchema = new mongoose\.Schema\({/,
             `const prescriptionSchema = new mongoose.Schema({
-                         ${fieldName}:{
+                         ${toCamelCase(fieldName)}:{
                             type:String,
                             required: [true, "Required"],
-                            ${values ? `enum: ${values}` : ''}
+                            ${values ? `enum: ${JSON.stringify(values)}` : ''}
                          }, `)
         fs.writeFileSync(baseSchemaPathPres, updatedSchemaCode, 'utf-8')
         res.status(200).json({
@@ -169,8 +200,15 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
     })
 })
 
-exports.createSlot = catchAsyncError(async (req,res)=>{
-    
+exports.getAllClinics = catchAsyncError(async (req, res) => {
+    const clinics = await clinicModel.find()
+    res.json({
+        data: clinics
+    })
+})
+
+exports.createSlot = catchAsyncError(async (req, res) => {
+
 })
 
 
