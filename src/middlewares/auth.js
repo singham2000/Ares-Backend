@@ -24,12 +24,12 @@ exports.auth = async (req, res, next) => {
     const userValid = await userModel.find({ _id: userId });
 
     if (!userValid) {
-      return res.status(401).send({ error: { message: `Unauthorized` } });
+      return res.status(401).send({ error: { message: `Unauthorized user not valid` } });
     }
     next();
-  } catch (error) {
+  } catch (error) { 
     console.log(error);
-    return res.status(401).send({ error: { message: `Unauthorized` } });
+    return res.status(401).send({ error: { message: `Unauthorized server error` } });
   }
 };
 
@@ -47,6 +47,6 @@ exports.isAdmin = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error);
-    return next(new ErrorHandler("Unauthorized.", 401));
+    return next(new ErrorHandler("Unauthorized is admin error", 401));
   }
 };
