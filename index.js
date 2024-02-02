@@ -1,10 +1,10 @@
 const express = require("express");
-const cors = require('cors');
-const Log = require('./src/models/logModel.js');
-const errorMiddleware = require('./src/middlewares/error.js');
+const cors = require("cors");
+const Log = require("./src/models/logModel.js");
+const errorMiddleware = require("./src/middlewares/error.js");
 const connectDB = require("./src/config/database.js");
 const dotenv = require("dotenv");
-const morgan = require('morgan');
+const morgan = require("morgan");
 const app = express();
 
 dotenv.config({ path: "./src/config/.env" });
@@ -13,24 +13,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "PUT"] }));
 
 connectDB();
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
 app.use((req, res, next) => {
   const logEntry = new Log({ message: `${req.method} ${req.url}` });
 
-  logEntry.save()
+  logEntry
+    .save()
     .then(() => next())
     .catch((err) => {
-      console.error('Error saving log:', err);
+      console.error("Error saving log:", err);
       next();
     });
 });
 
 const userRoute = require("./src/routes/userRoute");
-const adminRoute = require('./src/routes/adminRoute.js');
+const adminRoute = require("./src/routes/adminRoute");
+const atheleteRoute = require("./src/routes/athleteRoute");
 
 app.use("/api/doctor", userRoute);
 app.use("/api/admin", adminRoute);
+app.use("/api/admin", atheleteRoute);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
@@ -41,8 +44,7 @@ try {
     console.log("App is listening on ", process.env.PORT);
   });
 } catch (e) {
-  console.log('Hello-JS');
+  console.log("Hello-JS");
 }
-
 
 app.use(errorMiddleware);

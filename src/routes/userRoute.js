@@ -1,24 +1,24 @@
-const express = require('express');
-const { auth } = require('../middlewares/auth');
+const express = require("express");
+const { auth } = require("../middlewares/auth");
 const {
-    login,
-    getProfile,
-    sendForgotPasswordCode,
-    validateForgotPasswordCode,
-    resetPassword,
-    updateProfile,
-    updatePassword,
-    registerClient,
-    checkClient,
-    bookAppointment,
-    recentBookings,
-    recentPrescriptions,
-    inQueueRequests,
-    selectPlan,
-    getEvalForm,
-    getPresForm,
-    getAppointment
-} = require('../controllers/userController');
+  login,
+  getProfile,
+  sendForgotPasswordCode,
+  validateForgotPasswordCode,
+  resetPassword,
+  updateProfile,
+  updatePassword,
+  registerClient,
+  checkClient,
+  bookAppointment,
+  recentBookings,
+  recentPrescriptions,
+  inQueueRequests,
+  selectPlan,
+  getEvalForm,
+  getPresForm,
+  getAppointment,
+} = require("../controllers/userController");
 
 const router = express.Router();
 
