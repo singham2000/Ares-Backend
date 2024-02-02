@@ -8,7 +8,10 @@ const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
-const moment = require('moment');
+const fs = require('fs');
+const path = require('path');
+const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
+const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
@@ -265,16 +268,16 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
     const status = req.query.status || 'pending';
     const service_type = req.query.service_type;
     const date = req.query.date;
+    const query = {
+        status: status,
+        service_type: { $in: [...service_type] },
+    };
     if (date) {
         const startDate = new Date(date);
         const endDate = new Date(date);
         endDate.setDate(endDate.getDate() + 1);
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
-    const query = {
-        status: status,
-        service_type: { $in: [...service_type] },
-    };
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
@@ -370,8 +373,10 @@ exports.selectPlan = catchAsyncError(async (req, res) => {
 });
 
 exports.getEvalForm = catchAsyncError(async (req, res) => {
+    const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
     try {
-        const paths = Object.keys(evaluationModel.schema.paths);
+        const dynamicSchema = eval(schemaContent);
+        const paths = Object.keys(dynamicSchema.schema.paths);
 
         const fieldsAndEnums = paths.reduce((result, path) => {
             const schemaType = evaluationModel.schema.paths[path];
@@ -388,8 +393,10 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
 });
 
 exports.getPresForm = catchAsyncError(async (req, res) => {
+    const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathPres), 'utf8');
     try {
-        const paths = Object.keys(prescriptionModel.schema.paths);
+        const dynamicSchema = eval(schemaContent);
+        const paths = Object.keys(dynamicSchema.schema.paths);
 
         const fieldsAndEnums = paths.reduce((result, path) => {
             const schemaType = prescriptionModel.schema.paths[path];
