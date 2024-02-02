@@ -33,7 +33,7 @@ const atheleteRoute = require("./src/routes/athleteRoute");
 
 app.use("/api/doctor", userRoute);
 app.use("/api/admin", adminRoute);
-app.use("/api/admin", atheleteRoute);
+app.use("/api/athelete", atheleteRoute);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
