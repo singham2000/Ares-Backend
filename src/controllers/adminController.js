@@ -209,7 +209,7 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 
 exports.createSlot = catchAsyncError(async (req, res) => {
     const { date, doctor, address } = req.body;
-    const [day, month, year] = date.split('-');
+    const [day, month, year] = date.split('/');
     const formattedDate = `${month}-${day}-${year}`;
 
     if (!date || !doctor || !address)
