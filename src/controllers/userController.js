@@ -8,6 +8,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
+const moment = require('moment');
 
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
@@ -281,10 +282,21 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
 exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
+    const date = req.query.date;
+    console.log(date);
+    const query = {
+        status: 'paid',
+        service_type: { $in: ["MedicalOfficeVisit"] },
+    };
+    const startDate = new Date(date);
+    if (date) {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + 1); // Increment the date by 1 to get the next day
+        query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
+    }
 
-    const query = {};
-    query.status = 'paid';
-    query.service_type = { $in: ["MedicalOfficeVisit"] };
+
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
@@ -387,10 +399,10 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
         return res.status(400).json({ error: 'Date parameter is required.' });
     }
     const startDate = new Date(date);
-    const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0] } });
+    const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0], $lt: startDate.toISOString().split('T')[0] } });
     res.json(appointments);
 });
 
 exports.completedEvalReq = catchAsyncError(async (req, res) => {
-    
+
 });
