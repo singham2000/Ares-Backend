@@ -2,7 +2,7 @@ const userModel = require('../models/userModel');
 const clinicModel = require('../models/clinicModel');
 const fs = require('fs');
 const path = require('path');
-// const evaluationModel = require("../models/evaluationModel");
+const slotModel = require("../models/slotModel");
 const catchAsyncError = require('../utils/catchAsyncError');
 const ErrorHandler = require('../utils/errorHandler');
 const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
@@ -202,13 +202,37 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
 
 exports.getAllClinics = catchAsyncError(async (req, res) => {
     const clinics = await clinicModel.find()
-    res.json({
+    res.status(200).json({
         data: clinics
     })
 })
 
 exports.createSlot = catchAsyncError(async (req, res) => {
+    const { date, doctor, address } = req.body;
+    const [day, month, year] = date.split('-');
+    const formattedDate = `${month}-${day}-${year}`;
 
+    if (!date || !doctor || !address)
+        return next(new ErrorHandler('Please fill all fields', 400));
+    const slot = await slotModel.create({
+        date: new Date(formattedDate),
+        doctor,
+        address
+    });
+
+    slot.save()
+
+    res.status(200).json({
+        data: slot,
+        message: 'Added successfully'
+    })
+})
+
+exports.getAllSlots = catchAsyncError(async (req, res) => {
+    const slots = await slotModel.find()
+    res.status(200).json({
+        data: slots
+    })
 })
 
 

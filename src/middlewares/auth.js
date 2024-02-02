@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const dotenv = require("dotenv");
+const { token } = require("morgan");
 dotenv.config();
 
 exports.auth = async (req, res, next) => {
@@ -27,9 +28,9 @@ exports.auth = async (req, res, next) => {
       return res.status(401).send({ error: { message: `Unauthorized user not valid` } });
     }
     next();
-  } catch (error) { 
+  } catch (error) {
     console.log(error);
-    return res.status(401).send({ error: { message: `Unauthorized server error ${error}` } });
+    return res.status(401).send({ error: { message: `Unauthorized server error ${error, token}` } });
   }
 };
 
