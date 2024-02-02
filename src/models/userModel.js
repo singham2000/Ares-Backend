@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: roleEnum,
-    default: "Athelete",
+    default: "athelete",
   },
   temp_code: {
     type: String,
