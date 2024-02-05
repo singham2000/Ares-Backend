@@ -265,14 +265,20 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
 exports.recentBookings = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
-    const status = req.query.status || 'pending';
+    const status = req.query.status;
     const service_type = req.query.service_type;
     const date = req.query.date;
-    console.log(status, service_type, date);
-    const query = {
-        status: status,
-        service_type: { $in: [service_type] },
-    };
+    let query = {};
+    if (status) {
+        query = {
+            ...query, status: status
+        }
+    }
+    if (service_type) {
+        query = {
+            ...query, service_type: { $in: [service_type] },
+        };
+    }
     if (date) {
         const startDate = new Date(date);
         const endDate = new Date(date);
@@ -284,9 +290,7 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
-    console.log(appointments);
     const totalRecords = await appointmentModel.countDocuments();
-
     res.json({
         data: appointments,
         totalPages: Math.ceil(totalRecords / limit),
