@@ -18,6 +18,7 @@ const {
   getEvalForm,
   getPresForm,
   getAppointment,
+  getSlots
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -29,6 +30,7 @@ router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
 router.post("/book-appointment/:id", auth, bookAppointment);
 router.post("/select-plan", auth, selectPlan);
+router.post("/get-slots", auth, getSlots);
 
 router.get("/get-profile", auth, getProfile);
 router.get("/recent-bookings", auth, recentBookings);

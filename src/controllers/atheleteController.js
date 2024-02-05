@@ -79,3 +79,49 @@ exports.login = catchAsyncError(async (req, res, next) => {
   const token = user.getJWTToken();
   res.status(201).json({ user, token });
 });
+
+exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await athleteModel.findOne({ email });
+
+  if (!user) return next(new ErrorHandler("User Not Found.", 404));
+
+  const code = generateCode(6);
+
+  await athleteModel.findOneAndUpdate({ email }, { temp_code: code });
+  resetPasswordCode(email, user.fullname, code);
+
+  res.status(200).json({ message: "Code sent to your email." });
+});
+
+exports.validateForgotPasswordCode = catchAsyncError(async (req, res, next) => {
+  const { email, code } = req.body;
+  const user = await athleteModel.findOne({ email });
+
+  if (!user) return next(new ErrorHandler("User Not Found.", 404));
+
+  if (user.temp_code === code) {
+    user.temp_code = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ message: "Code Validated Successfully." });
+  } else {
+    return next(new ErrorHandler("Invalid Code.", 400));
+  }
+});
+
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  const { email, newPassword, confirmPassword } = req.body;
+  const user = await athleteModel.findOne({ email });
+
+  if (!user) return next(new ErrorHandler("User Not Found.", 404));
+  if (!newPassword || !confirmPassword)
+    return next(new ErrorHandler("Please fill in all fields", 400));
+  if (newPassword !== confirmPassword)
+    return next(new ErrorHandler("Password does not match", 400));
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(203).json({ message: "Password Updated Successfully." });
+});

@@ -3,6 +3,7 @@ const clientModel = require('../models/clientModel');
 const appointmentModel = require("../models/appointmentModel");
 const evaluationModel = require("../models/evaluationModel");
 const prescriptionModel = require("../models/prescriptionModel");
+const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
@@ -428,5 +429,13 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
 });
 
 exports.completedEvalReq = catchAsyncError(async (req, res) => {
-
 });
+
+exports.getSlots = catchAsyncError(async (req, res) => {
+    const doctor = req.body.doctor;
+    if (!doctor) {
+        return res.status(400).json({ error: 'Parameter is required.' });
+    }
+    const slots = await slotModel.find({ doctor: doctor });
+    res.json(slots);
+})
