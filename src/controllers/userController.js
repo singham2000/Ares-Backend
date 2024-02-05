@@ -14,6 +14,39 @@ const path = require('path');
 const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
+const timeForService = {
+    MedicalOfficeVisit: 30,
+    Consultation: 15,
+    SportsVision: 90,
+    ConcussionEval: 60
+}
+
+function timeValidate(service_type, validateTo, inputTime) {
+    let time = timeForService[service_type];
+    const input = new Date(`2024-02-05T${convertTo24HourFormat(inputTime)}`);
+    const target = new Date(`2024-02-05T${convertTo24HourFormat(validateTo)}`);
+    const timeDifference = Math.abs(input.getTime() - target.getTime());
+    const result = timeDifference <= time * 60 * 1000;
+    return result;
+}
+
+function convertTo24HourFormat(time12Hour) {
+    const [hour, minute, period] = time12Hour.match(/(\d+):(\d+)\s*(AM|PM)/i).slice(1);
+    if (!hour || !minute || !period) {
+        console.error('Invalid time format');
+        return 'Invalid Date';
+    }
+    let hours = parseInt(hour);
+    const minutes = parseInt(minute);
+    if (period.toUpperCase() === 'PM' && hours !== 12) {
+        hours += 12;
+    } else if (period.toUpperCase() === 'AM' && hours === 12) {
+        hours = 0;
+    }
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    return formattedTime;
+}
+
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
 
@@ -228,6 +261,7 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
 
 exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     const client_id = req.params.id;
+    let appointmentOnDate = 0;
     const {
         service_type,
         app_date,
@@ -235,7 +269,10 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         doctor_trainer,
         location
     } = req.body;
-
+    let query = {
+        app_date: app_date,
+        doctor_trainer: doctor_trainer
+    };
     const app_id = generateAppointmentId();
 
     if (!client_id) {
@@ -245,6 +282,17 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     if (!client) {
         return next(new ErrorHandler("Client does not exist", 400));
     }
+
+    const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
+    if (dayAppointments) {
+        dayAppointments.forEach(appointment => {
+            if (timeValidate(appointment.service_type, appointment.app_time, app_time)) {
+                appointmentOnDate = appointmentOnDate + 1;
+            }
+        })
+    }
+    if (appointmentOnDate)
+        return next(new ErrorHandler("Another Appointment is overlapping", 400));
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
         client: client,
@@ -255,7 +303,9 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location,
         status: 'pending'
     });
+
     await appointment.save();
+
     res.status(200).json({
         success: true,
         message: `Appointment booked. Your Appointment ID: ${app_id}.`,
