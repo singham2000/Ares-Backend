@@ -83,7 +83,7 @@ const athleteSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: roleEnum,
-        default: "athelete",
+        default: "athlete",
     },
     temp_code: {
         type: String,
