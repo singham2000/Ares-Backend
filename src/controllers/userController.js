@@ -326,8 +326,9 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         }
     }
     if (service_type) {
+        console.log(service_type.split(','));
         query = {
-            ...query, service_type: { $in: [service_type] },
+            ...query, service_type: { $in: service_type.split(',') },
         };
     }
     if (date) {
