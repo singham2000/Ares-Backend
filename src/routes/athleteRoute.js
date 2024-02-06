@@ -6,6 +6,7 @@ const {
   validateForgotPasswordCode,
   resetPassword,
   getProfile,
+  editProfile,
 } = require("../controllers/atheleteController");
 const { auth } = require("../middlewares/auth");
 
@@ -18,4 +19,5 @@ router.post("/login", login);
 
 router.put("/reset-password", resetPassword);
 router.get("/get-profile", auth, getProfile);
+router.put("/edit-profile", auth, editProfile);
 module.exports = router;
