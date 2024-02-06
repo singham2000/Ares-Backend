@@ -131,31 +131,6 @@ const dryRefractionODAddEnum = [
 const dryRefractionODAxisEnum = Array.from({ length: 180 }, (_, i) => (i + 1).toString().padStart(3, '0'));
 
 const evaluationSchema = new mongoose.Schema({
-                dfgdfgd:{
-                   type:String,
-                   required: [true, "Required"],
-                   enum: []
-                }, 
-    fieldRTwo: {
-        type: String,
-        required: [true, "Required"],
-        enum: ["test2@test.com"]
-    },
-    handle: {
-        type: String,
-        required: [true, "Required"],
-        enum: ["test2@test.com"]
-    },
-    firstInserted: {
-        type: String,
-        required: [true, "Required"],
-
-    },
-    evalId: {
-        type: String,
-        unique: true,
-        required: true
-    },
     accommodativeFacilityOD: {
         type: String,
         enum: accommodativeFacilityEnum,

@@ -7,6 +7,8 @@ const catchAsyncError = require('../utils/catchAsyncError');
 const ErrorHandler = require('../utils/errorHandler');
 const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
+const PrescriptionModel = require('../models/prescriptionModel');
+const EvaluationModel = require('../models/evaluationModel');
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken()
 
@@ -140,11 +142,23 @@ exports.evaluationFormMake = catchAsyncError(async (req, res, next) => {
             /const evaluationSchema = new mongoose\.Schema\({/,
             `const evaluationSchema = new mongoose.Schema({
                 ${toCamelCase(fieldName)}:{
-                   type:String,
-                   required: [true, "Required"],
-                   ${values ? `enum: ${JSON.stringify(values)}` : ''}
-                }, `)
-        fs.writeFileSync(baseSchemaPathEval, updatedSchemaCode, 'utf-8')
+                    type:String,
+                    required: [true, "Required"],
+                    ${values ? `enum: ${JSON.stringify(values)}` : ''}
+                }, `);
+        fs.writeFileSync(baseSchemaPathEval, updatedSchemaCode, 'utf-8');
+        EvaluationModel.schema.add(values ? {
+            [toCamelCase(fieldName)]: {
+                type: String,
+                required: [true, "Required"],
+                enum: values
+            }
+        } : {
+            [toCamelCase(fieldName)]: {
+                type: String,
+                required: [true, "Required"],
+            }
+        });
         res.status(200).json({
             success: true,
             message: `Schema updated successfully.`,
@@ -171,6 +185,18 @@ exports.prescriptionFormMake = catchAsyncError(async (req, res, next) => {
                             ${values ? `enum: ${JSON.stringify(values)}` : ''}
                          }, `)
         fs.writeFileSync(baseSchemaPathPres, updatedSchemaCode, 'utf-8')
+        PrescriptionModel.schema.add(values ? {
+            [toCamelCase(fieldName)]: {
+                type: String,
+                required: [true, "Required"],
+                enum: values
+            }
+        } : {
+            [toCamelCase(fieldName)]: {
+                type: String,
+                required: [true, "Required"],
+            }
+        });
         res.status(200).json({
             success: true,
             message: `Schema updated successfully.`,
@@ -207,13 +233,18 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
     })
 })
 
-exports.createSlot = catchAsyncError(async (req, res) => {
+exports.createSlot = catchAsyncError(async (req, res, next) => {
     const { date, doctor, address } = req.body;
     const [day, month, year] = date.split('/');
     const formattedDate = `${month}-${day}-${year}`;
-
+    const query = {}
     if (!date || !doctor || !address)
         return next(new ErrorHandler('Please fill all fields', 400));
+
+    const availablecheck = await slotModel.find({ date: formattedDate, doctor: doctor })
+    if (availablecheck.length > 0) {
+        return next(new ErrorHandler('Already created a slot', 400))
+    }
     const slot = await slotModel.create({
         date: new Date(formattedDate),
         doctor,
