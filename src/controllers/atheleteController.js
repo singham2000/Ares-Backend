@@ -19,10 +19,27 @@ exports.register = catchAsyncError(async (req, res, next) => {
     guardianLastName,
     guardianSuffix,
     organization,
-    password
+    password,
   } = req.body;
 
-  if (!firstName || !lastName || !email || !city || !phone || !state || !age || !dob || !gender || !height, !dominatedHand || !guardianFirstName || !guardianLastName || !guardianSuffix || !organization || !password) {
+  if (
+    (!firstName ||
+      !lastName ||
+      !email ||
+      !city ||
+      !phone ||
+      !state ||
+      !age ||
+      !dob ||
+      !gender ||
+      !height,
+    !dominatedHand ||
+      !guardianFirstName ||
+      !guardianLastName ||
+      !guardianSuffix ||
+      !organization ||
+      !password)
+  ) {
     return next(new ErrorHandler("Please enter all the fields"));
   }
 
@@ -51,7 +68,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     guardianSuffix,
     organization,
     password,
-    role: 'athlete'
+    role: "athlete",
   });
 
   await user.save();
@@ -124,4 +141,54 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   res.status(203).json({ message: "Password Updated Successfully." });
+});
+
+exports.getProfile = catchAsyncError(async (req, res, next) => {
+  const { userId } = req;
+  const athlete = await athleteModel.findById(userId).select("-password");
+  res.status(200).json({ athlete });
+});
+
+exports.editProfile = catchAsyncError(async (req, res, next) => {
+  const { userId } = req;
+  const athlete = await athleteModel.findById(userId).select("-password");
+  const {
+    firstName,
+    lastName,
+    email,
+    city,
+    phone,
+    state,
+    age,
+    dob,
+    gender,
+    height,
+    dominatedHand,
+    guardianFirstName,
+    guardianLastName,
+    guardianSuffix,
+    organization,
+    role,
+  } = req.body;
+
+  firstName && (athlete.firstName = firstName);
+  lastName && (athlete.lastName = lastName);
+  email && (athlete.email = email);
+  city && (athlete.city = city);
+  phone && (athlete.phone = phone);
+  state && (athlete.state = state);
+  age && (athlete.age = age);
+  dob && (athlete.dob = dob);
+  gender && (athlete.gender = gender);
+  height && (athlete.height = height);
+  dominatedHand && (athlete.dominatedHand = dominatedHand);
+  guardianFirstName && (athlete.guardianFirstName = guardianFirstName);
+  guardianLastName && (athlete.guardianLastName = guardianLastName);
+  guardianSuffix && (athlete.guardianSuffix = guardianSuffix);
+  organization && (athlete.organization = organization);
+  role && (athlete.role = role);
+
+  await athlete.save();
+
+  res.status(200).json({ athlete });
 });
