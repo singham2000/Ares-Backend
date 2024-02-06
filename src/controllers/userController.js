@@ -471,11 +471,14 @@ exports.getPresForm = catchAsyncError(async (req, res) => {
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
     const date = req.params.date;
+    console.log(date);
     if (!date) {
         return res.status(400).json({ error: 'Date parameter is required.' });
     }
     const startDate = new Date(date);
-    const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0], $lt: startDate.toISOString().split('T')[0] } });
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+    const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] } });
     res.json(appointments);
 });
 
