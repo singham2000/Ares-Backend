@@ -1,41 +1,61 @@
 const mongoose = require('mongoose')
 
 const prescriptionSchema = new mongoose.Schema({
-                         fieldRTwo:{
+                         asdasdasd:{
                             type:String,
                             required: [true, "Required"],
-                            enum: []
+                            enum: ["asd","asdasd"]
                          }, 
-                         field2:{
+                         fieldUpdates:{
                             type:String,
                             required: [true, "Required"],
-                            enum: []
-                         }, 
-                         handle:{
-                            type:String,
-                            required: [true, "Required"],
-                            enum: []
+                            enum: ["1","2","3","4"]
                          }, 
                          handle:{
                             type:String,
                             required: [true, "Required"],
-                            enum: []
+                            enum: ["1","3"]
                          }, 
-                         fieldTest:{
-                            type:String,
-                            required: [true, "Required"],
-                            enum: []
-                         }, 
-                         firstField:{
-                            type:String,
-                            required: [true, "Required"],
-                            enum: ["test1"]
-                         }, 
-                         firstField:{
-                            type:String,
-                            required: [true, "Required"],
-                            enum: ["test1"]
-                         }, 
-
+   fieldAdded3: {
+      type: String,
+      required: [true, "Required"],
+      enum: ["1", "2", "3", "4"]
+   },
+   fieldAdded2: {
+      type: String,
+      required: [true, "Required"],
+      enum: ["1", "a"]
+   },
+   fieldAdded: {
+      type: String,
+      required: [true, "Required"],
+      enum: ["1", "2", "3"]
+   },
+   fieldRTwo: {
+      type: String,
+      required: [true, "Required"],
+      enum: []
+   },
+   field2: {
+      type: String,
+      required: [true, "Required"],
+      enum: []
+   },
+   handle: {
+      type: String,
+      required: [true, "Required"],
+      enum: []
+   },
+   fieldTest: {
+      type: String,
+      required: [true, "Required"],
+      enum: []
+   },
+   firstField: {
+      type: String,
+      required: [true, "Required"],
+      enum: ["test1"]
+   },
 })
+
 module.exports = mongoose.model('prescription', prescriptionSchema)

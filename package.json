@@ -20,6 +20,7 @@
     "mongoose": "^8.0.3",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.8",
+    "util": "^0.12.5",
     "validator": "^13.11.0"
   },
   "devDependencies": {
