@@ -11,8 +11,8 @@ const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
 const fs = require('fs');
 const path = require('path');
-const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
-const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
+// const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
+// const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
 const timeForService = {
     MedicalOfficeVisit: 30,
@@ -430,13 +430,15 @@ exports.selectPlan = catchAsyncError(async (req, res) => {
 });
 
 exports.getEvalForm = catchAsyncError(async (req, res) => {
-    const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
+    // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
     try {
-        const dynamicSchema = eval(schemaContent);
+        const evaluationModel = require('../models/evaluationModel');
+        // const dynamicSchema = eval(schemaContent);
+        const dynamicSchema = evaluationModel;
         const paths = Object.keys(dynamicSchema.schema.paths);
 
         const fieldsAndEnums = paths.reduce((result, path) => {
-            const schemaType = evaluationModel.schema.paths[path];
+            const schemaType = dynamicSchema.schema.paths[path];
             if (schemaType.enumValues) {
                 result.push({ field: path, enumValues: schemaType.enumValues });
             }
@@ -450,13 +452,15 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
 });
 
 exports.getPresForm = catchAsyncError(async (req, res) => {
-    const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathPres), 'utf8');
+    // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathPres), 'utf8');
     try {
-        const dynamicSchema = eval(schemaContent);
+        const prescriptionModel = require('../models/prescriptionModel');
+        // const dynamicSchema = eval(schemaContent);
+        const dynamicSchema = prescriptionModel;
         const paths = Object.keys(dynamicSchema.schema.paths);
 
         const fieldsAndEnums = paths.reduce((result, path) => {
-            const schemaType = prescriptionModel.schema.paths[path];
+            const schemaType = dynamicSchema.schema.paths[path];
             if (schemaType.enumValues) {
                 result.push({ field: path, enumValues: schemaType.enumValues });
             }
