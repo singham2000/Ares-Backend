@@ -59,7 +59,7 @@ exports.markAllRead = catchAsyncError(async (req, res, next) => {
   console.log("Mark all notifications as read");
   const { userId } = req;
 
-  const result = await notificationModel.updateMany(
+  await notificationModel.updateMany(
     { user: userId },
     { seen: true }
   );
