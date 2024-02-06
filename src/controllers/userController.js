@@ -493,3 +493,23 @@ exports.getSlots = catchAsyncError(async (req, res) => {
     const slots = await slotModel.find({ doctor: doctor });
     res.json(slots);
 })
+
+exports.getAllDoc = catchAsyncError(async (req, res) => {
+    const page = parseInt(req.query.page_no) || 1
+    const limit = parseInt(req.query.per_page_count) || 10
+    const query = {}
+    query.role = 'doctor'
+    const doctors = await userModel
+        .find(query)
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec()
+
+    const totalRecords = await userModel.countDocuments(query)
+    res.json({
+        data: doctors,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    })
+})

@@ -18,7 +18,8 @@ const {
   getEvalForm,
   getPresForm,
   getAppointment,
-  getSlots
+  getSlots,
+  getAllDoc
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.get("/in-queue-requests", auth, inQueueRequests);
 router.get("/get-eval-form", auth, getEvalForm);
 router.get("/get-pres-form", auth, getPresForm);
 router.get("/appointments/:date", auth, getAppointment);
+router.get('/get-all-doctor', auth, getAllDoc);
 
 router.put("/reset-password", resetPassword);
 router.put("/update-profile", auth, updateProfile);
