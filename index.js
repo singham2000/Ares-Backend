@@ -30,10 +30,11 @@ app.use((req, res, next) => {
 const userRoute = require("./src/routes/userRoute");
 const adminRoute = require("./src/routes/adminRoute");
 const athleteRoute = require("./src/routes/athleteRoute");
-
+const notificationRoute = require("./src/routes/notificationRoute");
 app.use("/api/doctor", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/athlete", athleteRoute);
+app.use("/api/notification", notificationRoute);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)

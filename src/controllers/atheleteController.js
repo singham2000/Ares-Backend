@@ -19,10 +19,27 @@ exports.register = catchAsyncError(async (req, res, next) => {
     guardianLastName,
     guardianSuffix,
     organization,
-    password
+    password,
   } = req.body;
 
-  if (!firstName || !lastName || !email || !city || !phone || !state || !age || !dob || !gender || !height, !dominatedHand || !guardianFirstName || !guardianLastName || !guardianSuffix || !organization || !password) {
+  if (
+    (!firstName ||
+      !lastName ||
+      !email ||
+      !city ||
+      !phone ||
+      !state ||
+      !age ||
+      !dob ||
+      !gender ||
+      !height,
+    !dominatedHand ||
+      !guardianFirstName ||
+      !guardianLastName ||
+      !guardianSuffix ||
+      !organization ||
+      !password)
+  ) {
     return next(new ErrorHandler("Please enter all the fields"));
   }
 
@@ -51,7 +68,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     guardianSuffix,
     organization,
     password,
-    role: 'athlete'
+    role: "athlete",
   });
 
   await user.save();
@@ -124,4 +141,10 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
   await user.save();
 
   res.status(203).json({ message: "Password Updated Successfully." });
+});
+
+exports.getProfile = catchAsyncError(async (req, res, next) => {
+  const { userId } = req;
+  const athlete = await athleteModel.findById(userId).select("-password");
+  res.status(200).json({ athlete });
 });
