@@ -25,12 +25,18 @@ exports.auth = async (req, res, next) => {
     const userValid = await userModel.find({ _id: userId });
 
     if (!userValid) {
-      return res.status(401).send({ error: { message: `Unauthorized user not valid` } });
+      return res
+        .status(401)
+        .send({ error: { message: `Unauthorized user not valid` } });
     }
     next();
   } catch (error) {
     console.log(error);
-    return res.status(401).send({ error: { message: `Unauthorized server error ${error, token}` } });
+    return res
+      .status(401)
+      .send({
+        error: { message: `Unauthorized server error ${(error, token)}` },
+      });
   }
 };
 

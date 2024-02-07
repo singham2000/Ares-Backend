@@ -1,46 +1,54 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const appointmentServiceEnum = ['MedicalOfficeVisit', 'SportsVision', 'Consultation', 'TrainingSessions', 'ConcussionEval'];
-const appointmentStatus = ['paid', 'pending', 'failed'];
+const appointmentServiceEnum = [
+  "MedicalOfficeVisit",
+  "SportsVision",
+  "Consultation",
+  "TrainingSessions",
+  "ConcussionEval",
+];
+const appointmentStatus = ["paid", "pending", "failed"];
 
-const appointmentSchema = new mongoose.Schema({
+const appointmentSchema = new mongoose.Schema(
+  {
     appointment_id: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     service_type: {
-        type: String,
-        required: true,
-        enum: appointmentServiceEnum
+      type: String,
+      required: true,
+      enum: appointmentServiceEnum,
     },
     client: {
-        type: Object,
-        required: true,
+      type: Object,
+      required: true,
     },
     app_date: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     app_time: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     doctor_trainer: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     location: {
-        type: String,
+      type: String,
     },
     status: {
-        type: String,
-        required: true,
-        enum: appointmentStatus
-    }
-},
-    {
-        timestamps: true,
-    })
+      type: String,
+      required: true,
+      enum: appointmentStatus,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model("appointment", appointmentSchema);
