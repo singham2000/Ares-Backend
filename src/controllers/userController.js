@@ -342,7 +342,7 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
-    const totalRecords = await appointmentModel.countDocuments();
+    const totalRecords = await appointmentModel.countDocuments(query);
     res.json({
         appointments: appointments,
         totalPages: Math.ceil(totalRecords / limit),
