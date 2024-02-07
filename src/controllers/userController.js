@@ -309,7 +309,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: `Appointment booked. Your Appointment ID: ${app_id}.`,
-        appointment,
+        appointment: appointment,
     });
 });
 
@@ -344,7 +344,7 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         .exec();
     const totalRecords = await appointmentModel.countDocuments();
     res.json({
-        data: appointments,
+        appointments: appointments,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     });
@@ -378,7 +378,7 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const totalRecords = await appointmentModel.countDocuments(query);
 
     res.json({
-        data: appointments,
+        appointments: appointments,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     });
@@ -403,7 +403,7 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
     const totalRecords = await appointmentModel.countDocuments(query);
 
     res.json({
-        data: appointments,
+        appointments: appointments,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     });
@@ -495,7 +495,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         return res.status(400).json({ error: 'Parameter is required.' });
     }
     const slots = await slotModel.find({ doctor: doctor });
-    res.json(slots);
+    res.json({ slots: slots });
 })
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
@@ -512,7 +512,7 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
 
     const totalRecords = await userModel.countDocuments(query)
     res.json({
-        data: doctors,
+        doctors: doctors,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     })
