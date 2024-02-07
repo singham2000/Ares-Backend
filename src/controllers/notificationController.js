@@ -1,9 +1,12 @@
 const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
+
+
 exports.getAllNotifications = catchAsyncError(async (req, res, next) => {
   console.log("Get all Notification");
   const { userId } = req;
+  console.log(userId);
   const notifications = await notificationModel.find({ user: userId });
   const unreadCounts = await notificationModel.countDocuments({ seen: false });
   res.status(200).json({ notifications, unreadCounts });

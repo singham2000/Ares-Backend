@@ -9,9 +9,10 @@ const {
   updateNotification,
   generateNotification,
 } = require("../controllers/notificationController");
-router.get("/", auth, getAllNotifications);
-router.put("/mark-all-read", auth, markAllRead);
+
 // router.get("/create-default", auth, generateNotification);
+router.get("/get-all", auth, getAllNotifications);
+router.put("/mark-all-read", auth, markAllRead);
 router
   .route("/:id")
   .get(auth, getNotification)

@@ -17,7 +17,8 @@ router.post("/validate-code", validateForgotPasswordCode);
 router.post("/register", register);
 router.post("/login", login);
 
-router.put("/reset-password", resetPassword);
 router.get("/get-profile", auth, getProfile);
+
+router.put("/reset-password", resetPassword);
 router.put("/edit-profile", auth, editProfile);
 module.exports = router;
