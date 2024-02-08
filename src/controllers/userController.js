@@ -19,7 +19,7 @@ const timeForService = {
     Consultation: 15,
     SportsVision: 90,
     ConcussionEval: 60
-}
+};
 
 function timeValidate(service_type, validateTo, inputTime) {
     let time = timeForService[service_type];
@@ -28,7 +28,7 @@ function timeValidate(service_type, validateTo, inputTime) {
     const timeDifference = Math.abs(input.getTime() - target.getTime());
     const result = timeDifference <= time * 60 * 1000;
     return result;
-}
+};
 
 function convertTo24HourFormat(time12Hour) {
     const [hour, minute, period] = time12Hour.match(/(\d+):(\d+)\s*(AM|PM)/i).slice(1);
@@ -45,7 +45,7 @@ function convertTo24HourFormat(time12Hour) {
     }
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
     return formattedTime;
-}
+};
 
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken();
@@ -507,7 +507,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
     }
     const slots = await slotModel.find({ doctor: doctor });
     res.json({ slots: slots });
-})
+});
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1
@@ -527,4 +527,8 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     })
-})
+});
+
+exports.submitEvaluation = catchAsyncError(async (req, res) => {
+    
+});
