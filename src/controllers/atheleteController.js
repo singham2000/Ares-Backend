@@ -1,3 +1,4 @@
+const appointmentModel = require("../models/appointmentModel");
 const athleteModel = require("../models/athleteModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
@@ -191,4 +192,32 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
   await athlete.save();
 
   res.status(200).json({ athlete });
+});
+
+// ==========================APPOINTMENT STUFF =============================================>
+
+exports.getUpcomingAppointments = catchAsyncError(async (req, res, next) => {
+  const currentDateTime = new Date();
+  const currentDate = currentDateTime.toISOString().split("T")[0];
+  const currentTime = currentDateTime.toTimeString().split(" ")[0].slice(0, 5); // we need to remove timezone info so splitting and im getting first element
+  // take the first 4 cuz we dont need seconds acoording to schema
+  console.log(currentDate);
+  console.log(currentTime);
+  const upcomingAppointments = await appointmentModel
+    .find({
+      $or: [
+        { app_date: { $gt: currentDate } }, // Future dates
+        {
+          app_date: currentDate, // Current date
+          app_time: { $gte: currentTime }, // Time greater than or equal to current time
+        },
+      ],
+    })
+    .select("app_date app_time");
+
+  if (!upcomingAppointments) {
+    return next(new ErrorHandler("No upcoming appointments found", 404));
+  }
+
+  res.status(200).json({ upcomingAppointments });
 });
