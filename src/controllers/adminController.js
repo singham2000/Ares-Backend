@@ -266,4 +266,39 @@ exports.getAllSlots = catchAsyncError(async (req, res) => {
     })
 })
 
+exports.delDoc = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
+
+    try {
+        const deletedUser = await userModel.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return next(new ErrorHandler("User not found!", 404));
+        }
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+            data: deletedUser
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+exports.editDoc = catchAsyncError(async (req, res, next) => {
+    const { fullname, email } = req.body;
+    const { id } = req.query;
+    console.log(id);
+    let user = await userModel.findById(id)
+    if (!user || user.role != 'doctor')
+        return next(new ErrorHandler('User does not exists as Doctor', 400))
+
+    if (fullname)
+        user.fullname = fullname;
+    if (email)
+        user.email = email;
+    await user.save();
+    sendData(user, 200, res)
+});
+
+
 

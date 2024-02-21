@@ -10,7 +10,9 @@ const {
   registerClinic,
   getAllClinics,
   createSlot,
-  getAllSlots
+  getAllSlots,
+  delDoc,
+  editDoc
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -26,5 +28,8 @@ router.post('/create_slot', auth, isAdmin, createSlot);
 router.get('/get_all_doctor', auth, isAdmin, getAllDoc);
 router.get('/get_all_clinics', auth, isAdmin, getAllClinics);
 router.get('/get_all_slots', auth, isAdmin, getAllSlots);
+
+router.delete('/delete_doc', auth, isAdmin, delDoc);
+router.put('/edit_doc', auth, isAdmin, editDoc);
 
 module.exports = router
