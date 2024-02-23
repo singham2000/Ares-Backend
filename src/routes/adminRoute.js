@@ -14,7 +14,8 @@ const {
   delDoc,
   editDoc,
   addPlans,
-  getPlans
+  getPlans,
+  editPlan
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -29,7 +30,7 @@ router.post('/create_slot', auth, isAdmin, createSlot);
 router
   .route('/plans')
   .post(auth, isAdmin, addPlans)
-  .put(auth, isAdmin, editDoc)
+  .put(auth, isAdmin, editPlan)
   .get(auth, isAdmin, getPlans);
 
 

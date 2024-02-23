@@ -9,53 +9,17 @@ const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
+const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
 const fs = require('fs');
 const path = require('path');
 const planModel = require("../models/planModel");
 // const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 // const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
-
 const timeForService = {
     MedicalOfficeVisit: 30,
     Consultation: 15,
     SportsVision: 90,
     ConcussionEval: 60
-};
-
-function timeValidate(service_type, validateTo, inputTime) {
-    let time = timeForService[service_type];
-    const input = new Date(`2024-02-05T${convertTo24HourFormat(inputTime)}`);
-    const target = new Date(`2024-02-05T${convertTo24HourFormat(validateTo)}`);
-    const timeDifference = Math.abs(input.getTime() - target.getTime());
-    const result = timeDifference <= time * 60 * 1000;
-    return result;
-};
-
-function convertTo24HourFormat(time12Hour) {
-    const [hour, minute, period] = time12Hour.match(/(\d+):(\d+)\s*(AM|PM)/i).slice(1);
-    if (!hour || !minute || !period) {
-        console.error('Invalid time format');
-        return 'Invalid Date';
-    }
-    let hours = parseInt(hour);
-    const minutes = parseInt(minute);
-    if (period.toUpperCase() === 'PM' && hours !== 12) {
-        hours += 12;
-    } else if (period.toUpperCase() === 'AM' && hours === 12) {
-        hours = 0;
-    }
-    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-    return formattedTime;
-};
-
-const sendData = (user, statusCode, res) => {
-    const token = user.getJWTToken();
-
-    res.status(statusCode).json({
-        "status": "user login successfully",
-        "user_data": user,
-        token,
-    });
 };
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
@@ -503,7 +467,7 @@ exports.completedEvalReq = catchAsyncError(async (req, res) => {
 
 exports.getSlots = catchAsyncError(async (req, res) => {
     // const doctor = req.body.doctor;
-    const { doctor, date } = req.query;
+    const { doctor, date, service_type } = req.query;
     let slots;
     const query = {};
     if (date) {
@@ -511,6 +475,15 @@ exports.getSlots = catchAsyncError(async (req, res) => {
     }
     if (doctor) {
         query.doctor = doctor;
+    }
+    if (date && doctor && service_type) {
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0] });
+        const time1 = "16:16";
+        const time2 = "17:16";
+        const duration = 20;
+        const timePieces = calculateTimeDifference(time1, time2, duration);
+        console.log(timePieces);
+        // console.log(dayAppointments);
     }
     if (!doctor && !date) {
         slots = await slotModel.find().select('date');

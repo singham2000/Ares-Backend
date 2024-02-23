@@ -364,10 +364,11 @@ exports.addPlans = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.EditPlan = catchAsyncError(async (req, res, next) => {
+exports.editPlan = catchAsyncError(async (req, res, next) => {
     const { name, cost, duration } = req.body;
+    const { id } = req.query;
 
-    const plan = await planModel.findOne({ name: name });
+    const plan = await planModel.findById(id);
     if (!plan) {
         return next(new ErrorHandler("Plan is not created yet!", 400));
     }
