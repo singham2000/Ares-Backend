@@ -15,7 +15,8 @@ const {
   editDoc,
   addPlans,
   getPlans,
-  editPlan
+  editPlan,
+  delPlan
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -31,8 +32,8 @@ router
   .route('/plans')
   .post(auth, isAdmin, addPlans)
   .put(auth, isAdmin, editPlan)
-  .get(auth, isAdmin, getPlans);
-
+  .get(auth, isAdmin, getPlans)
+  .delete(auth, isAdmin, delPlan)
 
 router.get('/get_all_doctor', auth, isAdmin, getAllDoc);
 router.get('/get_all_clinics', auth, isAdmin, getAllClinics);

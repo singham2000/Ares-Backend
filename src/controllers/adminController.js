@@ -397,5 +397,23 @@ exports.getPlans = catchAsyncError(async (req, res, next) => {
         success: true,
         plans
     })
-})
+});
+
+exports.delPlan = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
+
+    try {
+        const deletedUser = await planModel.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return next(new ErrorHandler("Not found!", 404));
+        }
+        res.status(200).json({
+            success: true,
+            message: "Plan deleted successfully",
+            data: deletedUser
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
 
