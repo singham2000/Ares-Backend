@@ -1,14 +1,15 @@
 const userModel = require('../models/userModel');
 const clinicModel = require('../models/clinicModel');
+const slotModel = require("../models/slotModel");
 const fs = require('fs');
 const path = require('path');
-const slotModel = require("../models/slotModel");
 const catchAsyncError = require('../utils/catchAsyncError');
 const ErrorHandler = require('../utils/errorHandler');
 const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 const PrescriptionModel = require('../models/prescriptionModel');
 const EvaluationModel = require('../models/evaluationModel');
+const planModel = require('../models/planModel');
 const sendData = (user, statusCode, res) => {
     const token = user.getJWTToken()
 
@@ -16,6 +17,18 @@ const sendData = (user, statusCode, res) => {
         user,
         token,
     })
+}
+
+function generateDateRange(startDate, endDate) {
+    let dates = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
 }
 
 function toCamelCase(inputString) {
@@ -234,29 +247,56 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 })
 
 exports.createSlot = catchAsyncError(async (req, res, next) => {
-    const { date, doctor, address } = req.body;
-    const [day, month, year] = date.split('/');
+    const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
+    const [day, month, year] = startDate.split('/');
     const formattedDate = `${month}-${day}-${year}`;
+    console.log(startDate, endDate);
     const query = {}
-    if (!date || !doctor || !address)
+    let slot;
+    if (!startDate || !doctor || !address)
         return next(new ErrorHandler('Please fill all fields', 400));
 
     const availablecheck = await slotModel.find({ date: formattedDate, doctor: doctor })
     if (availablecheck.length > 0) {
         return next(new ErrorHandler('Already created a slot', 400))
     }
-    const slot = await slotModel.create({
-        date: new Date(formattedDate),
-        doctor,
-        address
-    });
+    if (startDate === endDate) {
+        slot = await slotModel.create({
+            date: new Date(formattedDate),
+            doctor,
+            address,
+            startTime,
+            endTime
+        });
+        slot.save()
+        res.status(200).json({
+            slots: slot,
+            message: 'Added successfully'
+        })
+    } else {
+        let slots = [];
+        const [day, month, year] = startDate.split('/');
+        const [day1, month1, year1] = endDate.split('/');
+        let startDates = new Date(year, month, day);
+        let endDates = new Date(year1, month1, day1);
+        let dateRange = generateDateRange(startDates, endDates);
+        dateRange.map(async (date, index) => {
+            slot = await slotModel.create({
+                date,
+                doctor,
+                address,
+                startTime,
+                endTime
+            });
+            slot.save();
+            slots.push({ [`${index + 1}`]: slot });
+        })
+        res.status(200).json({
+            slots,
+            message: 'Added successfully'
+        })
+    }
 
-    slot.save()
-
-    res.status(200).json({
-        data: slot,
-        message: 'Added successfully'
-    })
 })
 
 exports.getAllSlots = catchAsyncError(async (req, res) => {
@@ -300,5 +340,61 @@ exports.editDoc = catchAsyncError(async (req, res, next) => {
     sendData(user, 200, res)
 });
 
+exports.addPlans = catchAsyncError(async (req, res, next) => {
+    const { name, cost, duration } = req.body;
+    console.log(name, cost, duration);
 
+    if (!name || !cost || !duration) {
+        return next(new ErrorHandler("All fields are required !", 400));
+    }
+    let plan = await planModel.find({ name: name });
+    console.log(plan);
+    if (plan > 0) {
+        return next(new ErrorHandler("Plan already created !", 400));
+    }
+
+    plan = await planModel.create({
+        name, cost, duration
+    });
+    plan.save();
+    res.status(200).json({
+        success: true,
+        message: `Plan added successfully.`,
+        plan,
+    });
+});
+
+exports.EditPlan = catchAsyncError(async (req, res, next) => {
+    const { name, cost, duration } = req.body;
+
+    const plan = await planModel.findOne({ name: name });
+    if (!plan) {
+        return next(new ErrorHandler("Plan is not created yet!", 400));
+    }
+
+    if (name) {
+        plan.name = name;
+    }
+    if (cost) {
+        plan.cost = cost;
+    }
+    if (duration) {
+        plan.duration = duration;
+    }
+
+    plan.save();
+    res.status(200).json({
+        success: true,
+        message: `Plan updated successfully.`,
+        plan,
+    });
+});
+
+exports.getPlans = catchAsyncError(async (req, res, next) => {
+    const plans = await planModel.find()
+    res.status(200).json({
+        success: true,
+        plans
+    })
+})
 

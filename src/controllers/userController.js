@@ -11,6 +11,7 @@ const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
 const fs = require('fs');
 const path = require('path');
+const planModel = require("../models/planModel");
 // const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 // const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
@@ -501,12 +502,23 @@ exports.completedEvalReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getSlots = catchAsyncError(async (req, res) => {
-    const doctor = req.body.doctor;
-    if (!doctor) {
-        return res.status(400).json({ error: 'Parameter is required.' });
+    // const doctor = req.body.doctor;
+    const { doctor, date } = req.query;
+    let slots;
+    const query = {};
+    if (date) {
+        query.date = date;
     }
-    const slots = await slotModel.find({ doctor: doctor });
-    res.json({ slots: slots });
+    if (doctor) {
+        query.doctor = doctor;
+    }
+    if (!doctor && !date) {
+        slots = await slotModel.find().select('date');
+    } else {
+        slots = await slotModel.find(query);
+    }
+
+    res.status(200).json({ slots: slots });
 });
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
@@ -530,5 +542,5 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
 });
 
 exports.submitEvaluation = catchAsyncError(async (req, res) => {
-    
+
 });
