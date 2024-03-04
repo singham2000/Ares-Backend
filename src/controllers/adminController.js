@@ -38,9 +38,25 @@ function toCamelCase(inputString) {
 }
 
 exports.registerDoctor = catchAsyncError(async (req, res, next) => {
-    const { fullname, email, password } = req.body
+    console.log("ranned");
+    const {
+        firstName,
+        lastName,
+        startTime,
+        endTime,
+        suffix,
+        gender,
+        dob,
+        address,
+        city,
+        zip,
+        state,
+        email,
+        phone,
+        password,
+    } = req.body
 
-    if (!fullname || !email || !password) {
+    if (!firstName || !lastName || !email || !password || !startTime || !endTime) {
         return next(new ErrorHandler('Please fill all fields', 400))
     }
 
@@ -54,8 +70,19 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
         )
 
     user = await userModel.create({
-        fullname,
+        firstName,
+        lastName,
+        startTime,
+        endTime,
+        suffix,
+        gender,
+        dob,
+        address,
+        city,
+        zip,
+        state,
         email,
+        phone,
         password,
         role: 'doctor',
     })
@@ -63,8 +90,90 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     await user.save()
 
     user.password = undefined
-    sendData(user, 200, res)
+    res.status(200).json({
+        success: true,
+        message: "Doctor added successfully",
+    });
 })
+
+exports.registerAthlete = catchAsyncError(async (req, res, next) => {
+    console.log('Ranned');
+    const {
+        firstName,
+        lastName,
+        email,
+        city,
+        phone,
+        state,
+        age,
+        dob,
+        gender,
+        height,
+        dominatedHand,
+        guardianFirstName,
+        guardianLastName,
+        guardianSuffix,
+        organization,
+        password,
+    } = req.body;
+
+    if (
+        (!firstName ||
+            !lastName ||
+            !email ||
+            !city ||
+            !phone ||
+            !state ||
+            !age ||
+            !dob ||
+            !gender ||
+            !height,
+            !dominatedHand ||
+            !guardianFirstName ||
+            !guardianLastName ||
+            !guardianSuffix ||
+            !organization ||
+            !password)
+    ) {
+        return next(new ErrorHandler("Please enter all the fields", 400));
+    }
+
+    let user = await userModel.findOne({ email });
+    if (user)
+        return next(new ErrorHandler("User already exists with this email", 400));
+    if (password.length < 8)
+        return next(
+            new ErrorHandler("Password should have minimum 8 characters", 400)
+        );
+
+    user = await userModel.create({
+        firstName,
+        lastName,
+        email,
+        city,
+        phone,
+        state,
+        age,
+        dob,
+        gender,
+        height,
+        dominatedHand,
+        guardianFirstName,
+        guardianLastName,
+        guardianSuffix,
+        organization,
+        password,
+        role: "athlete",
+    });
+
+    await user.save();
+
+    const token = user.getJWTToken();
+    res.status(200).json({
+        success: true,
+        message: "Doctor added successfully",
+    });
+});
 
 exports.registerClinic = catchAsyncError(async (req, res, next) => {
     const { name, address } = req.body
@@ -415,5 +524,14 @@ exports.delPlan = catchAsyncError(async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
+});
+
+exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+    const users = await userModel.find({ role: ['doctor', 'athlete'] })
+    res.status(200).json({
+        success: true,
+        users,
+        message: 'Fetched successfully'
+    })
 });
 

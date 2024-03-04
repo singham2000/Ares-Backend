@@ -19,7 +19,8 @@ const {
   getPresForm,
   getAppointment,
   getSlots,
-  getAllDoc
+  getAllDoc,
+  getPlans
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -31,8 +32,8 @@ router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
 router.post("/book-appointment/:id", auth, bookAppointment);
 router.post("/select-plan", auth, selectPlan);
-router.post("/get-slots", auth, getSlots);
 
+router.get("/get-slots", auth, getSlots);
 router.get("/get-profile", auth, getProfile);
 router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
@@ -41,6 +42,7 @@ router.get("/get-eval-form", auth, getEvalForm);
 router.get("/get-pres-form", auth, getPresForm);
 router.get("/appointments/:date", auth, getAppointment);
 router.get('/get-all-doctors', auth, getAllDoc);
+router.get('/getServiceTypes', auth, getPlans);
 
 router.put("/reset-password", resetPassword);
 router.put("/update-profile", auth, updateProfile);

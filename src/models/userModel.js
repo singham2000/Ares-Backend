@@ -3,23 +3,88 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const roleEnum = ['admin', 'doctor', 'athlete'];
+
 const userSchema = new mongoose.Schema({
-  fullname: {
+  firstName: {
     type: String,
     trim: true,
-    required: [true, "Your full name is required"],
+    default: '',
+  },
+  lastName: {
+    type: String,
+    trim: true,
+    default: '',
   },
   email: {
     type: String,
     trim: true,
+    default: '',
     required: [true, "Email is required"],
     validate: [validator.isEmail, "Please provide a valid email"],
+  },
+  city: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  phone: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  state: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  age: {
+    type: Number,
+    default: '',
+  },
+  dob: {
+    type: Date,
+    default: '',
+  },
+  gender: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  height: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  dominatedHand: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  guardianFirstName: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  guardianLastName: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  guardianSuffix: {
+    type: String,
+    trim: true,
+    default: '',
+  },
+  organization: {
+    type: String,
+    trim: true,
+    default: '',
   },
   password: {
     type: String,
     trim: true,
     required: [true, "Password is required"],
-    minLength: [8, "Password should have minimum 8 characters"],
+    minlength: [8, "Password should have minimum 8 characters"],
     select: false,
   },
   role: {

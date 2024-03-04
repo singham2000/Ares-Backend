@@ -9,21 +9,14 @@ const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
-const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
+const { timeValidate, calculateTimeDifference, addDuration, sendData, createArrayOfPairs } = require('../utils/functions');
 const fs = require('fs');
 const path = require('path');
 const planModel = require("../models/planModel");
 // const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 // const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
-const timeForService = {
-    MedicalOfficeVisit: 30,
-    Consultation: 15,
-    SportsVision: 90,
-    ConcussionEval: 60
-};
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
-    console.log(req.query.email);
     const email = req.query.email;
     const user = await userModel.findOne({ email });
 
@@ -291,7 +284,6 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         }
     }
     if (service_type) {
-        console.log(service_type.split(','));
         query = {
             ...query, service_type: { $in: service_type.split(',') },
         };
@@ -451,7 +443,6 @@ exports.getPresForm = catchAsyncError(async (req, res) => {
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
     const date = req.params.date;
-    console.log(date);
     if (!date) {
         return res.status(400).json({ error: 'Date parameter is required.' });
     }
@@ -478,20 +469,28 @@ exports.getSlots = catchAsyncError(async (req, res) => {
     }
     if (date && doctor && service_type) {
         const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0] });
-        const time1 = "16:16";
-        const time2 = "17:16";
-        const duration = 20;
-        const timePieces = calculateTimeDifference(time1, time2, duration);
-        console.log(timePieces);
-        // console.log(dayAppointments);
+        let pairs;
+        let Calcslots = [];
+        if (dayAppointments.length > 1) {
+            pairs = createArrayOfPairs(dayAppointments);
+            pairs.map((pair) => (
+                Calcslots = [...Calcslots, ...calculateTimeDifference(pair[0].app_time, pair[0].service_type, pair[1].app_time, service_type)]
+            ))
+        } else {
+            const doc = await slotModel.find(query);
+            Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type)]
+        }
+        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1]]));
+        return res.status(200).json({ slots: slots });
     }
     if (!doctor && !date) {
         slots = await slotModel.find().select('date');
+        return res.status(200).json({ slots: slots });
     } else {
         slots = await slotModel.find(query);
+        return res.status(200).json({ slots: slots });
     }
 
-    res.status(200).json({ slots: slots });
 });
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
@@ -511,6 +510,14 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
         doctors: doctors,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
+    })
+});
+
+exports.getPlans = catchAsyncError(async (req, res, next) => {
+    const plans = await planModel.find()
+    res.status(200).json({
+        success: true,
+        plans
     })
 });
 
