@@ -38,7 +38,6 @@ function toCamelCase(inputString) {
 }
 
 exports.registerDoctor = catchAsyncError(async (req, res, next) => {
-    console.log("ranned");
     const {
         firstName,
         lastName,

@@ -523,8 +523,12 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         slots = await slotModel.find().select('date address');
         return res.status(200).json({ dates: slots });
     } else {
+        let dates = await slotModel.find().select('date address');
         slots = await slotModel.find(query);
-        return res.status(200).json({ location: slots });
+        return res.status(200).json({
+            location: slots,
+            dates: dates
+        });
     }
 
 });
