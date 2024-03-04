@@ -507,16 +507,16 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0] });
         let pairs;
         let Calcslots = [];
+        const doc = await slotModel.find(query);
         if (dayAppointments.length > 1) {
             pairs = createArrayOfPairs(dayAppointments);
             pairs.map((pair) => (
                 Calcslots = [...Calcslots, ...calculateTimeDifference(pair[0].app_time, pair[0].service_type, pair[1].app_time, service_type)]
             ))
         } else {
-            const doc = await slotModel.find(query);
             Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type)]
         }
-        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1]]));
+        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
         return res.status(200).json({ slots: slots });
     }
     if (!doctor && !date) {
