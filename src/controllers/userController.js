@@ -30,6 +30,42 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
+exports.editProfile = catchAsyncError(async (req, res, next) => {
+    const { userId } = req;
+    const doctor = await userModel.findById(userId).select("-password");
+    const {
+        firstName,
+        lastName,
+        startTime,
+        endTime,
+        suffix,
+        gender,
+        dob,
+        address,
+        city,
+        zip,
+        state,
+        email,
+        phone,
+    } = req.body;
+
+    firstName && (doctor.firstName = firstName);
+    lastName && (doctor.lastName = lastName);
+    startTime && (doctor.startTime = startTime);
+    suffix && (doctor.suffix = suffix);
+    gender && (doctor.gender = gender);
+    dob && (doctor.dob = dob);
+    address && (doctor.address = address);
+    city && (doctor.city = city);
+    zip && (doctor.zip = zip);
+    state && (doctor.state = state);
+    email && (doctor.email = email);
+    phone && (doctor.phone = phone);
+    await doctor.save();
+
+    res.status(200).json({ doctor });
+});
+
 exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
     const { email } = req.body;
     const user = await userModel.findOne({ email });
