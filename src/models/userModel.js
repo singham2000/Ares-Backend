@@ -8,77 +8,98 @@ const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     trim: true,
-    default: '',
+
   },
   lastName: {
     type: String,
     trim: true,
-    default: '',
+
+  },
+  suffix: {
+    type: String,
+    trim: true,
   },
   email: {
     type: String,
     trim: true,
-    default: '',
+
     required: [true, "Email is required"],
     validate: [validator.isEmail, "Please provide a valid email"],
   },
   city: {
     type: String,
     trim: true,
-    default: '',
+
+  },
+  zip: {
+    type: Number,
+    trim: true,
+
   },
   phone: {
+    type: Number,
+    trim: true,
+  },
+  startTime: {
     type: String,
     trim: true,
-    default: '',
+  },
+  endTime: {
+    type: String,
+    trim: true,
   },
   state: {
     type: String,
     trim: true,
-    default: '',
+
+  },
+  address: {
+    type: String,
+    trim: true,
+
   },
   age: {
     type: Number,
-    default: '',
+
   },
   dob: {
     type: Date,
-    default: '',
+
   },
   gender: {
     type: String,
     trim: true,
-    default: '',
+
   },
   height: {
     type: String,
     trim: true,
-    default: '',
+
   },
   dominatedHand: {
     type: String,
     trim: true,
-    default: '',
+
   },
   guardianFirstName: {
     type: String,
     trim: true,
-    default: '',
+
   },
   guardianLastName: {
     type: String,
     trim: true,
-    default: '',
+
   },
   guardianSuffix: {
     type: String,
     trim: true,
-    default: '',
+
   },
   organization: {
     type: String,
     trim: true,
-    default: '',
+
   },
   password: {
     type: String,
