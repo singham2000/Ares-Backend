@@ -12,7 +12,15 @@ const planSchema = new mongoose.Schema({
     duration: {
         type: Number,
         required: true
+    },
+    alias: {
+        type: String,
     }
+});
+
+planSchema.pre("save", async function (next) {
+    this.alias = this.name.replace(/\s/g, '');
+    next();
 });
 
 module.exports = mongoose.model("plan", planSchema);

@@ -450,13 +450,11 @@ exports.editDoc = catchAsyncError(async (req, res, next) => {
 
 exports.addPlans = catchAsyncError(async (req, res, next) => {
     const { name, cost, duration } = req.body;
-    console.log(name, cost, duration);
 
     if (!name || !cost || !duration) {
         return next(new ErrorHandler("All fields are required !", 400));
     }
     let plan = await planModel.find({ name: name });
-    console.log(plan);
     if (plan > 0) {
         return next(new ErrorHandler("Plan already created !", 400));
     }

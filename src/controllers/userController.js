@@ -493,7 +493,6 @@ exports.completedEvalReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getSlots = catchAsyncError(async (req, res) => {
-    // const doctor = req.body.doctor;
     const { doctor, date, service_type } = req.query;
     let slots;
     const query = {};
@@ -505,14 +504,18 @@ exports.getSlots = catchAsyncError(async (req, res) => {
     }
     if (date && doctor && service_type) {
         const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0] });
-        let pairs;
-        let Calcslots = [];
         const doc = await slotModel.find(query);
+        let Calcslots = [];
         if (dayAppointments.length > 1) {
-            pairs = createArrayOfPairs(dayAppointments);
-            pairs.map((pair) => (
-                Calcslots = [...Calcslots, ...calculateTimeDifference(pair[0].app_time, pair[0].service_type, pair[1].app_time, service_type)]
-            ))
+            dayAppointments.map((app, index) => {
+                if (index === 0) {
+                    Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, app.app_time, service_type)];
+                } else if (index + 1 === dayAppointments.length) {
+                    Calcslots = [...Calcslots, ...calculateTimeDifference(app.app_time, app.service_type, doc[0].startTime, service_type)];
+                } else {
+                    Calcslots = [...Calcslots, ...calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].app_time, service_type)]
+                }
+            })
         } else {
             Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type)]
         }
@@ -530,7 +533,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
             dates: dates
         });
     }
-
 });
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
