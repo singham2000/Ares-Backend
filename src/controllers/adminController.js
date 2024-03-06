@@ -87,16 +87,15 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     })
 
     await user.save()
-
-    user.password = undefined
+    const users = await userModel.find({ role: ['doctor', 'athlete'] })
     res.status(200).json({
         success: true,
-        message: "Doctor added successfully",
-    });
+        users,
+        message: 'Doctor added successfully'
+    })
 })
 
 exports.registerAthlete = catchAsyncError(async (req, res, next) => {
-    console.log('Ranned');
     const {
         firstName,
         lastName,
@@ -156,7 +155,7 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
         dob,
         gender,
         height,
-        dominatedHand,
+        dominatedHand: dominatedHand.toLowerCase(),
         guardianFirstName,
         guardianLastName,
         guardianSuffix,
@@ -166,11 +165,11 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     });
 
     await user.save();
-
-    const token = user.getJWTToken();
+    const users = await userModel.find({ role: ['doctor', 'athlete'] })
     res.status(200).json({
         success: true,
-        message: "Doctor added successfully",
+        users,
+        message: "Athlete added successfully",
     });
 });
 
@@ -354,11 +353,10 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
     })
 })
 
-exports.createSlot = catchAsyncError(async (req, res, next) => {
+exports.addSlot = catchAsyncError(async (req, res, next) => {
     const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
     const [day, month, year] = startDate.split('/');
     const formattedDate = `${month}-${day}-${year}`;
-    console.log(startDate, endDate);
     const query = {}
     let slot;
     if (!startDate || !doctor || !address)
@@ -370,7 +368,7 @@ exports.createSlot = catchAsyncError(async (req, res, next) => {
     }
     if (startDate === endDate) {
         slot = await slotModel.create({
-            date: new Date(formattedDate),
+            date: startDate,
             doctor,
             address,
             startTime,
@@ -432,10 +430,27 @@ exports.delDoc = catchAsyncError(async (req, res, next) => {
     }
 });
 
+exports.delUser = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
+    try {
+        const deletedUser = await userModel.findByIdAndDelete(id);
+        const allUser = await userModel.find({ role: ['doctor', 'athlete'] });
+        if (!deletedUser) {
+            return next(new ErrorHandler("User not found!", 404));
+        }
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+            users: allUser
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
 exports.editDoc = catchAsyncError(async (req, res, next) => {
     const { fullname, email } = req.body;
     const { id } = req.query;
-    console.log(id);
     let user = await userModel.findById(id)
     if (!user || user.role != 'doctor')
         return next(new ErrorHandler('User does not exists as Doctor', 400))
@@ -524,11 +539,41 @@ exports.delPlan = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 8;
     const users = await userModel.find({ role: ['doctor', 'athlete'] })
-    res.status(200).json({
-        success: true,
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+
+    const totalRecords = await userModel.countDocuments({ role: ['doctor', 'athlete'] });
+    res.json({
         users,
-        message: 'Fetched successfully'
-    })
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    });
 });
+
+exports.activateUser = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
+    try {
+        const activateUser = await planModel.findById(id);
+        activateUser.isActive = !activateUser.isActive;
+        await activateUser.save();
+        if (!activateUser) {
+            return next(new ErrorHandler("Not found!", 404));
+        }
+        const users = await userModel.find({ role: ['doctor', 'athlete'] })
+        res.status(200).json({
+            success: true,
+            users: users,
+            message: 'Activated successfully'
+        })
+    } catch (error) {
+        return next(error);
+    }
+});
+
+
 

@@ -51,55 +51,51 @@ const userSchema = new mongoose.Schema({
   state: {
     type: String,
     trim: true,
-
   },
   address: {
     type: String,
     trim: true,
-
   },
   age: {
     type: Number,
-
   },
   dob: {
-    type: Date,
-
+    type: String,
   },
   gender: {
     type: String,
     trim: true,
-
   },
   height: {
     type: String,
     trim: true,
-
   },
   dominatedHand: {
     type: String,
     trim: true,
+    enum: ['right', 'left']
 
   },
   guardianFirstName: {
     type: String,
     trim: true,
-
+  },
+  isActive: {
+    type: Boolean,
+    trim: true,
+    default: true
   },
   guardianLastName: {
     type: String,
     trim: true,
-
   },
   guardianSuffix: {
     type: String,
     trim: true,
-
   },
   organization: {
     type: String,
     trim: true,
-
   },
   password: {
     type: String,

@@ -9,16 +9,18 @@ const {
   evaluationFormMake,
   registerClinic,
   getAllClinics,
-  createSlot,
+  addSlot,
   getAllSlots,
   delDoc,
+  delUser,
   editDoc,
   addPlans,
   getPlans,
   editPlan,
   delPlan,
   registerAthlete,
-  getAllUsers
+  getAllUsers,
+  activateUser
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -30,13 +32,17 @@ router.post('/register_athlete', auth, isAdmin, registerAthlete);
 router.post('/register_clinic', auth, isAdmin, registerClinic);
 router.post('/set_pres_form', auth, isAdmin, prescriptionFormMake);
 router.post('/set_eval_form', auth, isAdmin, evaluationFormMake);
-router.post('/create_slot', auth, isAdmin, createSlot);
+router.post('/add_slot', auth, isAdmin, addSlot);
 router
   .route('/plans')
   .post(auth, isAdmin, addPlans)
   .put(auth, isAdmin, editPlan)
   .get(auth, isAdmin, getPlans)
   .delete(auth, isAdmin, delPlan)
+
+router.delete('/delete_user', auth, isAdmin, delUser);
+
+router.put('/activate_user', auth, isAdmin, activateUser);
 
 router.get('/get_all_doctor', auth, isAdmin, getAllDoc);
 router.get('/get_all_clinics', auth, isAdmin, getAllClinics);

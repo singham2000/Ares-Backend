@@ -8,6 +8,19 @@ const clinicSchema = new mongoose.Schema({
     address: {
         type: String,
         required: true
-    }
+    },
+    startTime: {
+        type: String,
+        trim: true,
+    },
+    endTime: {
+        type: String,
+        trim: true,
+    },
+    isActive: {
+        type: Boolean,
+        trim: true,
+        default: true
+    },
 })
 module.exports = mongoose.model('clinic', clinicSchema)
