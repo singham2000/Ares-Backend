@@ -557,15 +557,26 @@ exports.getAllUsers = catchAsyncError(async (req, res, next) => {
 
 exports.activateUser = catchAsyncError(async (req, res, next) => {
     const { id } = req.query;
+    let page = 1;
+    const limit = 8;
     try {
-        const activateUser = await planModel.findById(id);
+        const activateUser = await userModel.findById(id);
         activateUser.isActive = !activateUser.isActive;
         await activateUser.save();
         if (!activateUser) {
             return next(new ErrorHandler("Not found!", 404));
         }
         const users = await userModel.find({ role: ['doctor', 'athlete'] })
+            .sort({ createdAt: 'desc' })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
+
+        const totalRecords = await userModel.countDocuments({ role: ['doctor', 'athlete'] });
+
         res.status(200).json({
+            totalPages: Math.ceil(totalRecords / limit),
+            currentPage: page,
             success: true,
             users: users,
             message: 'Activated successfully'
@@ -575,5 +586,23 @@ exports.activateUser = catchAsyncError(async (req, res, next) => {
     }
 });
 
+exports.activateClinic = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
+    try {
+        const activateClinic = await clinicModel.findById(id);
+        activateClinic.isActive = !activateClinic.isActive;
+        await activateClinic.save();
+        if (!activateClinic) {
+            return next(new ErrorHandler("Not found!", 404));
+        }
+        const clinics = await clinicModel.find()
 
-
+        res.status(200).json({
+            success: true,
+            data: clinics,
+            message: 'Activated successfully'
+        })
+    } catch (error) {
+        return next(error);
+    }
+});

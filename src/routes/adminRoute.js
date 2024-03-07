@@ -20,7 +20,8 @@ const {
   delPlan,
   registerAthlete,
   getAllUsers,
-  activateUser
+  activateUser,
+  activateClinic
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -42,7 +43,8 @@ router
 
 router.delete('/delete_user', auth, isAdmin, delUser);
 
-router.put('/activate_user', auth, isAdmin, activateUser);
+router.get('/make_active_user', auth, isAdmin, activateUser);
+router.get('/make_active_clinic', auth, isAdmin, activateClinic);
 
 router.get('/get_all_doctor', auth, isAdmin, getAllDoc);
 router.get('/get_all_clinics', auth, isAdmin, getAllClinics);

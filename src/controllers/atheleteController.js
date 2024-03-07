@@ -1,5 +1,5 @@
 const appointmentModel = require("../models/appointmentModel");
-const athleteModel = require("../models/athleteModel");
+const athleteModel = require("../models/userModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 
@@ -34,7 +34,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
       !dob ||
       !gender ||
       !height,
-    !dominatedHand ||
+      !dominatedHand ||
       !guardianFirstName ||
       !guardianLastName ||
       !guardianSuffix ||
