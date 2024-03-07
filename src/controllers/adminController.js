@@ -356,8 +356,7 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 exports.addSlot = catchAsyncError(async (req, res, next) => {
     const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
     const [day, month, year] = startDate.split('/');
-    const formattedDate = `${month}-${day}-${year}`;
-    const query = {}
+    const formattedDate = new Date(year, month - 1, day)
     let slot;
     if (!startDate || !doctor || !address)
         return next(new ErrorHandler('Please fill all fields', 400));
@@ -368,7 +367,7 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
     }
     if (startDate === endDate) {
         slot = await slotModel.create({
-            date: startDate,
+            date: formattedDate,
             doctor,
             address,
             startTime,
@@ -383,8 +382,8 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
         let slots = [];
         const [day, month, year] = startDate.split('/');
         const [day1, month1, year1] = endDate.split('/');
-        let startDates = new Date(year, month, day);
-        let endDates = new Date(year1, month1, day1);
+        let startDates = new Date(year, month + 1, day);
+        let endDates = new Date(year1, month1 + 1, day1);
         let dateRange = generateDateRange(startDates, endDates);
         dateRange.map(async (date, index) => {
             slot = await slotModel.create({
