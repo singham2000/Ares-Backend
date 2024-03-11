@@ -357,6 +357,10 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
     const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
     const [day, month, year] = startDate.split('/');
     const formattedDate = new Date(year, month - 1, day)
+    formattedDate.setHours(0);
+    formattedDate.setMinutes(0);
+    formattedDate.setSeconds(0);
+    formattedDate.setMilliseconds(0);
     let slot;
     if (!startDate || !doctor || !address)
         return next(new ErrorHandler('Please fill all fields', 400));
