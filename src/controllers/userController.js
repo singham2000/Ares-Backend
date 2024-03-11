@@ -18,11 +18,10 @@ const planModel = require("../models/planModel");
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
-    const user = await userModel.findOne({ email, role: 'doctor' });
-
+    const user = await userModel.findOne({ email: email, role: 'doctor' });
 
     if (!user) {
-        return next(new ErrorHandler("User not found.", 400));
+        return next(new ErrorHandler("User not found.", 404));
     }
 
     res.status(200).json({
