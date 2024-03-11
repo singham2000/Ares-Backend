@@ -3,6 +3,7 @@ const { auth } = require("../middlewares/auth");
 const {
   login,
   getProfile,
+  editProfile,
   sendForgotPasswordCode,
   validateForgotPasswordCode,
   resetPassword,
@@ -45,7 +46,7 @@ router.get('/get-all-doctors', auth, getAllDoc);
 router.get('/getServiceTypes', auth, getPlans);
 
 router.put("/reset-password", resetPassword);
-router.put("/update-profile", auth, updateProfile);
+router.put("/update-profile", auth, editProfile);
 router.put("/update-password", auth, updatePassword);
 
 module.exports = router;

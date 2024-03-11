@@ -30,7 +30,7 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.editProfile = catchAsyncError(async (req, res, next) => {
-    const { userId } = req;
+    const { userId } = req.query;
     const doctor = await userModel.findById(userId).select("-password");
     const {
         firstName,
@@ -47,6 +47,11 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
         email,
         phone,
     } = req.body;
+    if (doctor.role !== 'doctor') {
+        return next(new ErrorHandler("Not a doctor.", 404));
+    } else if (!doctor) {
+        return next(new ErrorHandler("User Not Found.", 404));
+    }
 
     firstName && (doctor.firstName = firstName);
     lastName && (doctor.lastName = lastName);
@@ -62,7 +67,10 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
     phone && (doctor.phone = phone);
     await doctor.save();
 
-    res.status(200).json({ doctor });
+    res.status(200).json({
+        success: true,
+        doctor
+    });
 });
 
 exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
