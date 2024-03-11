@@ -7,7 +7,8 @@ const appointmentServiceEnum = [
   "TrainingSessions",
   "ConcussionEval",
 ];
-const appointmentStatus = ["paid", "pending", "failed"];
+const paymentStatus = ["paid", "pending", "failed"];
+const appointmentStatus = ["completed", "upcomming", "cancled"];
 
 const appointmentSchema = new mongoose.Schema(
   {
@@ -43,8 +44,14 @@ const appointmentSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: appointmentStatus,
+      enum: paymentStatus,
     },
+    service_status: {
+      type: String,
+      required: true,
+      enum: appointmentStatus,
+      default: 'upcomming'
+    }
   },
   {
     timestamps: true,
