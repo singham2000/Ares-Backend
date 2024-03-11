@@ -493,7 +493,11 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
     const endDate = new Date(date);
     endDate.setDate(endDate.getDate() + 1);
     const appointments = await appointmentModel.find({ app_date: { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] } });
-    res.json(appointments);
+    res.status(200).json({
+        success: true,
+        appointments:
+            appointments
+    });
 });
 
 exports.completedEvalReq = catchAsyncError(async (req, res) => {
