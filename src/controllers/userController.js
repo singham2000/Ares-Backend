@@ -256,7 +256,13 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        client_id: user.client_id
+        client_id: user.client_id,
+        client_details: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone: user.phone_number
+        }
     });
 });
 
