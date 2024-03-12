@@ -356,11 +356,11 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 exports.addSlot = catchAsyncError(async (req, res, next) => {
     const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
     const [day, month, year] = startDate.split('/');
-    const formattedDate = new Date(year, month - 1, day)
-    formattedDate.setHours(0);
-    formattedDate.setMinutes(0);
-    formattedDate.setSeconds(0);
-    formattedDate.setMilliseconds(0);
+    const formattedDate = new Date((`${year}-${month < 10 && '0'}${month}-${day}T18:30:00.000Z`).toString());
+    formattedDate.setUTCHours(0);
+    formattedDate.setUTCMinutes(0);
+    formattedDate.setUTCSeconds(0);
+    formattedDate.setUTCMilliseconds(0);
     let slot;
     if (!startDate || !doctor || !address)
         return next(new ErrorHandler('Please fill all fields', 400));
