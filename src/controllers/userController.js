@@ -47,10 +47,13 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
         email,
         phone,
     } = req.body;
+    if (!userId)
+        return next(new ErrorHandler("Please send userId.", 404));
+    if (!doctor) {
+        return next(new ErrorHandler("User Not Found.", 404));
+    }
     if (doctor.role !== 'doctor') {
         return next(new ErrorHandler("Not a doctor.", 404));
-    } else if (!doctor) {
-        return next(new ErrorHandler("User Not Found.", 404));
     }
 
     firstName && (doctor.firstName = firstName);
