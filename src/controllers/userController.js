@@ -590,11 +590,12 @@ exports.submitEvaluation = catchAsyncError(async (req, res) => {
 });
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
+    // Aggregate appointments by date
     const appointmentsByDate = await appointmentModel.aggregate([
         {
             $addFields: {
                 appDate: {
-                    $toDate: '$app_date'
+                    $toDate: '$app_date' // Convert app_date string to date object
                 }
             }
         },
@@ -613,12 +614,25 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         }
     ]);
 
-    const formattedAppointments = appointmentsByDate.map(dateGroup => ({
-        [moment(dateGroup._id).format('YYYY-MM-DD')]: {
-            appointments: dateGroup.appointments
+    // Filter out past dates and include only today's and upcoming dates
+    const currentDate = moment().startOf('day');
+    const filteredAppointments = appointmentsByDate.filter(dateGroup => {
+        if (currentDate.year() <= dateGroup._id.year) {
+            if (currentDate.month() + 1 <= dateGroup._id.month) {
+                if (currentDate.date() <= dateGroup._id.day) {
+                    return true;
+                }
+            }
         }
-    }));
+        return false;
 
+    });
+
+    // Format result for response
+    const formattedAppointments = filteredAppointments.map(dateGroup => ({
+        date: moment({ ...dateGroup._id, month: dateGroup._id.month - 1 }).format('YYYY-MM-DD'),
+        appointments: dateGroup.appointments
+    }));
 
     res.status(200).json({
         success: true,
