@@ -638,7 +638,6 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
 
 exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
     const { Id, status } = req.query;
-    console.log(Id, status);
 
     if (!Id || !status) {
         return next(new ErrorHandler("Fields are empty", 404));
