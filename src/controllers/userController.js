@@ -278,6 +278,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         service_type,
         app_date,
         app_time,
+        end_time,
         doctor_trainer,
         location
     } = req.body;
@@ -311,6 +312,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         service_type,
         app_date,
         app_time,
+        end_time,
         doctor_trainer,
         location,
         status: 'pending'
@@ -590,12 +592,11 @@ exports.submitEvaluation = catchAsyncError(async (req, res) => {
 });
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
-    // Aggregate appointments by date
     const appointmentsByDate = await appointmentModel.aggregate([
         {
             $addFields: {
                 appDate: {
-                    $toDate: '$app_date' // Convert app_date string to date object
+                    $toDate: '$app_date'
                 }
             }
         },
@@ -613,8 +614,6 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
             $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
         }
     ]);
-
-    // Filter out past dates and include only today's and upcoming dates
     const currentDate = moment().startOf('day');
     const filteredAppointments = appointmentsByDate.filter(dateGroup => {
         if (currentDate.year() <= dateGroup._id.year) {
@@ -627,15 +626,32 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         return false;
 
     });
-
-    // Format result for response
     const formattedAppointments = filteredAppointments.map(dateGroup => ({
         date: moment({ ...dateGroup._id, month: dateGroup._id.month - 1 }).format('YYYY-MM-DD'),
         appointments: dateGroup.appointments
     }));
-
     res.status(200).json({
         success: true,
         appointments: formattedAppointments
     });
 });
+
+exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
+    const { Id, status } = req.query;
+    console.log(Id, status);
+
+    if (!Id || !status) {
+        return next(new ErrorHandler("Fields are empty", 404));
+    }
+    const appointment = await appointmentModel.findById(Id);
+    if (!appointment) {
+        return next(new ErrorHandler("No such appointment exists", 404));
+    }
+    appointment.service_status = status;
+    await appointment.save();
+
+    res.status(200).json({
+        success: true,
+        appointment
+    });
+})

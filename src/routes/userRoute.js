@@ -22,7 +22,8 @@ const {
   getSlots,
   getAllDoc,
   getPlans,
-  getAllAppointments
+  getAllAppointments,
+  appointmentStatus
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -50,5 +51,6 @@ router.get('/get-all-appointments', auth, getAllAppointments);
 router.put("/reset-password", resetPassword);
 router.put("/update-profile", auth, editProfile);
 router.put("/update-password", auth, updatePassword);
+router.put('/update-status-appointment', auth, appointmentStatus);
 
 module.exports = router;
