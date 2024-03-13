@@ -13,6 +13,8 @@ const { timeValidate, calculateTimeDifference, addDuration, sendData, createArra
 const fs = require('fs');
 const path = require('path');
 const planModel = require("../models/planModel");
+const moment = require('moment');
+
 // const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
 // const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
@@ -585,4 +587,41 @@ exports.getPlans = catchAsyncError(async (req, res, next) => {
 
 exports.submitEvaluation = catchAsyncError(async (req, res) => {
 
+});
+
+exports.getAllAppointments = catchAsyncError(async (req, res) => {
+    const appointmentsByDate = await appointmentModel.aggregate([
+        {
+            $addFields: {
+                appDate: {
+                    $toDate: '$app_date'
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: '$appDate' },
+                    month: { $month: '$appDate' },
+                    day: { $dayOfMonth: '$appDate' }
+                },
+                appointments: { $push: '$$ROOT' }
+            }
+        },
+        {
+            $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
+        }
+    ]);
+
+    const formattedAppointments = appointmentsByDate.map(dateGroup => ({
+        [moment(dateGroup._id).format('YYYY-MM-DD')]: {
+            appointments: dateGroup.appointments
+        }
+    }));
+
+
+    res.status(200).json({
+        success: true,
+        appointments: formattedAppointments
+    });
 });
