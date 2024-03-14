@@ -533,11 +533,8 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
     }
     const startDate = new Date(date);
     const endDate = new Date(date);
-    console.log(startDate, endDate);
     endDate.setDate(endDate.getDate() + 1);
-    console.log(date);
     const appointments = await appointmentModel.find({ app_date: date, app_date: { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] } });
-    // const appointments = await appointmentModel.find({ app_date: date });
     res.status(200).json({
         success: true,
         appointments:
