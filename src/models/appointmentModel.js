@@ -36,6 +36,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     end_time: {
       type: String,
+      required: true,
     },
     doctor_trainer: {
       type: String,
