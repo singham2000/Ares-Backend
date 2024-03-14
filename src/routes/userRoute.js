@@ -3,11 +3,11 @@ const { auth } = require("../middlewares/auth");
 const {
   login,
   getProfile,
-  editProfile,
   sendForgotPasswordCode,
   validateForgotPasswordCode,
   resetPassword,
-  updateProfile,
+  editClientProfile,
+  editDoctorProfile,
   updatePassword,
   registerClient,
   checkClient,
@@ -49,7 +49,8 @@ router.get('/getServiceTypes', auth, getPlans);
 router.get('/get-all-appointments', auth, getAllAppointments);
 
 router.put("/reset-password", resetPassword);
-router.put("/update-profile", auth, editProfile);
+router.put("/update-profile-client", auth, editClientProfile);
+router.put("/update-profile-doctor", auth, editDoctorProfile);
 router.put("/update-password", auth, updatePassword);
 router.put('/update-status-appointment', auth, appointmentStatus);
 

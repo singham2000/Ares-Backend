@@ -6,7 +6,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
-const { generateClientId, generateAppointmentId } = require("../utils/generateId");
+const { generateAppointmentId } = require("../utils/generateId");
 const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
 const planModel = require("../models/planModel");
 const moment = require('moment');
@@ -24,7 +24,7 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.editProfile = catchAsyncError(async (req, res, next) => {
+exports.editClientProfile = catchAsyncError(async (req, res, next) => {
     const { userId } = req.query;
     const {
         firstName,
@@ -51,6 +51,54 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
 
     firstName && (doctor.firstName = firstName);
     lastName && (doctor.lastName = lastName);
+    suffix && (doctor.suffix = suffix);
+    gender && (doctor.gender = gender);
+    dob && (doctor.dob = dob);
+    address && (doctor.address = address);
+    city && (doctor.city = city);
+    zip && (doctor.zip = zip);
+    state && (doctor.state = state);
+    email && (doctor.email = email);
+    phone && (doctor.phone = phone);
+    await doctor.save();
+
+    res.status(200).json({
+        success: true,
+        doctor
+    });
+});
+
+exports.editDoctorProfile = catchAsyncError(async (req, res, next) => {
+    const { userId } = req.query;
+    const {
+        firstName,
+        lastName,
+        startTime,
+        endTime,
+        suffix,
+        gender,
+        dob,
+        address,
+        city,
+        zip,
+        state,
+        email,
+        phone,
+    } = req.body;
+    if (!userId)
+        return next(new ErrorHandler("Please send userId.", 404));
+    const doctor = await userModel.findById(userId).select("-password");
+    if (!doctor) {
+        return next(new ErrorHandler("User Not Found.", 404));
+    }
+    if (doctor.role !== 'doctor') {
+        return next(new ErrorHandler("Not a doctor.", 404));
+    }
+
+    firstName && (doctor.firstName = firstName);
+    lastName && (doctor.lastName = lastName);
+    startTime && (doctor.startTime = startTime);
+    endTime && (doctor.lastName = endTime);
     suffix && (doctor.suffix = suffix);
     gender && (doctor.gender = gender);
     dob && (doctor.dob = dob);
