@@ -240,11 +240,7 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
 
     let user = await userModel.findOne({ email });
     if (user)
-        return next(new ErrorHandler("User already exists with this email", 400));
-    if (password.length < 8)
-        return next(
-            new ErrorHandler("Password should have minimum 8 characters", 400)
-        );
+        return next(new ErrorHandler("User already exists with this email", 400))
 
     user = await userModel.create({
         firstName,
