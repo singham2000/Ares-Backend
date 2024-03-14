@@ -1,5 +1,5 @@
 const userModel = require("../models/userModel");
-const clientModel = require('../models/clientModel');
+// const clientModel = require('../models/clientModel');
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
@@ -277,18 +277,17 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a email", 400));
     }
 
-    let user = await clientModel.findOne({ email });
+    let user = await userModel.findOne({ email });
     if (!user)
         return next(new ErrorHandler("User does not exists with this email", 400));
 
     res.status(200).json({
         success: true,
-        client_id: user.client_id,
         client_details: {
-            first_name: user.first_name,
-            last_name: user.last_name,
+            first_name: user.firstName,
+            last_name: user.lastName,
             email: user.email,
-            phone: user.phone_number
+            phone: user.phone
         }
     });
 });
