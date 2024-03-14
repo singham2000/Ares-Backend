@@ -26,24 +26,22 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
 
 exports.editProfile = catchAsyncError(async (req, res, next) => {
     const { userId } = req.query;
-    const doctor = await userModel.findById(userId).select("-password");
     const {
         firstName,
         lastName,
-        startTime,
-        endTime,
         suffix,
-        gender,
-        dob,
-        address,
-        city,
-        zip,
-        state,
         email,
+        city,
         phone,
+        state,
+        dob,
+        gender,
+        address,
+        zip,
     } = req.body;
     if (!userId)
         return next(new ErrorHandler("Please send userId.", 404));
+    const doctor = await userModel.findById(userId).select("-password");
     if (!doctor) {
         return next(new ErrorHandler("User Not Found.", 404));
     }
@@ -53,7 +51,6 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
 
     firstName && (doctor.firstName = firstName);
     lastName && (doctor.lastName = lastName);
-    startTime && (doctor.startTime = startTime);
     suffix && (doctor.suffix = suffix);
     gender && (doctor.gender = gender);
     dob && (doctor.dob = dob);
@@ -137,34 +134,6 @@ exports.login = catchAsyncError(async (req, res, next) => {
     sendData(user, 200, res);
 });
 
-exports.updateProfile = catchAsyncError(async (req, res, next) => {
-    const { fullname, email } = req.body;
-
-    let user1 = await userModel.findOne({ email });
-    if (user1 && user1._id.toString() !== req.userId.toString()) {
-        return next(
-            new ErrorHandler(
-                "Try with different email. User with this email already exists",
-                400
-            )
-        );
-    }
-
-    const user = await userModel.findById(req.userId);
-    if (!user) return next(new ErrorHandler("User Not Found.", 404));
-
-    if (email) user.email = email;
-    if (fullname) user.fullname = fullname;
-
-
-    await user.save();
-    res.status(200).json({
-        success: true,
-        message: "Profile Updated Successfully.",
-        user,
-    });
-});
-
 exports.updatePassword = catchAsyncError(async (req, res, next) => {
     const user = await userModel.findById(req.userId).select("+password");
     const { oldPassword, newPassword } = req.body;
@@ -194,39 +163,29 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
     const {
         firstName,
         lastName,
+        suffix,
         email,
         city,
         phone,
         state,
-        age,
         dob,
         gender,
-        height,
-        dominatedHand,
-        guardianFirstName,
-        guardianLastName,
-        guardianSuffix,
-        organization,
-        password,
+        address,
+        zip
     } = req.body;
 
     if (
         (!firstName ||
             !lastName ||
+            !suffix ||
+            !address ||
             !email ||
             !city ||
             !phone ||
             !state ||
-            !age ||
             !dob ||
             !gender ||
-            !height,
-            !dominatedHand ||
-            !guardianFirstName ||
-            !guardianLastName ||
-            !guardianSuffix ||
-            !organization ||
-            !password)
+            !zip)
     ) {
         return next(new ErrorHandler("Please enter all the fields", 400));
     }
@@ -242,28 +201,23 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
     user = await userModel.create({
         firstName,
         lastName,
+        suffix,
         email,
         city,
         phone,
         state,
-        age,
         dob,
         gender,
-        height,
-        dominatedHand: dominatedHand.toLowerCase(),
-        guardianFirstName,
-        guardianLastName,
-        guardianSuffix,
-        organization,
-        password,
+        address,
+        zip,
+        password: `${phone}${firstName}`,
         role: "athlete",
     });
 
     await user.save();
-    const users = await userModel.find({ role: ['doctor', 'athlete'] })
     res.status(200).json({
         success: true,
-        users,
+        user,
         message: "Athlete added successfully",
     });
 });
@@ -652,13 +606,25 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         return false;
 
     });
-    const formattedAppointments = filteredAppointments.map(dateGroup => ({
-        date: moment({ ...dateGroup._id, month: dateGroup._id.month - 1 }).format('YYYY-MM-DD'),
-        appointments: dateGroup.appointments
-    }));
+    const groupedAppointments = {};
+    filteredAppointments.forEach(appointment => {
+        const date = appointment.date;
+        if (!groupedAppointments[date]) {
+            groupedAppointments[date] = [];
+        }
+        groupedAppointments[date].push(appointment);
+    });
+
+    // Sort dates
+    const sortedDates = Object.keys(groupedAppointments).sort();
+
+    // Create an array of appointments sorted by date
+    const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
+
+    // Send the sorted list as the response
     res.status(200).json({
         success: true,
-        appointments: formattedAppointments
+        appointments: sortedAppointments
     });
 });
 

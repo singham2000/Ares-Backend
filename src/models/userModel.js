@@ -8,12 +8,10 @@ const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     trim: true,
-
   },
   lastName: {
     type: String,
     trim: true,
-
   },
   suffix: {
     type: String,
@@ -29,12 +27,10 @@ const userSchema = new mongoose.Schema({
   city: {
     type: String,
     trim: true,
-
   },
   zip: {
     type: Number,
     trim: true,
-
   },
   phone: {
     type: Number,
@@ -56,9 +52,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  age: {
-    type: Number,
-  },
   dob: {
     type: String,
   },
@@ -66,36 +59,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  height: {
-    type: String,
-    trim: true,
-  },
-  dominatedHand: {
-    type: String,
-    trim: true,
-    enum: ['right', 'left']
-
-  },
-  guardianFirstName: {
-    type: String,
-    trim: true,
-  },
   isActive: {
     type: Boolean,
     trim: true,
     default: true
-  },
-  guardianLastName: {
-    type: String,
-    trim: true,
-  },
-  guardianSuffix: {
-    type: String,
-    trim: true,
-  },
-  organization: {
-    type: String,
-    trim: true,
   },
   password: {
     type: String,

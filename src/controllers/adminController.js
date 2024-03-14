@@ -100,39 +100,29 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     const {
         firstName,
         lastName,
+        suffix,
         email,
         city,
         phone,
         state,
-        age,
         dob,
         gender,
-        height,
-        dominatedHand,
-        guardianFirstName,
-        guardianLastName,
-        guardianSuffix,
-        organization,
-        password,
+        address,
+        zip
     } = req.body;
 
     if (
         (!firstName ||
             !lastName ||
+            !suffix ||
+            !address ||
             !email ||
             !city ||
             !phone ||
             !state ||
-            !age ||
             !dob ||
             !gender ||
-            !height,
-            !dominatedHand ||
-            !guardianFirstName ||
-            !guardianLastName ||
-            !guardianSuffix ||
-            !organization ||
-            !password)
+            !zip)
     ) {
         return next(new ErrorHandler("Please enter all the fields", 400));
     }
@@ -148,20 +138,16 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     user = await userModel.create({
         firstName,
         lastName,
+        suffix,
         email,
         city,
         phone,
         state,
-        age,
         dob,
         gender,
-        height,
-        dominatedHand: dominatedHand.toLowerCase(),
-        guardianFirstName,
-        guardianLastName,
-        guardianSuffix,
-        organization,
-        password,
+        address,
+        zip,
+        password: `${phone}${firstName}`,
         role: "athlete",
     });
 
@@ -611,15 +597,46 @@ exports.activateClinic = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.getBookings = catchAsyncError(async (req, res, next) => {
+exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
-    const appointments = await appointmentModel.find()
+    const status = req.query.status;
+    const service_type = req.query.service_type;
+    const date = req.query.date;
+    const doctor = req.query.doctor;
+    let query = {};
+
+    if (!doctor) {
+        return next(new ErrorHandler("Doctor is required", 404))
+    }
+    if (doctor) {
+        query = {
+            ...query, doctor_trainer: doctor
+        }
+    }
+
+    if (status) {
+        query = {
+            ...query, status: status
+        }
+    }
+    if (service_type) {
+        query = {
+            ...query, service_type: { $in: service_type.split(',') },
+        };
+    }
+    if (date) {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + 1);
+        query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
+    }
+    const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
-    const totalRecords = await appointmentModel.countDocuments();
+    const totalRecords = await appointmentModel.countDocuments(query);
     res.json({
         appointments: appointments,
         totalPages: Math.ceil(totalRecords / limit),
