@@ -1,5 +1,6 @@
 const userModel = require('../models/userModel');
 const clinicModel = require('../models/clinicModel');
+const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const fs = require('fs');
 const path = require('path');
@@ -608,4 +609,47 @@ exports.activateClinic = catchAsyncError(async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
+});
+
+exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 10;
+    const status = req.query.status;
+    const service_type = req.query.service_type;
+    const date = req.query.date;
+    const id = req.query.id;
+    let query = {};
+
+    if (!id) {
+        return next(new ErrorHandler("Id is required", 404))
+    }
+
+    if (status) {
+        query = {
+            ...query, status: status
+        }
+    }
+    if (service_type) {
+        query = {
+            ...query, service_type: { $in: service_type.split(',') },
+        };
+    }
+    if (date) {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + 1);
+        query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
+    }
+    const appointments = await appointmentModel.find(query)
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
+    const totalRecords = await appointmentModel.countDocuments(query);
+    res.json({
+        appointments: appointments,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+    });
+
 });
