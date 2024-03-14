@@ -368,14 +368,14 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
     if (searchQuery) {
-        // let query = `/^${searchQuery}.*$/i;`
-        const regex = new RegExp(searchQuery, 'i');
+        const regex = new RegExp(`^${searchQuery}`, 'i');
         query.$or = [
             { 'client.firstName': regex },
             { 'client.lastName': regex },
             { 'client.email': regex }
         ];
     }
+
 
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
