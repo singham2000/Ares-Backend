@@ -324,6 +324,7 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
     if (searchQuery) {
+        // let query = `/^${searchQuery}.*$/i;`
         const regex = new RegExp(searchQuery, 'i');
         query.client.$or = [
             { 'client.firstName': regex },
