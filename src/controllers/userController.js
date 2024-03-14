@@ -45,8 +45,8 @@ exports.editClientProfile = catchAsyncError(async (req, res, next) => {
     if (!doctor) {
         return next(new ErrorHandler("User Not Found.", 404));
     }
-    if (doctor.role !== 'doctor') {
-        return next(new ErrorHandler("Not a doctor.", 404));
+    if (doctor.role !== 'athlete') {
+        return next(new ErrorHandler("Not a athlete.", 404));
     }
 
     firstName && (doctor.firstName = firstName);
