@@ -617,11 +617,16 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
     const status = req.query.status;
     const service_type = req.query.service_type;
     const date = req.query.date;
-    const id = req.query.id;
+    const doctor = req.query.doctor;
     let query = {};
 
-    if (!id) {
-        return next(new ErrorHandler("Id is required", 404))
+    if (!doctor) {
+        return next(new ErrorHandler("Doctor is required", 404))
+    }
+    if (doctor) {
+        query = {
+            ...query, doctor_trainer: doctor
+        }
     }
 
     if (status) {
