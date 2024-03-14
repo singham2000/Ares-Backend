@@ -653,8 +653,12 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         return false;
 
     });
+    const formattedAppointments = filteredAppointments.map(dateGroup => ({
+        date: moment({ ...dateGroup._id, month: dateGroup._id.month - 1 }).format('YYYY-MM-DD'),
+        appointments: dateGroup.appointments
+    }));
     const groupedAppointments = {};
-    filteredAppointments.forEach(appointment => {
+    formattedAppointments.forEach(appointment => {
         const date = appointment.date;
         if (!groupedAppointments[date]) {
             groupedAppointments[date] = [];
