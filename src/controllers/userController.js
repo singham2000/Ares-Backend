@@ -374,7 +374,7 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
     if (searchQuery) {
         // let query = `/^${searchQuery}.*$/i;`
         const regex = new RegExp(searchQuery, 'i');
-        query.client.$or = [
+        query.$or = [
             { 'client.firstName': regex },
             { 'client.lastName': regex },
             { 'client.email': regex }
