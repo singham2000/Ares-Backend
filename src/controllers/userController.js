@@ -1,22 +1,15 @@
 const userModel = require("../models/userModel");
 const clientModel = require('../models/clientModel');
 const appointmentModel = require("../models/appointmentModel");
-const evaluationModel = require("../models/evaluationModel");
-const prescriptionModel = require("../models/prescriptionModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const resetPasswordCode = require("../utils/resetPasswordCode");
 const generateCode = require("../utils/generateCode");
 const { generateClientId, generateAppointmentId } = require("../utils/generateId");
-const { timeValidate, calculateTimeDifference, addDuration, sendData, createArrayOfPairs } = require('../utils/functions');
-const fs = require('fs');
-const path = require('path');
+const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
 const planModel = require("../models/planModel");
 const moment = require('moment');
-
-// const baseSchemaPathEval = path.resolve(__dirname, '../models/evaluationModel.js');
-// const baseSchemaPathPres = path.resolve(__dirname, '../models/prescriptionModel.js');
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -199,50 +192,79 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
 
 exports.registerClient = catchAsyncError(async (req, res, next) => {
     const {
-        first_name,
-        last_name,
-        suffix,
-        birthday,
-        gender,
+        firstName,
+        lastName,
         email,
-        phone_number,
-        address,
         city,
+        phone,
         state,
-        zip
+        age,
+        dob,
+        gender,
+        height,
+        dominatedHand,
+        guardianFirstName,
+        guardianLastName,
+        guardianSuffix,
+        organization,
+        password,
     } = req.body;
 
-    let clientid = generateClientId();
-
-    if (!first_name || !last_name || !suffix || !birthday || !gender || !email || !phone_number || !address || !city || !state || !zip) {
-        return next(new ErrorHandler("Please fill all fields", 400));
+    if (
+        (!firstName ||
+            !lastName ||
+            !email ||
+            !city ||
+            !phone ||
+            !state ||
+            !age ||
+            !dob ||
+            !gender ||
+            !height,
+            !dominatedHand ||
+            !guardianFirstName ||
+            !guardianLastName ||
+            !guardianSuffix ||
+            !organization ||
+            !password)
+    ) {
+        return next(new ErrorHandler("Please enter all the fields", 400));
     }
 
-    let client = await clientModel.findOne({ email });
-    if (client)
+    let user = await userModel.findOne({ email });
+    if (user)
         return next(new ErrorHandler("User already exists with this email", 400));
+    if (password.length < 8)
+        return next(
+            new ErrorHandler("Password should have minimum 8 characters", 400)
+        );
 
-    client = await clientModel.create({
-        first_name,
-        last_name,
-        suffix,
-        birthday,
-        gender,
+    user = await userModel.create({
+        firstName,
+        lastName,
         email,
-        phone_number,
-        address,
         city,
+        phone,
         state,
-        zip,
-        client_id: clientid
+        age,
+        dob,
+        gender,
+        height,
+        dominatedHand: dominatedHand.toLowerCase(),
+        guardianFirstName,
+        guardianLastName,
+        guardianSuffix,
+        organization,
+        password,
+        role: "athlete",
     });
 
-    await client.save();
-
+    await user.save();
+    const users = await userModel.find({ role: ['doctor', 'athlete'] })
     res.status(200).json({
         success: true,
-        message: "Client Created Successfully.",
-        client,
+        users,
+        message: "Athlete added successfully",
     });
 });
 
@@ -349,8 +371,8 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
     if (searchQuery) {
-        const regex = new RegExp(searchQuery, 'i'); 
-        query.$or = [
+        const regex = new RegExp(searchQuery, 'i');
+        query.client.$or = [
             { firstName: regex },
             { lastName: regex },
             { email: regex }
@@ -369,7 +391,6 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         currentPage: page,
     });
 });
-
 
 exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
@@ -524,7 +545,7 @@ exports.completedEvalReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getSlots = catchAsyncError(async (req, res) => {
-    const { doctor, date, service_type } = req.query;
+    const { doctor, date, service_type, location } = req.query;
     let slots;
     const query = {};
     if (date) {
@@ -534,7 +555,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         query.doctor = doctor;
     }
     if (date && doctor && service_type) {
-        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0] });
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location: location });
         const doc = await slotModel.find(query);
         let Calcslots = [];
         if (dayAppointments.length > 1) {
