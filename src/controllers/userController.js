@@ -282,6 +282,7 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
         success: true,
         client_details: {
+            client_id: user._id,
             first_name: user.firstName,
             last_name: user.lastName,
             email: user.email,
@@ -310,7 +311,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     if (!client_id) {
         return next(new ErrorHandler("Please provide a client_id", 400));
     }
-    const client = await clientModel.findOne({ client_id: client_id });
+    const client = await userModel.findById(client_id);
     if (!client) {
         return next(new ErrorHandler("Client does not exist", 400));
     }
@@ -665,14 +666,8 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         }
         groupedAppointments[date].push(appointment);
     });
-
-    // Sort dates
     const sortedDates = Object.keys(groupedAppointments).sort();
-
-    // Create an array of appointments sorted by date
     const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
-
-    // Send the sorted list as the response
     res.status(200).json({
         success: true,
         appointments: sortedAppointments
