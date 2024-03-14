@@ -333,16 +333,14 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
     const status = req.query.status;
     const service_type = req.query.service_type;
     const date = req.query.date;
+    const searchQuery = req.query.searchQuery;
     let query = {};
+
     if (status) {
-        query = {
-            ...query, status: status
-        }
+        query.status = status;
     }
     if (service_type) {
-        query = {
-            ...query, service_type: { $in: service_type.split(',') },
-        };
+        query.service_type = { $in: service_type.split(',') };
     }
     if (date) {
         const startDate = new Date(date);
@@ -350,6 +348,15 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         endDate.setDate(endDate.getDate() + 1);
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
+    if (searchQuery) {
+        const regex = new RegExp(searchQuery, 'i'); 
+        query.$or = [
+            { firstName: regex },
+            { lastName: regex },
+            { email: regex }
+        ];
+    }
+
     const appointments = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
@@ -361,8 +368,8 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
     });
-
 });
+
 
 exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1;
@@ -588,7 +595,6 @@ exports.getPlans = catchAsyncError(async (req, res, next) => {
 });
 
 exports.submitEvaluation = catchAsyncError(async (req, res) => {
-
 });
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
@@ -613,7 +619,7 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         {
             $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
         }
-    ]);
+    ]).sort({ createdAt: 'desc' });
     const currentDate = moment().startOf('day');
     const filteredAppointments = appointmentsByDate.filter(dateGroup => {
         if (currentDate.year() <= dateGroup._id.year) {
@@ -653,4 +659,4 @@ exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
         success: true,
         appointment
     });
-})
+});
