@@ -8,7 +8,7 @@ const appointmentServiceEnum = [
   "ConcussionEval",
 ];
 const paymentStatus = ["paid", "pending", "failed"];
-const appointmentStatus = ["completed", "upcoming", "cancel"];
+const appointmentStatus = ["completed", "upcoming", "cancelled"];
 
 const appointmentSchema = new mongoose.Schema(
   {
