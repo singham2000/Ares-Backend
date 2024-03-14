@@ -316,16 +316,16 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Client does not exist", 400));
     }
 
-    const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
-    if (dayAppointments) {
-        dayAppointments.forEach(appointment => {
-            if (timeValidate(appointment.service_type, appointment.app_time, app_time)) {
-                appointmentOnDate = appointmentOnDate + 1;
-            }
-        })
-    }
-    if (appointmentOnDate)
-        return next(new ErrorHandler("Another Appointment is overlapping", 400));
+    // const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
+    // if (dayAppointments) {
+    //     dayAppointments.forEach(appointment => {
+    //         if (timeValidate(appointment.service_type, appointment.app_time, app_time)) {
+    //             appointmentOnDate = appointmentOnDate + 1;
+    //         }
+    //     })
+    // }
+    // if (appointmentOnDate)
+    //     return next(new ErrorHandler("Another Appointment is overlapping", 400));
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
         client: client,
