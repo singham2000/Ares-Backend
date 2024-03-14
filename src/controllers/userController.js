@@ -326,9 +326,9 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
     if (searchQuery) {
         const regex = new RegExp(searchQuery, 'i');
         query.client.$or = [
-            { firstName: regex },
-            { lastName: regex },
-            { email: regex }
+            { 'client.firstName': regex },
+            { 'client.lastName': regex },
+            { 'client.email': regex }
         ];
     }
 
