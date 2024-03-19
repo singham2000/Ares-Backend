@@ -24,7 +24,8 @@ const {
   getPlans,
   getAllAppointments,
   appointmentStatus,
-  inQueueEvaluation
+  inQueueEvaluation,
+  submitEvaluation
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -36,6 +37,7 @@ router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
 router.post("/book-appointment/:id", auth, bookAppointment);
 router.post("/select-plan", auth, selectPlan);
+router.post("/submit-eval-form", auth, submitEvaluation);
 
 router.get("/get-slots", auth, getSlots);
 router.get("/get-profile", auth, getProfile);

@@ -1,5 +1,5 @@
 const userModel = require("../models/userModel");
-// const clientModel = require('../models/clientModel');
+const EvalutionsForm = require("../models/EvaluationForms")
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
@@ -683,7 +683,33 @@ exports.getPlans = catchAsyncError(async (req, res, next) => {
     })
 });
 
-exports.submitEvaluation = catchAsyncError(async (req, res) => {
+exports.submitEvaluation = catchAsyncError(async (req, res, next) => {
+
+    const { appointmentId, form } = req.body
+
+    if (!appointmentId || !form) {
+        return next(new ErrorHandler("Fields are empty", 404));
+    }
+
+    const forms = await EvalutionsForm.find({appointmentId});
+
+    if(forms.length>0){
+        return next(new ErrorHandler("Form is already  filled for this", 404));
+    }
+
+    const newEvalForm = new EvalutionsForm({
+        appointmentId,
+        form
+      });
+
+      await newEvalForm.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Form Submitted",
+        newEvalForm
+    });
+
 });
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
