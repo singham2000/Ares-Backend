@@ -550,25 +550,41 @@ exports.selectPlan = catchAsyncError(async (req, res) => {
 });
 
 exports.getEvalForm = catchAsyncError(async (req, res) => {
-    // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
-    try {
-        const evaluationModel = require('../models/evaluationModel');
-        // const dynamicSchema = eval(schemaContent);
-        const dynamicSchema = evaluationModel;
-        const paths = Object.keys(dynamicSchema.schema.paths);
+    // // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
+    // try {
+    //     const evaluationModel = require('../models/evaluationModel');
+    //     // const dynamicSchema = eval(schemaContent);
+    //     const dynamicSchema = evaluationModel;
+    //     const paths = Object.keys(dynamicSchema.schema.paths);
 
-        const fieldsAndEnums = paths.reduce((result, path) => {
-            const schemaType = dynamicSchema.schema.paths[path];
-            if (schemaType.enumValues) {
-                result.push({ field: path, enumValues: schemaType.enumValues });
-            }
-            return result;
-        }, []);
-        res.json(fieldsAndEnums);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
+    //     const fieldsAndEnums = paths.reduce((result, path) => {
+    //         const schemaType = dynamicSchema.schema.paths[path];
+    //         if (schemaType.enumValues) {
+    //             result.push({ field: path, enumValues: schemaType.enumValues });
+    //         }
+    //         return result;
+    //     }, []);
+    //     res.json(fieldsAndEnums);
+    // } catch (error) {
+    //     console.error(error);
+    //     res.status(500).send('Internal Server Error');
+    // }
+
+    const name = "Evaluation";
+    console.log(name);
+      if (!name || typeof name !== 'string') {
+        return res.status(400).json({ success: false, message: "Invalid input" });
+      }
+    
+      const doc = await EvalForm.find({name})
+      
+      if (!doc||doc.length<1) {
+        return res.status(400).json({ success: false, message: "Not found" });
+      }
+      res
+      .status(200)
+      .json({ success: true, message: "EvalForm",doc });
+   
 });
 
 exports.getPresForm = catchAsyncError(async (req, res) => {
