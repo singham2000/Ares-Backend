@@ -16,8 +16,7 @@ const {
   recentPrescriptions,
   inQueueRequests,
   selectPlan,
-  getEvalForm,
-  getPresForm,
+  getForm,
   getAppointment,
   getSlots,
   getAllDoc,
@@ -45,8 +44,7 @@ router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
 router.get("/in-queue-requests", auth, inQueueRequests);
 router.get("/in-queue-evaluations", auth, inQueueEvaluation);
-router.get("/get-eval-form", auth, getEvalForm);
-router.get("/get-pres-form", auth, getPresForm);
+router.get("/get-form", auth, getForm);
 router.get("/appointments/:date", auth, getAppointment);
 router.get('/get-all-doctors', auth, getAllDoc);
 router.get('/getServiceTypes', auth, getPlans);

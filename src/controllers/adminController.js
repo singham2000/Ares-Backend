@@ -17,7 +17,8 @@ const baseSchemaPathPres = path.resolve(
 const PrescriptionModel = require("../models/prescriptionModel");
 const EvaluationModel = require("../models/evaluationModel");
 const planModel = require("../models/planModel");
-const mongoose = require("mongoose");
+const EvalForm = require("../models/FormModel");
+
 const sendData = (user, statusCode, res) => {
   const token = user.getJWTToken();
 
@@ -702,19 +703,6 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
   });
 });
 
-const EvalForm = mongoose.model(
-  "EvalForm",
-  mongoose.Schema({
-    name:{
-      type: String,
-    },
-    obj: {
-      type: Array,
-    },
-  }),
-  "Forms",
-);
-
 exports.fetchForm = catchAsyncError(async (req, res, next) => {
   const name = req.query.name;
 console.log(name);
@@ -735,6 +723,7 @@ console.log(name);
 
 exports.saveForm = catchAsyncError(async (req, res, next) => {
   const name = req.body.name;
+  const obj = req.body.obj;
   console.log(obj);
   const newDoc = new EvalForm({ name,obj });
 
@@ -750,3 +739,4 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
       .json({ success: false, message: "Failed to save EvalForm" });
   }
 });
+

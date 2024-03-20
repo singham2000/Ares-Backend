@@ -10,6 +10,7 @@ const { generateAppointmentId } = require("../utils/generateId");
 const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
 const planModel = require("../models/planModel");
 const moment = require('moment');
+const EvalForm = require("../models/FormModel");
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -549,7 +550,7 @@ exports.selectPlan = catchAsyncError(async (req, res) => {
     });
 });
 
-exports.getEvalForm = catchAsyncError(async (req, res) => {
+exports.getForm = catchAsyncError(async (req, res) => {
     // // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathEval), 'utf8');
     // try {
     //     const evaluationModel = require('../models/evaluationModel');
@@ -570,13 +571,14 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
     //     res.status(500).send('Internal Server Error');
     // }
 
-    const name = "Evaluation";
+    const name = req.query.name;
     console.log(name);
       if (!name || typeof name !== 'string') {
         return res.status(400).json({ success: false, message: "Invalid input" });
       }
     
-      const doc = await EvalForm.find({name})
+      const doc = await EvalForm.find()
+      console.log(doc);
       
       if (!doc||doc.length<1) {
         return res.status(400).json({ success: false, message: "Not found" });
@@ -585,28 +587,6 @@ exports.getEvalForm = catchAsyncError(async (req, res) => {
       .status(200)
       .json({ success: true, message: "EvalForm",doc });
    
-});
-
-exports.getPresForm = catchAsyncError(async (req, res) => {
-    // const schemaContent = fs.readFileSync(path.resolve(baseSchemaPathPres), 'utf8');
-    try {
-        const prescriptionModel = require('../models/prescriptionModel');
-        // const dynamicSchema = eval(schemaContent);
-        const dynamicSchema = prescriptionModel;
-        const paths = Object.keys(dynamicSchema.schema.paths);
-
-        const fieldsAndEnums = paths.reduce((result, path) => {
-            const schemaType = dynamicSchema.schema.paths[path];
-            if (schemaType.enumValues) {
-                result.push({ field: path, enumValues: schemaType.enumValues });
-            }
-            return result;
-        }, []);
-        res.json(fieldsAndEnums);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
 });
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
