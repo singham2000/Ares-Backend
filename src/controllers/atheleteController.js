@@ -156,17 +156,17 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
     zip,
   } = req.body;
 
-  firstName && (doctor.firstName = firstName);
-  lastName && (doctor.lastName = lastName);
-  suffix && (doctor.suffix = suffix);
-  gender && (doctor.gender = gender);
-  dob && (doctor.dob = dob);
-  address && (doctor.address = address);
-  city && (doctor.city = city);
-  zip && (doctor.zip = zip);
-  state && (doctor.state = state);
-  email && (doctor.email = email);
-  phone && (doctor.phone = phone);
+  firstName && (athlete.firstName = firstName);
+  lastName && (athlete.lastName = lastName);
+  suffix && (athlete.suffix = suffix);
+  gender && (athlete.gender = gender);
+  dob && (athlete.dob = dob);
+  address && (athlete.address = address);
+  city && (athlete.city = city);
+  zip && (athlete.zip = zip);
+  state && (athlete.state = state);
+  email && (athlete.email = email);
+  phone && (athlete.phone = phone);
 
   await athlete.save();
 
