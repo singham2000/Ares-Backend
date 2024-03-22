@@ -570,16 +570,11 @@ exports.getForm = catchAsyncError(async (req, res) => {
     //     console.error(error);
     //     res.status(500).send('Internal Server Error');
     // }
-
     const name = req.query.name;
-    console.log(name);
       if (!name || typeof name !== 'string') {
         return res.status(400).json({ success: false, message: "Invalid input" });
       }
-    
       const doc = await EvalForm.find()
-      console.log(doc);
-      
       if (!doc||doc.length<1) {
         return res.status(400).json({ success: false, message: "Not found" });
       }
