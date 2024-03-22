@@ -725,34 +725,25 @@ exports.fetchForm = catchAsyncError(async (req, res, next) => {
 exports.saveForm = catchAsyncError(async (req, res, next) => {
   const name = req.body.name;
   const obj = req.body.obj;
-  console.log(obj);
-  const doc = await EvalForm.find({ name })
-  if (!doc)
-    try {
-      const newDoc = new EvalForm({ name, obj });
-      await newDoc.save();
-      res
-        .status(200)
-        .json({ success: true, message: "EvalForm saved successfully" });
-    } catch (error) {
-      console.error("Error saving EvalForm:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Failed to save EvalForm" });
-    }
-  else
-    try {
+  
+  try {
+    let doc = await EvalForm.findOne({ name });
+    if (!doc) {
+      console.log("Creating new EvalForm");
+      doc = new EvalForm({ name, obj });
+      await doc.save();
+      res.status(200).json({ success: true, message: "EvalForm saved successfully" });
+    } else {
+      console.log("Updating existing EvalForm");
       doc.name = name;
       doc.obj = obj;
       await doc.save();
-      res
-        .status(200)
-        .json({ success: true, message: "EvalForm saved successfully" });
-    } catch (error) {
-      console.error("Error saving EvalForm:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Failed to save EvalForm" });
+      res.status(200).json({ success: true, message: "EvalForm updated successfully" });
     }
+  } catch (error) {
+    console.error("Error saving EvalForm:", error);
+    res.status(500).json({ success: false, message: "Failed to save EvalForm" });
+  }
 });
+
 
