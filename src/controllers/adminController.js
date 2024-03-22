@@ -729,19 +729,16 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
   try {
     let doc = await EvalForm.findOne({ name });
     if (!doc) {
-      console.log("Creating new EvalForm");
       doc = new EvalForm({ name, obj });
       await doc.save();
       res.status(200).json({ success: true, message: "EvalForm saved successfully" });
     } else {
-      console.log("Updating existing EvalForm");
       doc.name = name;
       doc.obj = obj;
       await doc.save();
       res.status(200).json({ success: true, message: "EvalForm updated successfully" });
     }
   } catch (error) {
-    console.error("Error saving EvalForm:", error);
     res.status(500).json({ success: false, message: "Failed to save EvalForm" });
   }
 });
