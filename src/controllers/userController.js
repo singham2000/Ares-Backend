@@ -257,7 +257,7 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
         password: `${phone}${firstName}`,
         role: "athlete",
     });
-    newAccount(email, user.fullname, `${phone}${firstName}`);
+    newAccount(email, `${firstName}${lastName}`, `${phone}${firstName}`);
     await user.save();
     res.status(200).json({
         success: true,

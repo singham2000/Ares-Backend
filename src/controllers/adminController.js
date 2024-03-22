@@ -104,7 +104,7 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     password,
     role: "doctor",
   });
-  newAccount(email, user.fullname, password);
+  newAccount(email, `${firstName}${lastName}`, password);
   await user.save();
   const users = await userModel.find({ role: ["doctor", "athlete"] });
   res.status(200).json({
@@ -168,7 +168,7 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     password: `${phone}${firstName}`,
     role: "athlete",
   });
-  newAccount(email, user.fullname, `${phone}${firstName}`);
+  newAccount(email, `${firstName}${lastName}`, `${phone}${firstName}`);
   await user.save();
   const users = await userModel.find({ role: ["doctor", "athlete"] });
   res.status(200).json({

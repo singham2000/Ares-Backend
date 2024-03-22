@@ -60,7 +60,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     password,
     role: "athlete",
   });
-  newAccount(email, user.fullname, password);
+  newAccount(email, `${firstName}${lastName}`, password);
   await user.save();
 
   const token = user.getJWTToken();
