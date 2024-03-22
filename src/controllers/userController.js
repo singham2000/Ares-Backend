@@ -4,7 +4,7 @@ const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
-const resetPasswordCode = require("../utils/resetPasswordCode");
+const { resetPasswordCode, newAccount } = require("../utils/mails");
 const generateCode = require("../utils/generateCode");
 const { generateAppointmentId } = require("../utils/generateId");
 const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
@@ -242,7 +242,6 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
     let user = await userModel.findOne({ email });
     if (user)
         return next(new ErrorHandler("User already exists with this email", 400))
-
     user = await userModel.create({
         firstName,
         lastName,
@@ -258,7 +257,7 @@ exports.registerClient = catchAsyncError(async (req, res, next) => {
         password: `${phone}${firstName}`,
         role: "athlete",
     });
-
+    newAccount(email, user.fullname, `${phone}${firstName}`);
     await user.save();
     res.status(200).json({
         success: true,
@@ -571,17 +570,17 @@ exports.getForm = catchAsyncError(async (req, res) => {
     //     res.status(500).send('Internal Server Error');
     // }
     const name = req.query.name;
-      if (!name || typeof name !== 'string') {
+    if (!name || typeof name !== 'string') {
         return res.status(400).json({ success: false, message: "Invalid input" });
-      }
-      const doc = await EvalForm.find()
-      if (!doc||doc.length<1) {
+    }
+    const doc = await EvalForm.find()
+    if (!doc || doc.length < 1) {
         return res.status(400).json({ success: false, message: "Not found" });
-      }
-      res
-      .status(200)
-      .json({ success: true, message: "EvalForm",doc });
-   
+    }
+    res
+        .status(200)
+        .json({ success: true, message: "EvalForm", doc });
+
 });
 
 exports.getAppointment = catchAsyncError(async (req, res) => {
@@ -682,20 +681,20 @@ exports.submitEvaluation = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Fields are empty", 404));
     }
 
-    const forms = await EvalutionsForm.find({appointmentId});
+    const forms = await EvalutionsForm.find({ appointmentId });
 
-    if(forms.length>0){
+    if (forms.length > 0) {
         return next(new ErrorHandler("Form is already  filled for this", 404));
     }
 
     const newEvalForm = new EvalutionsForm({
         appointmentId,
         form
-      });
+    });
 
-      await newEvalForm.save();
+    await newEvalForm.save();
 
-      res.status(200).json({
+    res.status(200).json({
         success: true,
         message: "Form Submitted",
         newEvalForm

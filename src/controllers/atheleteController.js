@@ -2,6 +2,7 @@ const appointmentModel = require("../models/appointmentModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
+const { resetPasswordCode, newAccount } = require("../utils/mails");
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -59,7 +60,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     password,
     role: "athlete",
   });
-
+  newAccount(email, user.fullname, password);
   await user.save();
 
   const token = user.getJWTToken();

@@ -3,6 +3,7 @@ const clinicModel = require("../models/clinicModel");
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const fs = require("fs");
+const { resetPasswordCode, newAccount } = require("../utils/mails");
 const path = require("path");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
@@ -103,7 +104,7 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     password,
     role: "doctor",
   });
-
+  newAccount(email, user.fullname, password);
   await user.save();
   const users = await userModel.find({ role: ["doctor", "athlete"] });
   res.status(200).json({
@@ -167,7 +168,7 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     password: `${phone}${firstName}`,
     role: "athlete",
   });
-
+  newAccount(email, user.fullname, `${phone}${firstName}`);
   await user.save();
   const users = await userModel.find({ role: ["doctor", "athlete"] });
   res.status(200).json({
