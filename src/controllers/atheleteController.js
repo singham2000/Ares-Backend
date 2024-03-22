@@ -1,50 +1,42 @@
 const appointmentModel = require("../models/appointmentModel");
-const athleteModel = require("../models/userModel");
 const catchAsyncError = require("../utils/catchAsyncError");
+const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
     firstName,
     lastName,
+    suffix,
     email,
     city,
     phone,
     state,
-    age,
     dob,
     gender,
-    height,
-    dominatedHand,
-    guardianFirstName,
-    guardianLastName,
-    guardianSuffix,
-    organization,
+    address,
+    zip,
     password,
   } = req.body;
 
   if (
     (!firstName ||
       !lastName ||
+      !suffix ||
+      !address ||
       !email ||
       !city ||
       !phone ||
       !state ||
-      !age ||
       !dob ||
       !gender ||
-      !height,
-      !dominatedHand ||
-      !guardianFirstName ||
-      !guardianLastName ||
-      !guardianSuffix ||
-      !organization ||
+      !zip,
       !password)
   ) {
     return next(new ErrorHandler("Please enter all the fields"));
   }
 
-  let user = await athleteModel.findOne({ email });
+  let user = await userModel.findOne({ email });
   if (user)
     return next(new ErrorHandler("User already exists with this email", 400));
   if (password.length < 8)
@@ -52,22 +44,18 @@ exports.register = catchAsyncError(async (req, res, next) => {
       new ErrorHandler("Password should have minimum 8 characters", 400)
     );
 
-  user = await athleteModel.create({
+  user = await userModel.create({
     firstName,
     lastName,
+    suffix,
     email,
     city,
     phone,
     state,
-    age,
     dob,
     gender,
-    height,
-    dominatedHand,
-    guardianFirstName,
-    guardianLastName,
-    guardianSuffix,
-    organization,
+    address,
+    zip,
     password,
     role: "athlete",
   });
@@ -84,7 +72,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
   if (!email || !password)
     return next(new ErrorHandler("Please enter your email and password", 400));
 
-  const user = await athleteModel.findOne({ email }).select("+password");
+  const user = await userModel.findOne({ email }).select("+password");
 
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
@@ -100,13 +88,13 @@ exports.login = catchAsyncError(async (req, res, next) => {
 
 exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
-  const user = await athleteModel.findOne({ email });
+  const user = await userModel.findOne({ email });
 
   if (!user) return next(new ErrorHandler("User Not Found.", 404));
 
   const code = generateCode(6);
 
-  await athleteModel.findOneAndUpdate({ email }, { temp_code: code });
+  await userModel.findOneAndUpdate({ email }, { temp_code: code });
   resetPasswordCode(email, user.fullname, code);
 
   res.status(200).json({ message: "Code sent to your email." });
@@ -114,7 +102,7 @@ exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
 
 exports.validateForgotPasswordCode = catchAsyncError(async (req, res, next) => {
   const { email, code } = req.body;
-  const user = await athleteModel.findOne({ email });
+  const user = await userModel.findOne({ email });
 
   if (!user) return next(new ErrorHandler("User Not Found.", 404));
 
@@ -130,7 +118,7 @@ exports.validateForgotPasswordCode = catchAsyncError(async (req, res, next) => {
 
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
   const { email, newPassword, confirmPassword } = req.body;
-  const user = await athleteModel.findOne({ email });
+  const user = await userModel.findOne({ email });
 
   if (!user) return next(new ErrorHandler("User Not Found.", 404));
   if (!newPassword || !confirmPassword)
@@ -146,48 +134,38 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
   const { userId } = req;
-  const athlete = await athleteModel.findById(userId).select("-password");
+  const athlete = await userModel.findById(userId).select("-password");
   res.status(200).json({ athlete });
 });
 
 exports.editProfile = catchAsyncError(async (req, res, next) => {
   const { userId } = req;
-  const athlete = await athleteModel.findById(userId).select("-password");
+  const athlete = await userModel.findById(userId).select("-password");
   const {
     firstName,
     lastName,
+    suffix,
     email,
     city,
     phone,
     state,
-    age,
     dob,
     gender,
-    height,
-    dominatedHand,
-    guardianFirstName,
-    guardianLastName,
-    guardianSuffix,
-    organization,
-    role,
+    address,
+    zip,
   } = req.body;
 
-  firstName && (athlete.firstName = firstName);
-  lastName && (athlete.lastName = lastName);
-  email && (athlete.email = email);
-  city && (athlete.city = city);
-  phone && (athlete.phone = phone);
-  state && (athlete.state = state);
-  age && (athlete.age = age);
-  dob && (athlete.dob = dob);
-  gender && (athlete.gender = gender);
-  height && (athlete.height = height);
-  dominatedHand && (athlete.dominatedHand = dominatedHand);
-  guardianFirstName && (athlete.guardianFirstName = guardianFirstName);
-  guardianLastName && (athlete.guardianLastName = guardianLastName);
-  guardianSuffix && (athlete.guardianSuffix = guardianSuffix);
-  organization && (athlete.organization = organization);
-  role && (athlete.role = role);
+  firstName && (doctor.firstName = firstName);
+  lastName && (doctor.lastName = lastName);
+  suffix && (doctor.suffix = suffix);
+  gender && (doctor.gender = gender);
+  dob && (doctor.dob = dob);
+  address && (doctor.address = address);
+  city && (doctor.city = city);
+  zip && (doctor.zip = zip);
+  state && (doctor.state = state);
+  email && (doctor.email = email);
+  phone && (doctor.phone = phone);
 
   await athlete.save();
 
