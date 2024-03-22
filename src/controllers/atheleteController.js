@@ -4,6 +4,9 @@ const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const { resetPasswordCode, newAccount } = require("../utils/mails");
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const { Types: { ObjectId } } = require('mongoose');
+
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -181,6 +184,21 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
   res.status(200).json({ athlete });
 });
 
+exports.getBookings = catchAsyncError(async (req, res, next) => {
+
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
+
+  req.userId = userId;
+  const appointments = await appointmentModel.find({ "client._id": new ObjectId(userId) }).select("-client");
+  res.status(200).json({
+    success: true,
+    appointments
+  });
+});
+
 // ==========================APPOINTMENT STUFF =============================================>
 
 exports.getUpcomingAppointments = catchAsyncError(async (req, res, next) => {
@@ -200,7 +218,7 @@ exports.getUpcomingAppointments = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .select("app_date app_time");
+    .select("app_date app_time -client");
 
   if (!upcomingAppointments) {
     return next(new ErrorHandler("No upcoming appointments found", 404));

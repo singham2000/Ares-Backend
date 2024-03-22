@@ -8,6 +8,7 @@ const {
   getProfile,
   editProfile,
   getUpcomingAppointments,
+  getBookings
 } = require("../controllers/atheleteController");
 const { auth } = require("../middlewares/auth");
 
@@ -19,8 +20,9 @@ router.post("/register", register);
 router.post("/login", login);
 
 router.get("/get-profile", auth, getProfile);
+router.get("/get-bookings", auth, getBookings);
+router.get("/upcoming-bookings", auth, getUpcomingAppointments);
 
 router.put("/reset-password", resetPassword);
 router.put("/edit-profile", auth, editProfile);
-router.get("/upcoming-bookings", auth, getUpcomingAppointments);
 module.exports = router;
