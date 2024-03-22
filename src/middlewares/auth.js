@@ -22,7 +22,7 @@ exports.auth = async (req, res, next) => {
 
     req.userId = userId;
 
-    const userValid = await userModel.find({ _id: userId });
+    const userValid = await userModel.findById(userId);
 
     if (!userValid) {
       return res

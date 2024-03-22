@@ -3,6 +3,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const { resetPasswordCode, newAccount } = require("../utils/mails");
+const jwt = require('jsonwebtoken');
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -140,7 +141,14 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.editProfile = catchAsyncError(async (req, res, next) => {
-  const { userId } = req;
+
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
+
+  req.userId = userId;
+
   const athlete = await userModel.findById(userId).select("-password");
   const {
     firstName,
