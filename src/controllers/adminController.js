@@ -278,18 +278,18 @@ exports.evaluationFormMake = catchAsyncError(async (req, res, next) => {
     EvaluationModel.schema.add(
       values
         ? {
-            [toCamelCase(fieldName)]: {
-              type: String,
-              required: [true, "Required"],
-              enum: values,
-            },
-          }
-        : {
-            [toCamelCase(fieldName)]: {
-              type: String,
-              required: [true, "Required"],
-            },
+          [toCamelCase(fieldName)]: {
+            type: String,
+            required: [true, "Required"],
+            enum: values,
           },
+        }
+        : {
+          [toCamelCase(fieldName)]: {
+            type: String,
+            required: [true, "Required"],
+          },
+        },
     );
     res.status(200).json({
       success: true,
@@ -321,18 +321,18 @@ exports.prescriptionFormMake = catchAsyncError(async (req, res, next) => {
     PrescriptionModel.schema.add(
       values
         ? {
-            [toCamelCase(fieldName)]: {
-              type: String,
-              required: [true, "Required"],
-              enum: values,
-            },
-          }
-        : {
-            [toCamelCase(fieldName)]: {
-              type: String,
-              required: [true, "Required"],
-            },
+          [toCamelCase(fieldName)]: {
+            type: String,
+            required: [true, "Required"],
+            enum: values,
           },
+        }
+        : {
+          [toCamelCase(fieldName)]: {
+            type: String,
+            required: [true, "Required"],
+          },
+        },
     );
     res.status(200).json({
       success: true,
@@ -706,38 +706,54 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
 
 exports.fetchForm = catchAsyncError(async (req, res, next) => {
   const name = req.query.name;
-console.log(name);
+  console.log(name);
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ success: false, message: "Invalid input" });
   }
 
-  
-  const doc = await EvalForm.find({name})
-  
-  if (!doc||doc.length<1) {
+
+  const doc = await EvalForm.find({ name })
+
+  if (!doc || doc.length < 1) {
     return res.status(400).json({ success: false, message: "Not found" });
   }
   res
-  .status(200)
-  .json({ success: true, message: "EvalForm",doc });
+    .status(200)
+    .json({ success: true, message: "EvalForm", doc });
 });
 
 exports.saveForm = catchAsyncError(async (req, res, next) => {
   const name = req.body.name;
   const obj = req.body.obj;
   console.log(obj);
-  const newDoc = new EvalForm({ name,obj });
 
-  try {
-    await newDoc.save();
-    res
-      .status(200)
-      .json({ success: true, message: "EvalForm saved successfully" });
-  } catch (error) {
-    console.error("Error saving EvalForm:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to save EvalForm" });
-  }
+  if (!doc)
+    try {
+      const newDoc = new EvalForm({ name, obj });
+      await newDoc.save();
+      res
+        .status(200)
+        .json({ success: true, message: "EvalForm saved successfully" });
+    } catch (error) {
+      console.error("Error saving EvalForm:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Failed to save EvalForm" });
+    }
+  else
+    try {
+      const doc = await EvalForm.find({ name })
+      doc.name = name;
+      doc.obj = obj;
+      await doc.save();
+      res
+        .status(200)
+        .json({ success: true, message: "EvalForm saved successfully" });
+    } catch (error) {
+      console.error("Error saving EvalForm:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Failed to save EvalForm" });
+    }
 });
 
