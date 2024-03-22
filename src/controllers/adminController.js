@@ -726,7 +726,7 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
   const name = req.body.name;
   const obj = req.body.obj;
   console.log(obj);
-
+  const doc = await EvalForm.find({ name })
   if (!doc)
     try {
       const newDoc = new EvalForm({ name, obj });
@@ -742,7 +742,6 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
     }
   else
     try {
-      const doc = await EvalForm.find({ name })
       doc.name = name;
       doc.obj = obj;
       await doc.save();
