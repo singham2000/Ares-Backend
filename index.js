@@ -41,8 +41,8 @@ app.get("/", (req, res) =>
 );
 
 try {
-  app.listen(5000, () => {
-    console.log("App is listening on ", 5000);
+  app.listen(process.env.PORT, () => {
+    console.log("App is listening on ", process.env.PORT);
   });
 } catch (e) {
   console.log("Hello-JS");
