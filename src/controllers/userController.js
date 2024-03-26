@@ -7,9 +7,9 @@ const ErrorHandler = require("../utils/errorHandler");
 const { resetPasswordCode, newAccount } = require("../utils/mails");
 const generateCode = require("../utils/generateCode");
 const { generateAppointmentId } = require("../utils/generateId");
-const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
-const ServiceTypeModel = require("../models/ServiceTypeModel");
-const PlanModel = require("../models/PlanModel");
+const { calculateTimeDifference, sendData } = require('../utils/functions');
+const ServiceTypeModel = require("../models/ServiceTypeModel.js");
+const PlanModel = require("../models/PlanModel.js");
 const moment = require('moment');
 const EvalForm = require("../models/FormModel");
 

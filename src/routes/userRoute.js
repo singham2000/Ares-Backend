@@ -16,6 +16,7 @@ const {
   recentPrescriptions,
   inQueueRequests,
   selectPlan,
+  getPlans,
   getForm,
   getAppointment,
   getSlots,
@@ -39,6 +40,7 @@ router.post("/select-plan", auth, selectPlan);
 router.post("/submit-eval-form", auth, submitEvaluation);
 
 router.get("/get-slots", auth, getSlots);
+router.get("/get-plans", auth, getPlans);
 router.get("/get-profile", auth, getProfile);
 router.get("/recent-bookings", auth, recentBookings);
 router.get("/recent-prescriptions", auth, recentPrescriptions);
