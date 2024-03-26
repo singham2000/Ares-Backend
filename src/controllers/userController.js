@@ -402,7 +402,6 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const date = req.query.date;
     const service_type = req.query.service_type;
     const searchQuery = req.query.searchQuery;
-    let appointments = [];
     const query = {
         service_type: { $in: ["MedicalOfficeVisit", "Consultation"] },
     };
@@ -487,8 +486,7 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
         const Diagform = await DiagnosisForm.find({ appointmentId: appoint._id });
-
-        if (!Evalform || !Diagform) {
+        if (!Boolean(Diagform.length)) {
             let appointmentWithEval = {
                 ...appoint.toObject(),
                 isFilledPrescription: Boolean(Evalform.length),

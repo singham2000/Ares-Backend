@@ -1,24 +1,28 @@
 const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
+const jwt = require('jsonwebtoken');
 
 
 exports.getAllNotifications = catchAsyncError(async (req, res, next) => {
-  console.log("Get all Notification");
-  const { userId } = req;
-  console.log(userId);
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
   const notifications = await notificationModel.find({ user: userId });
   const unreadCounts = await notificationModel.countDocuments({ seen: false });
   res.status(200).json({ notifications, unreadCounts });
 });
 
 exports.getNotification = catchAsyncError(async (req, res, next) => {
-  console.log("Get Single Notification");
-  const { userId } = req;
+
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
   const {
     params: { id },
   } = req;
-  console.log(id);
   if (!id) {
     return next(new ErrorHandler("Please provide notification id", 400));
   }
@@ -27,7 +31,6 @@ exports.getNotification = catchAsyncError(async (req, res, next) => {
     user: userId,
     _id: id,
   });
-  console.log(notification);
   if (!notification) {
     return next(new ErrorHandler("Notification not found", 404));
   }
@@ -36,8 +39,10 @@ exports.getNotification = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateNotification = catchAsyncError(async (req, res, next) => {
-  console.log("Update Notification");
-  const { userId } = req;
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
   const {
     params: { id },
   } = req;
@@ -59,8 +64,10 @@ exports.updateNotification = catchAsyncError(async (req, res, next) => {
 });
 
 exports.markAllRead = catchAsyncError(async (req, res, next) => {
-  console.log("Mark all notifications as read");
-  const { userId } = req;
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
 
   await notificationModel.updateMany(
     { user: userId },
@@ -70,7 +77,6 @@ exports.markAllRead = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deleteNotification = catchAsyncError(async (req, res, next) => {
-  console.log("Delete Notification");
   const { id } = req.params;
   if (!id) {
     return next(ErrorHandler("Please provide Notification id in params"), 400);
