@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const planSchema = new mongoose.Schema({
+const serviceSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -18,9 +18,9 @@ const planSchema = new mongoose.Schema({
     }
 });
 
-planSchema.pre("save", async function (next) {
+serviceSchema.pre("save", async function (next) {
     this.alias = this.name.replace(/\s/g, '');
     next();
 });
 
-module.exports = mongoose.model("service", planSchema);
+module.exports = mongoose.model("service", serviceSchema);
