@@ -18,7 +18,7 @@ const baseSchemaPathPres = path.resolve(
 const PrescriptionModel = require("../models/prescriptionModel");
 const EvaluationModel = require("../models/evaluationModel");
 const ServiceTypeModel = require("../models/ServiceTypeModel");
-const PlanModel = require("../models/PlanModel");
+const PlanModel = require("../models/planModel");
 const EvalForm = require("../models/FormModel");
 
 const sendData = (user, statusCode, res) => {

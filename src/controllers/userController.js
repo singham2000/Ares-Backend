@@ -9,7 +9,7 @@ const generateCode = require("../utils/generateCode");
 const { generateAppointmentId } = require("../utils/generateId");
 const { calculateTimeDifference, sendData } = require('../utils/functions');
 const ServiceTypeModel = require("../models/ServiceTypeModel.js");
-const PlanModel = require("../models/PlanModel.js");
+const planModel = require("../models/planModel.js");
 const moment = require('moment');
 const EvalForm = require("../models/FormModel");
 
@@ -672,7 +672,7 @@ exports.getServiceTypes = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getPlans = catchAsyncError(async (req, res, next) => {
-    const plans = await PlanModel.find()
+    const plans = await planModel.find()
     res.status(200).json({
         success: true,
         plans
