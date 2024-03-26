@@ -20,7 +20,7 @@ const {
   getAppointment,
   getSlots,
   getAllDoc,
-  getPlans,
+  getServiceTypes,
   getAllAppointments,
   appointmentStatus,
   inQueueEvaluation,
@@ -47,7 +47,7 @@ router.get("/in-queue-evaluations", auth, inQueueEvaluation);
 router.get("/get-form", auth, getForm);
 router.get("/appointments/:date", auth, getAppointment);
 router.get('/get-all-doctors', auth, getAllDoc);
-router.get('/getServiceTypes', auth, getPlans);
+router.get('/getServiceTypes', auth, getServiceTypes);
 router.get('/get-all-appointments', auth, getAllAppointments);
 
 router.put("/reset-password", resetPassword);

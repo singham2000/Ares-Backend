@@ -14,10 +14,11 @@ const {
   delDoc,
   delUser,
   editDoc,
-  addPlans,
-  getPlans,
-  editPlan,
-  delPlan,
+  addService,
+  getService,
+  editService,
+  delService,
+  addplan,
   registerAthlete,
   getAllUsers,
   activateUser,
@@ -40,11 +41,18 @@ router.post("/set_pres_form", auth, isAdmin, prescriptionFormMake);
 router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
 router
+  .route("/service")
+  .post(auth, isAdmin, addService)
+  .put(auth, isAdmin, editService)
+  .get(auth, isAdmin, getService)
+  .delete(auth, isAdmin, delService);
+
+  router
   .route("/plans")
-  .post(auth, isAdmin, addPlans)
-  .put(auth, isAdmin, editPlan)
-  .get(auth, isAdmin, getPlans)
-  .delete(auth, isAdmin, delPlan);
+  .post(auth, addplan)
+  .put(auth, isAdmin, editService)
+  .get(auth, isAdmin, getService)
+  .delete(auth, isAdmin, delService);
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 

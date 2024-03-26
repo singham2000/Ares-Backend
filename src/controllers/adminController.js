@@ -3,7 +3,7 @@ const clinicModel = require("../models/clinicModel");
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const fs = require("fs");
-const { resetPasswordCode, newAccount } = require("../utils/mails");
+const { newAccount } = require("../utils/mails");
 const path = require("path");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
@@ -17,7 +17,8 @@ const baseSchemaPathPres = path.resolve(
 );
 const PrescriptionModel = require("../models/prescriptionModel");
 const EvaluationModel = require("../models/evaluationModel");
-const planModel = require("../models/planModel");
+const ServiceTypeModel = require("../models/ServiceTypeModel");
+const PlanModel = require("../models/PlanModel");
 const EvalForm = require("../models/FormModel");
 
 const sendData = (user, statusCode, res) => {
@@ -485,18 +486,41 @@ exports.editDoc = catchAsyncError(async (req, res, next) => {
   sendData(user, 200, res);
 });
 
-exports.addPlans = catchAsyncError(async (req, res, next) => {
+exports.addplan = catchAsyncError(async (req, res, next) => {
+  const { name, phases } = req.body;
+
+  if (!name || !phases) {
+    return next(new ErrorHandler("All fields are required !", 400));
+  }
+  let plan = await PlanModel.find({ name: name });
+  if (plan > 0) {
+    return next(new ErrorHandler("Plan already created !", 400));
+  }
+
+  plan = await PlanModel.create({
+    name,
+    phases
+  });
+  plan.save();
+  res.status(200).json({
+    success: true,
+    message: `Plan added successfully.`,
+    plan,
+  });
+});
+
+exports.addService = catchAsyncError(async (req, res, next) => {
   const { name, cost, duration } = req.body;
 
   if (!name || !cost || !duration) {
     return next(new ErrorHandler("All fields are required !", 400));
   }
-  let plan = await planModel.find({ name: name });
+  let plan = await ServiceTypeModel.find({ name: name });
   if (plan > 0) {
     return next(new ErrorHandler("Plan already created !", 400));
   }
 
-  plan = await planModel.create({
+  plan = await ServiceTypeModel.create({
     name,
     cost,
     duration,
@@ -509,11 +533,11 @@ exports.addPlans = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.editPlan = catchAsyncError(async (req, res, next) => {
+exports.editService = catchAsyncError(async (req, res, next) => {
   const { name, cost, duration } = req.body;
   const { id } = req.query;
 
-  const plan = await planModel.findById(id);
+  const plan = await ServiceTypeModel.findById(id);
   if (!plan) {
     return next(new ErrorHandler("Plan is not created yet!", 400));
   }
@@ -536,19 +560,19 @@ exports.editPlan = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getPlans = catchAsyncError(async (req, res, next) => {
-  const plans = await planModel.find();
+exports.getService = catchAsyncError(async (req, res, next) => {
+  const plans = await ServiceTypeModel.find();
   res.status(200).json({
     success: true,
     plans,
   });
 });
 
-exports.delPlan = catchAsyncError(async (req, res, next) => {
+exports.delService = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
 
   try {
-    const deletedUser = await planModel.findByIdAndDelete(id);
+    const deletedUser = await ServiceTypeModel.findByIdAndDelete(id);
     if (!deletedUser) {
       return next(new ErrorHandler("Not found!", 404));
     }
@@ -725,7 +749,7 @@ exports.fetchForm = catchAsyncError(async (req, res, next) => {
 exports.saveForm = catchAsyncError(async (req, res, next) => {
   const name = req.body.name;
   const obj = req.body.obj;
-  
+
   try {
     let doc = await EvalForm.findOne({ name });
     if (!doc) {

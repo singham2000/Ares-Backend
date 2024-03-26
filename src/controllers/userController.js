@@ -8,7 +8,8 @@ const { resetPasswordCode, newAccount } = require("../utils/mails");
 const generateCode = require("../utils/generateCode");
 const { generateAppointmentId } = require("../utils/generateId");
 const { timeValidate, calculateTimeDifference, sendData } = require('../utils/functions');
-const planModel = require("../models/planModel");
+const ServiceTypeModel = require("../models/ServiceTypeModel");
+const PlanModel = require("../models/PlanModel");
 const moment = require('moment');
 const EvalForm = require("../models/FormModel");
 
@@ -536,7 +537,7 @@ exports.selectPlan = catchAsyncError(async (req, res) => {
     if (!client_id) {
         return next(new ErrorHandler("Please provide a client_id", 400));
     }
-    const client = await clientModel.findOne({ client_id: client_id });
+    const client = await userModel.findOne({ client_id: client_id });
     if (!client) {
         return next(new ErrorHandler("Client does not exist", 400));
     }
@@ -597,9 +598,6 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
         appointments:
             appointments
     });
-});
-
-exports.completedEvalReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getSlots = catchAsyncError(async (req, res) => {
@@ -665,8 +663,16 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
     })
 });
 
+exports.getServiceTypes = catchAsyncError(async (req, res, next) => {
+    const plans = await ServiceTypeModel.find()
+    res.status(200).json({
+        success: true,
+        plans
+    })
+});
+
 exports.getPlans = catchAsyncError(async (req, res, next) => {
-    const plans = await planModel.find()
+    const plans = await PlanModel.find()
     res.status(200).json({
         success: true,
         plans
@@ -774,4 +780,14 @@ exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
         success: true,
         appointment
     });
+});
+
+exports.completedReq = catchAsyncError(async (req, res) => {
+    const { service_status, payment_status, date } = req.query;
+    const page = parseInt(req.query.page_no) || 1;
+    const limit = parseInt(req.query.per_page_count) || 10;
+    const searchQuery = req.query.searchQuery;
+    const query = {};
+
+    const appointments = appointmentModel.find(query).select('service_type app_date app_time end_time status')
 });

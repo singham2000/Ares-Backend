@@ -4,6 +4,9 @@ const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const roleEnum = ['admin', 'doctor', 'athlete'];
 
+const planEnum = ['novice', 'intermediate', 'advanced', 'elite'];
+const paymentStatus = ["paid", "pending", "failed"];
+
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -63,6 +66,16 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     trim: true,
     default: true
+  },
+  plan: {
+    type: String,
+    enum: planEnum,
+    default: null
+  },
+  plan_payment: {
+    type: String,
+    enum: paymentStatus,
+    default: 'pending'
   },
   password: {
     type: String,

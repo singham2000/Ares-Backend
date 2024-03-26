@@ -6,6 +6,7 @@ const { resetPasswordCode, newAccount } = require("../utils/mails");
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { Types: { ObjectId } } = require('mongoose');
+const generateCode = require("../utils/generateCode");
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
