@@ -402,6 +402,7 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const date = req.query.date;
     const service_type = req.query.service_type;
     const searchQuery = req.query.searchQuery;
+    let appointments = [];
     const query = {
         service_type: { $in: ["MedicalOfficeVisit", "Consultation"] },
     };
