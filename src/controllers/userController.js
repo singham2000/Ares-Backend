@@ -1,5 +1,4 @@
 const userModel = require("../models/userModel");
-const EvalutionsForm = require("../models/EvaluationForms")
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
@@ -12,7 +11,9 @@ const ServiceTypeModel = require("../models/ServiceTypeModel.js");
 const planModel = require("../models/planModel.js");
 const moment = require('moment');
 const EvalForm = require("../models/FormModel");
-const PrescriptionsForm = require("../models/PrescriptionForm.js")
+const EvalutionsForm = require("../models/EvaluationForms");
+const PrescriptionsForm = require("../models/PrescriptionForm.js");
+const DiagnosisForm = require('../models/DiagnosisForm.js');
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -427,12 +428,22 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
         ];
     }
 
-
-    const appointments = await appointmentModel.find(query)
+    const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
+
+    await Promise.all(appointmentsArray.map(async (appoint) => {
+        const Presform = await EvalutionsForm.find({ appointmentId: appoint._id });
+
+        let appointmentWithEval = {
+            ...appoint.toObject(),
+            isFilled: Boolean(Presform.length)
+        };
+        appointments.push(appointmentWithEval);
+
+    }));
 
     const totalRecords = await appointmentModel.countDocuments(query);
 
@@ -474,10 +485,12 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
     let appointments = [];
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
+        const Diagform = await DiagnosisForm.find({ appointmentId: appoint._id });
 
         let appointmentWithEval = {
             ...appoint.toObject(),
-            isFilled: Boolean(Evalform.length)
+            isFilledPrescription: Boolean(Evalform.length),
+            isFilledDiagnosis: Boolean(Diagform.length)
         };
         appointments.push(appointmentWithEval);
 
@@ -675,10 +688,10 @@ exports.getAllDoc = catchAsyncError(async (req, res) => {
 });
 
 exports.getServiceTypes = catchAsyncError(async (req, res, next) => {
-    const plans = await ServiceTypeModel.find()
+    const serviceType = await ServiceTypeModel.find()
     res.status(200).json({
         success: true,
-        plans
+        serviceType
     })
 });
 
@@ -734,6 +747,35 @@ exports.submitPrescription = catchAsyncError(async (req, res, next) => {
     }
 
     const newEvalForm = new PrescriptionsForm({
+        appointmentId,
+        form
+    });
+
+    await newEvalForm.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Form Submitted",
+        newEvalForm
+    });
+
+});
+
+exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
+
+    const { appointmentId, form } = req.body
+
+    if (!appointmentId || !form) {
+        return next(new ErrorHandler("Fields are empty", 404));
+    }
+
+    const forms = await DiagnosisForm.find({ appointmentId });
+
+    if (forms.length > 0) {
+        return next(new ErrorHandler("Form is already  filled for this", 404));
+    }
+
+    const newEvalForm = new DiagnosisForm({
         appointmentId,
         form
     });
@@ -822,6 +864,20 @@ exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
     });
 });
 
+exports.getPrescription = catchAsyncError(async (req, res, next) => {
+    const prescriptionId = req.query.PrescriptionId;
+
+    if (!prescriptionId) {
+        return next(new ErrorHandler(" prescriptionId not received "))
+    }
+    const form = await PrescriptionsForm.findById(prescriptionId);
+
+    res.status(200).json({
+        success: true,
+        form
+    });
+})
+
 exports.completedReq = catchAsyncError(async (req, res) => {
     const { service_status, payment_status, date } = req.query;
     const page = parseInt(req.query.page_no) || 1;
@@ -851,9 +907,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const appointmentsArray = await appointmentModel.find(query).find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
-        .limit(limit)
-        .exec()
-        .select('service_type app_date app_time end_time client.firstName client.phone client.lastName client.plan client.plan_payment client.email');
+        .limit(limit).select('service_type app_date app_time end_time client.firstName client.phone client.lastName client.plan client.plan_payment client.email').exec();
 
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
