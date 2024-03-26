@@ -487,12 +487,14 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
         const Diagform = await DiagnosisForm.find({ appointmentId: appoint._id });
 
-        let appointmentWithEval = {
-            ...appoint.toObject(),
-            isFilledPrescription: Boolean(Evalform.length),
-            isFilledDiagnosis: Boolean(Diagform.length)
-        };
-        appointments.push(appointmentWithEval);
+        if (!Evalform || !Diagform) {
+            let appointmentWithEval = {
+                ...appoint.toObject(),
+                isFilledPrescription: Boolean(Evalform.length),
+                isFilledDiagnosis: Boolean(Diagform.length)
+            };
+            appointments.push(appointmentWithEval);
+        }
 
     }));
 
