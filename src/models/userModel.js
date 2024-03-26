@@ -75,7 +75,8 @@ const userSchema = new mongoose.Schema({
   plan_payment: {
     type: String,
     enum: paymentStatus,
-    default: 'pending'
+    default: 'pending',
+    required: true
   },
   password: {
     type: String,

@@ -12,6 +12,7 @@ const ServiceTypeModel = require("../models/ServiceTypeModel.js");
 const planModel = require("../models/planModel.js");
 const moment = require('moment');
 const EvalForm = require("../models/FormModel");
+const PrescriptionsForm = require("../models/PrescriptionForm.js")
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -464,15 +465,25 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
 
-
-
-    const appointments = await appointmentModel.find(query)
+    const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
 
-    const totalRecords = await appointmentModel.countDocuments(query);
+    let appointments = [];
+    await Promise.all(appointmentsArray.map(async (appoint) => {
+        const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
+
+        let appointmentWithEval = {
+            ...appoint.toObject(),
+            isFilled: Boolean(Evalform.length)
+        };
+        appointments.push(appointmentWithEval);
+
+    }));
+
+    const totalRecords = await appointments.length;
 
     res.json({
         appointments: appointments,
@@ -708,6 +719,35 @@ exports.submitEvaluation = catchAsyncError(async (req, res, next) => {
 
 });
 
+exports.submitPrescription = catchAsyncError(async (req, res, next) => {
+
+    const { appointmentId, form } = req.body
+
+    if (!appointmentId || !form) {
+        return next(new ErrorHandler("Fields are empty", 404));
+    }
+
+    const forms = await PrescriptionsForm.find({ appointmentId });
+
+    if (forms.length > 0) {
+        return next(new ErrorHandler("Form is already  filled for this", 404));
+    }
+
+    const newEvalForm = new PrescriptionsForm({
+        appointmentId,
+        form
+    });
+
+    await newEvalForm.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Form Submitted",
+        newEvalForm
+    });
+
+});
+
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
     const appointmentsByDate = await appointmentModel.aggregate([
         {
@@ -788,6 +828,47 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const limit = parseInt(req.query.per_page_count) || 10;
     const searchQuery = req.query.searchQuery;
     const query = {};
+    if (service_status) {
+        query.service_status = service_status;
+    }
+    if (payment_status) {
+        query.payment_status = payment_status;
+    }
+    if (date) {
+        query.date = date;
+    }
+    let appointments = [];
+    if (searchQuery) {
+        const regex = new RegExp(`^${searchQuery}`, 'i');
+        query.$or = [
+            { 'client.firstName': regex },
+            { 'client.lastName': regex },
+            { 'client.first_name': regex },
+            { 'client.last_name': regex },
+            { 'client.email': regex }
+        ];
+    }
+    const appointmentsArray = await appointmentModel.find(query).find(query)
+        .sort({ createdAt: 'desc' })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec()
+        .select('service_type app_date app_time end_time client.firstName client.phone client.lastName client.plan client.plan_payment client.email');
 
-    const appointments = appointmentModel.find(query).select('service_type app_date app_time end_time status')
+    await Promise.all(appointmentsArray.map(async (appoint) => {
+        const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
+        if (Evalform.length) {
+            let appointmentWithEval = {
+                ...appoint.toObject(),
+                Evalform
+            };
+            appointments.push(appointmentWithEval);
+        }
+    }));
+
+    res.status(200).json({
+        success: true,
+        appointments
+    });
 });
+

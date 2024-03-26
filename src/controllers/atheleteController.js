@@ -103,7 +103,10 @@ exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
   await userModel.findOneAndUpdate({ email }, { temp_code: code });
   resetPasswordCode(email, user.fullname, code);
 
-  res.status(200).json({ message: "Code sent to your email." });
+  res.status(200).json({
+    success: true,
+    message: "Code sent to your email."
+  });
 });
 
 exports.validateForgotPasswordCode = catchAsyncError(async (req, res, next) => {
@@ -116,7 +119,10 @@ exports.validateForgotPasswordCode = catchAsyncError(async (req, res, next) => {
     user.temp_code = undefined;
     await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({ message: "Code Validated Successfully." });
+    res.status(200).json({
+      success: true,
+      message: "Code Validated Successfully."
+    });
   } else {
     return next(new ErrorHandler("Invalid Code.", 400));
   }
