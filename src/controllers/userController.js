@@ -600,13 +600,13 @@ exports.getForm = catchAsyncError(async (req, res) => {
     if (!name || typeof name !== 'string') {
         return res.status(400).json({ success: false, message: "Invalid input" });
     }
-    const doc = await EvalForm.find()
+    const doc = await EvalForm.findOne({ name });
     if (!doc || doc.length < 1) {
         return res.status(400).json({ success: false, message: "Not found" });
     }
     res
         .status(200)
-        .json({ success: true, message: "EvalForm", doc });
+        .json({ success: true, doc });
 
 });
 

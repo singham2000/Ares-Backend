@@ -432,14 +432,19 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
 
 exports.getAllSlots = catchAsyncError(async (req, res) => {
   const { date } = req.query;
-
   const filter = {};
 
   if (date) {
-    const startDate = new Date(date);
-    const endDate = new Date(startDate);
+    const formattedDate = new Date(date);
+    formattedDate.setUTCHours(0);
+    formattedDate.setUTCMinutes(0);
+    formattedDate.setUTCSeconds(0);
+    formattedDate.setUTCMilliseconds(0);
+    const endDate = new Date(formattedDate);
     endDate.setDate(endDate.getDate() + 1);
-    filter.startTime = { $gte: startDate, $lt: endDate };
+    endDate.setHours(0);
+    endDate.setMinutes(0);
+    filter.date = { $gte: formattedDate, $lt: endDate };
   }
 
   const slots = await slotModel.find(filter).sort("desc");
@@ -766,12 +771,12 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
     if (!doc) {
       doc = new EvalForm({ name, obj });
       await doc.save();
-      res.status(200).json({ success: true, message: "EvalForm saved successfully" });
+      res.status(200).json({ success: true, message: "saved successfully" });
     } else {
       doc.name = name;
       doc.obj = obj;
       await doc.save();
-      res.status(200).json({ success: true, message: "EvalForm updated successfully" });
+      res.status(200).json({ success: true, message: "updated successfully" });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to save EvalForm" });
