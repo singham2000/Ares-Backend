@@ -525,6 +525,14 @@ exports.addplan = catchAsyncError(async (req, res, next) => {
   });
 });
 
+exports.getPlan = catchAsyncError(async (req, res, next) => {
+  const plans = await PlanModel.find();
+  res.status(200).json({
+    success: true,
+    plans,
+  });
+});
+
 exports.addService = catchAsyncError(async (req, res, next) => {
   const { name, cost, duration } = req.body;
 

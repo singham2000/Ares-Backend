@@ -25,7 +25,8 @@ const {
   activateClinic,
   getBookingsByDoctor,
   saveForm,
-  fetchForm
+  fetchForm,
+  getPlan
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -51,7 +52,7 @@ router
   .route("/plans")
   .post(auth, addplan)
   .put(auth, isAdmin, editService)
-  .get(auth, isAdmin, getService)
+  .get(auth, isAdmin, getPlan)
   .delete(auth, isAdmin, delService);
 
 router.delete("/delete_user", auth, isAdmin, delUser);

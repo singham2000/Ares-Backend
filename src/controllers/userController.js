@@ -461,6 +461,7 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
     const limit = parseInt(req.query.per_page_count) || 10;
     const service_type = req.query.service_type;
     const date = req.query.date;
+    const searchQuery = req.query.searchQuery;
     const query = {};
 
     query.status = 'paid';
@@ -476,7 +477,16 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
         endDate.setDate(endDate.getDate() + 1);
         query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
     }
-
+    if (searchQuery) {
+        const regex = new RegExp(`^${searchQuery}`, 'i');
+        query.$or = [
+            { 'client.firstName': regex },
+            { 'client.lastName': regex },
+            { 'client.first_name': regex },
+            { 'client.last_name': regex },
+            { 'client.email': regex }
+        ];
+    }
     const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
