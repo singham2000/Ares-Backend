@@ -431,7 +431,18 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllSlots = catchAsyncError(async (req, res) => {
-  const slots = await slotModel.find().sort("desc");
+  const { date } = req.query;
+
+  const filter = {};
+
+  if (date) {
+    const startDate = new Date(date);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 1);
+    filter.startTime = { $gte: startDate, $lt: endDate };
+  }
+
+  const slots = await slotModel.find(filter).sort("desc");
   res.status(200).json({
     data: slots,
   });
