@@ -911,6 +911,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const limit = parseInt(req.query.per_page_count) || 10;
     const searchQuery = req.query.searchQuery;
     const query = {};
+    query.service_type = { $in: ['ConcussionEval', 'SportsVision'] };
     if (service_status) {
         query.service_status = service_status;
     }
@@ -931,7 +932,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
             { 'client.email': regex }
         ];
     }
-    const appointmentsArray = await appointmentModel.find(query).find(query)
+    const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
         .limit(limit).select('service_type app_date app_time end_time client.firstName client.phone client.lastName client.plan client.plan_payment client.email').exec();
