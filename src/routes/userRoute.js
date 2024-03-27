@@ -41,7 +41,6 @@ router.post("/validate-code", validateForgotPasswordCode);
 router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
 router.post("/book-appointment/:id", auth, bookAppointment);
-router.post("/select-plan", auth, selectPlan);
 router.post("/submit-eval-form", auth, submitEvaluation);
 router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);
@@ -63,6 +62,7 @@ router.get('/getServiceTypes', auth, getServiceTypes);
 router.get('/get-all-appointments', auth, getAllAppointments);
 
 router.put("/reset-password", resetPassword);
+router.put("/select-plan", auth, selectPlan);
 router.put("/update-profile-client", auth, editClientProfile);
 router.put("/update-profile-doctor", auth, editDoctorProfile);
 router.put("/update-password", auth, updatePassword);

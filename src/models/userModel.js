@@ -3,9 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const roleEnum = ['admin', 'doctor', 'athlete'];
-
-const planEnum = ['novice', 'intermediate', 'advanced', 'elite'];
-const paymentStatus = ["paid", "pending", "failed"];
+const paymentStatus = ["paid", "pending", "failed", "N.A."];
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -69,14 +67,15 @@ const userSchema = new mongoose.Schema({
   },
   plan: {
     type: String,
-    enum: planEnum,
     default: null
+  },
+  phase: {
+    type: String
   },
   plan_payment: {
     type: String,
     enum: paymentStatus,
-    default: 'pending',
-    required: true
+    default: 'N.A.'
   },
   password: {
     type: String,

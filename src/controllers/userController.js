@@ -566,23 +566,25 @@ exports.inQueueEvaluation = catchAsyncError(async (req, res) => {
     });
 });
 
-exports.selectPlan = catchAsyncError(async (req, res) => {
-    const client_id = req.body.id;
-    const plan = req.body.plan;
+exports.selectPlan = catchAsyncError(async (req, res, next) => {
+    const userId = req.query.userId;
+    const plan = req.query.plan;
+    const planPhase = req.query.planPhase;
 
-    if (!client_id) {
-        return next(new ErrorHandler("Please provide a client_id", 400));
+    if (!userId) {
+        return next(new ErrorHandler("Please provide a user id", 400));
     }
-    const client = await userModel.findOne({ client_id: client_id });
-    if (!client) {
-        return next(new ErrorHandler("Client does not exist", 400));
+    const user = await userModel.findById(userId);
+    if (!user) {
+        return next(new ErrorHandler("user does not exist", 400));
     }
-    client.plan = plan;
-    await client.save();
+    user.plan = plan;
+    user.phase = planPhase;
+    await user.save();
     res.status(200).json({
         success: true,
-        message: `Plan updated, your plan is: ${client.plan}.`,
-        client,
+        message: `Plan updated, your plan is: ${user.plan}.`,
+        user,
     });
 });
 
@@ -944,7 +946,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
         if (Evalform.length && Diagform.length) {
             let appointmentWithEval = {
                 ...appoint.toObject(),
-                Evalform
+                evaluationId: Evalform[0]._id
             };
             appointments.push(appointmentWithEval);
         }

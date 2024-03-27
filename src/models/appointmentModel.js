@@ -49,6 +49,7 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: paymentStatus,
+      default:'N.A.'
     },
     service_status: {
       type: String,
