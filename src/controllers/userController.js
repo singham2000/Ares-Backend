@@ -440,7 +440,8 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
 
         let appointmentWithEval = {
             ...appoint.toObject(),
-            isFilled: Boolean(Presform.length)
+            isFilled: Boolean(Presform.length),
+            presId: Presform[0]._id
         };
         appointments.push(appointmentWithEval);
 
