@@ -912,6 +912,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const searchQuery = req.query.searchQuery;
     const query = {};
     query.service_type = { $in: ['ConcussionEval', 'SportsVision'] };
+    query.status = 'paid';
     if (service_status) {
         query.service_status = service_status;
     }
@@ -939,7 +940,8 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
-        if (Evalform.length) {
+        const Diagform = await DiagnosisForm.find({ appointmentId: appoint._id });
+        if (Evalform.length && Diagform.length) {
             let appointmentWithEval = {
                 ...appoint.toObject(),
                 Evalform
