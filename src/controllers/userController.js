@@ -437,11 +437,10 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
 
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Presform = await PrescriptionsForm.find({ appointmentId: appoint._id });
-
         let appointmentWithEval = {
             ...appoint.toObject(),
             isFilled: Boolean(Presform.length),
-            presId: Presform[0]._id
+            presId: Boolean(Presform.length) ? Presform[0]._id : null
         };
         appointments.push(appointmentWithEval);
 
