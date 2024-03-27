@@ -29,7 +29,8 @@ const {
   submitPrescription,
   submitDiagnosis,
   completedReq,
-  getPrescription
+  getPrescription,
+  getEvaluation
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -47,6 +48,7 @@ router.post("/submit-diagnosis-form", auth, submitDiagnosis);
 
 router.get("/get-slots", auth, getSlots);
 router.get("/get-prescriptions", auth, getPrescription);
+router.get("/get-evaluations", auth, getEvaluation);
 router.get("/get-plans", auth, getPlans);
 router.get("/get-completed-req", auth, completedReq);
 router.get("/get-profile", auth, getProfile);

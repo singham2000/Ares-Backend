@@ -867,7 +867,7 @@ exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getPrescription = catchAsyncError(async (req, res, next) => {
-    const prescriptionId = req.query.PrescriptionId;
+    const prescriptionId = req.query.prescriptionId;
 
     if (!prescriptionId) {
         return next(new ErrorHandler(" prescriptionId not received "))
@@ -878,7 +878,22 @@ exports.getPrescription = catchAsyncError(async (req, res, next) => {
         success: true,
         form
     });
-})
+});
+
+exports.getEvaluation = catchAsyncError(async (req, res, next) => {
+    const evaluationId = req.query.evaluationId;
+
+    if (!evaluationId) {
+        return next(new ErrorHandler(" prescriptionId not received "))
+    }
+    const form = await EvalutionsForm.findById(evaluationId);
+    const diagForm = await DiagnosisForm.find({ appointmentId: form.appointmentId });
+    res.status(200).json({
+        success: true,
+        evaluationForm: form,
+        diagnosisForm: diagForm
+    });
+});
 
 exports.completedReq = catchAsyncError(async (req, res) => {
     const { service_status, payment_status, date } = req.query;
