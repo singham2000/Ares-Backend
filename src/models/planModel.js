@@ -20,7 +20,11 @@ const planSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    phases: [phaseSchema]
+    phases: [phaseSchema],
+    features: {
+        type: Array,
+        required: true
+    }
 });
 
 

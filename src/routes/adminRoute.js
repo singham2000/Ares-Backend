@@ -26,7 +26,8 @@ const {
   getBookingsByDoctor,
   saveForm,
   fetchForm,
-  getPlan
+  getPlan,
+  createDrillForm
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -41,6 +42,8 @@ router.post("/register_clinic", auth, isAdmin, registerClinic);
 router.post("/set_pres_form", auth, isAdmin, prescriptionFormMake);
 router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
+router.post('/set_drillform_form', auth, isAdmin, createDrillForm);
+
 router
   .route("/service")
   .post(auth, isAdmin, addService)
@@ -48,7 +51,7 @@ router
   .get(auth, isAdmin, getService)
   .delete(auth, isAdmin, delService);
 
-  router
+router
   .route("/plans")
   .post(auth, addplan)
   .put(auth, isAdmin, editService)

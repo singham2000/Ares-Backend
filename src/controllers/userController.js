@@ -938,7 +938,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
-        .limit(limit).select('service_type app_date app_time end_time client.firstName client.phone client.lastName client.plan client.plan_payment client.email').exec();
+        .limit(limit).select('service_type app_date app_time end_time client._id client.firstName client.phone client.lastName client.plan client.plan_payment client.email').exec();
 
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });

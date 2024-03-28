@@ -1,26 +1,20 @@
 const mongoose = require('mongoose');
 
-const activitesSchema = new mongoose.Schema({
-    week: [activityDay]
-});
-
-const activityDay = new mongoose.Schema({
-    day: { course }
-});
-
-const course = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
+const activity = new mongoose.Schema({
+    day: {
+        type: Number
     },
     videoLink: {
-        type: String,
-        required: true
+        type: String
     },
     form: {
         type: Array
     }
-})
+});
+const activityDay = new mongoose.Schema({
+    activites: [activity]
+});
+
 
 const drillSchema = new mongoose.Schema({
     plan: {
@@ -31,9 +25,7 @@ const drillSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    activities: {
-        activitesSchema
-    }
+    weeks: [activityDay]
 });
 
 

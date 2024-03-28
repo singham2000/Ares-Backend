@@ -20,6 +20,7 @@ const EvaluationModel = require("../models/evaluationModel");
 const ServiceTypeModel = require("../models/ServiceTypeModel");
 const PlanModel = require("../models/planModel");
 const EvalForm = require("../models/FormModel");
+const DrillModel = require("../models/DrillModel");
 
 const sendData = (user, statusCode, res) => {
   const token = user.getJWTToken();
@@ -789,6 +790,16 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to save EvalForm" });
   }
+});
+
+exports.createDrillForm = catchAsyncError(async (req, res, next) => {
+  const formdata = req.body.formdata;
+  console.log(formdata);
+
+  if (!formdata) {
+    return next(new ErrorHandler("Empty field", 404))
+  }
+  const form = DrillModel.find()
 });
 
 
