@@ -2,6 +2,7 @@ const userModel = require("../models/userModel");
 const appointmentModel = require("../models/appointmentModel");
 const slotModel = require("../models/slotModel");
 const catchAsyncError = require("../utils/catchAsyncError");
+const mongoose = require('mongoose');
 const ErrorHandler = require("../utils/errorHandler");
 const { resetPasswordCode, newAccount } = require("../utils/mails");
 const generateCode = require("../utils/generateCode");
@@ -14,6 +15,8 @@ const EvalForm = require("../models/FormModel");
 const EvalutionsForm = require("../models/EvaluationForms");
 const PrescriptionsForm = require("../models/PrescriptionForm.js");
 const DiagnosisForm = require('../models/DiagnosisForm.js');
+const DrillForm = require('../models/DrillFormModel.js');
+const DrillFormModel = require("../models/DrillModel.js");
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -882,7 +885,7 @@ exports.getPrescription = catchAsyncError(async (req, res, next) => {
     const prescriptionId = req.query.prescriptionId;
 
     if (!prescriptionId) {
-        return next(new ErrorHandler(" prescriptionId not received "))
+        return next(new ErrorHandler(" prescriptionId not received ", 404))
     }
     const form = await PrescriptionsForm.findById(prescriptionId);
 
@@ -896,7 +899,7 @@ exports.getEvaluation = catchAsyncError(async (req, res, next) => {
     const evaluationId = req.query.evaluationId;
 
     if (!evaluationId) {
-        return next(new ErrorHandler(" prescriptionId not received "))
+        return next(new ErrorHandler(" prescriptionId not received ", 404))
     }
     const form = await EvalutionsForm.findById(evaluationId);
     const diagForm = await DiagnosisForm.find({ appointmentId: form.appointmentId });
@@ -956,5 +959,27 @@ exports.completedReq = catchAsyncError(async (req, res) => {
         success: true,
         appointments
     });
+});
+
+exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
+    const { plan, phase, appointmentId, clientId } = req.query;
+    const drill = await DrillForm.find({ appointmentId, clientId });
+    const form = await DrillFormModel.find({ plan, phase }).select('-_id -__v');
+    if (drill.length < 1) {
+        const drillForm = await DrillForm.create({
+            appointmentId: appointmentId,
+            clientId: clientId,
+            drill: form
+        })
+        res.status(200).json({
+            success: true,
+            drillForm
+        })
+    } else {
+        res.status(200).json({
+            success: true,
+            drill
+        })
+    }
 });
 

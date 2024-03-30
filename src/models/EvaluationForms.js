@@ -5,7 +5,7 @@ const { ObjectId } = mongoose.Types;
 const evalformSchema = new mongoose.Schema({
     appointmentId: {
         type: ObjectId,
-        required: true
+        required: true,
     },
     form: {
         type: Array,

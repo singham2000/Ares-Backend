@@ -9,12 +9,13 @@ const activity = new mongoose.Schema({
     },
     form: {
         type: Array
+    },
+    isComplete: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
-const activityDay = new mongoose.Schema({
-    activites: [activity]
-});
-
 
 const drillSchema = new mongoose.Schema({
     plan: {
@@ -25,8 +26,15 @@ const drillSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    weeks: [activityDay]
+    week: {
+        type: String,
+        required: true
+    },
+    day: {
+        type: String,
+        required: true
+    },
+    activities: [activity]
 });
 
-
-module.exports = mongoose.model("drill", drillSchema);
+module.exports = mongoose.model("drillForm", drillSchema);

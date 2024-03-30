@@ -794,12 +794,32 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
 
 exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   const formdata = req.body.formdata;
-  console.log(formdata);
 
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
-  const form = DrillModel.find()
+  const form = DrillModel.find({
+    plan: formdata.plan,
+    phase: formdata.phase,
+    day: formdata.day,
+    week: formdata.week
+  });
+  if (form.length < 1)
+    return next(new ErrorHandler("Already created", 404))
+
+  const formNew = await DrillModel.create({
+    plan: formdata.plan,
+    phase: formdata.phase,
+    day: formdata.day,
+    week: formdata.week,
+    activities: formdata.activities,
+  });
+
+  formNew.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Form added successfully.`,
+    formNew,
+  });
 });
-
-

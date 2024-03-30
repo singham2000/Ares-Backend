@@ -30,7 +30,8 @@ const {
   submitDiagnosis,
   completedReq,
   getPrescription,
-  getEvaluation
+  getEvaluation,
+  getDrillDetails
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -46,6 +47,7 @@ router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);
 
 router.get("/get-slots", auth, getSlots);
+router.get("/get-Drills", auth, getDrillDetails);
 router.get("/get-prescriptions", auth, getPrescription);
 router.get("/get-evaluations", auth, getEvaluation);
 router.get("/get-plans", auth, getPlans);
