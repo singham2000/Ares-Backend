@@ -572,9 +572,9 @@ exports.inQueueEvaluation = catchAsyncError(async (req, res) => {
 exports.selectPlan = catchAsyncError(async (req, res, next) => {
     const userId = req.query.userId;
     const plan = req.query.plan;
-    const phase = req.query.planPhase;
+    const planPhase = req.query.planPhase;
 
-    if (!userId || !plan || !phase) {
+    if (!userId || !plan || !planPhase) {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
