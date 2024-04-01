@@ -379,8 +379,6 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
     startDate = `0${startDate}`;
     endDate = `0${endDate}`;
   }
-  console.log(startDate, endDate);
-
   const [day, month, year] = startDate.split("/");
   const formattedDate = new Date(
     `${year}-${month < 10 && "0"}${month}-${day}T00:00:00.000Z`.toString(),
