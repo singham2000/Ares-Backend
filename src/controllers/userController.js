@@ -579,12 +579,20 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
-    const appointment = await appointmentModel.find({ 'client._id': new mongoose.Types.ObjectId(userId) });
+
+    const appointment = await appointmentModel.updateMany(
+        { 'client._id': new mongoose.Types.ObjectId(userId) },
+        {
+            $set: {
+                "client.plan": plan,
+                "client.phase": planPhase
+            }
+        }
+    );
     if (!user) {
         return next(new ErrorHandler("user does not exist", 400));
     }
-    appointment.client.plan = plan;
-    appointment.client.phase = planPhase;
+
     user.plan = plan;
     user.phase = planPhase;
     await user.save();
@@ -595,15 +603,11 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
             success: true,
             message: `Plan updated, plan is: ${user.plan}. Notified to user`,
             user,
+            appointment
         });
     } catch (e) {
 
     }
-    res.status(200).json({
-        success: true,
-        message: `Plan updated, your plan is: ${user.plan}.`,
-        user,
-    });
 });
 
 exports.getForm = catchAsyncError(async (req, res) => {
