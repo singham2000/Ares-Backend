@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { Types: { ObjectId } } = require('mongoose');
 const generateCode = require("../utils/generateCode");
+const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
@@ -24,7 +25,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     zip,
     password,
   } = req.body;
-
+  const file = req.file;
   if (
     (!firstName ||
       !lastName ||
@@ -49,10 +50,12 @@ exports.register = catchAsyncError(async (req, res, next) => {
     return next(
       new ErrorHandler("Password should have minimum 8 characters", 400)
     );
-
+  const result = await s3Uploadv2(file);
+  const location = result.Location && result.Location;
   user = await userModel.create({
     firstName,
     lastName,
+    profilePic: location,
     suffix,
     email,
     city,
@@ -151,15 +154,13 @@ exports.getProfile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.editProfile = catchAsyncError(async (req, res, next) => {
-
+  const file = req.file;
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
 
   req.userId = userId;
-
-  const athlete = await userModel.findById(userId).select("-password");
   const {
     firstName,
     lastName,
@@ -173,9 +174,13 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
     address,
     zip,
   } = req.body;
+  const athlete = await userModel.findById(userId).select("-password");
+  const result = await s3UpdateImage(file, athlete.profilePic);
+  const location = result.Location && result.Location;
 
   firstName && (athlete.firstName = firstName);
   lastName && (athlete.lastName = lastName);
+  file && (athlete.profilePic = location);
   suffix && (athlete.suffix = suffix);
   gender && (athlete.gender = gender);
   dob && (athlete.dob = dob);
