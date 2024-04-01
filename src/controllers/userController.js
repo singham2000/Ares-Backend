@@ -585,7 +585,8 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         {
             $set: {
                 "client.plan": plan,
-                "client.phase": planPhase
+                "client.phase": planPhase,
+                "client.plan_payment": "pending"
             }
         }
     );
@@ -595,6 +596,7 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
 
     user.plan = plan;
     user.phase = planPhase;
+    user.plan_payment = "pending";
     await user.save();
     try {
         const isSend = await createNotification("Doctor has selected your plan ", `A plan has been selected by doctor, your are in ${plan} and phase ${planPhase}`, user);
