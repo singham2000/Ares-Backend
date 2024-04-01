@@ -579,9 +579,12 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
+    const appointment = await appointmentModel.find({ 'client._id': mongoose.Types.ObjectId(userId) });
     if (!user) {
         return next(new ErrorHandler("user does not exist", 400));
     }
+    appointment.client.plan = plan;
+    appointment.client.phase = planPhase;
     user.plan = plan;
     user.phase = planPhase;
     await user.save();
@@ -664,7 +667,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         query.doctor = doctor;
     }
     if (date && doctor && service_type) {
-        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location: location });
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location, service_type });
         const doc = await slotModel.find(query);
         let Calcslots = [];
         if (dayAppointments.length > 1) {
