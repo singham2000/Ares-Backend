@@ -579,7 +579,7 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
-    const appointment = await appointmentModel.find({ 'client._id': mongoose.Types.ObjectId(userId) });
+    const appointment = await appointmentModel.find({ 'client._id':new mongoose.Types.ObjectId(userId) });
     if (!user) {
         return next(new ErrorHandler("user does not exist", 400));
     }
