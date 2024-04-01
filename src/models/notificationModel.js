@@ -10,10 +10,9 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: [true, "Notification text is Required"],
     },
-    athlete: {
+    user: {
       type: mongoose.Types.ObjectId,
       required: true,
-      ref: "Athlete",
     },
     seen: {
       type: Boolean,

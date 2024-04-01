@@ -2,15 +2,31 @@ const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose')
 
+const createNotification = catchAsyncError(async (title, text, user) => {
+  console.log("notification");
+  try {
+    const notification = await notificationModel.create({
+      title, text, user: new mongoose.Types.ObjectId(user)
+    })
+    notification.save();
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+})
 
 exports.getAllNotifications = catchAsyncError(async (req, res, next) => {
+  let a = await createNotification("hello", "hello", '65e6d521ee624ba25bd5f7a9')
+  console.log(a);
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
   const notifications = await notificationModel.find({ user: userId });
-  const unreadCounts = await notificationModel.countDocuments({ seen: false });
+  const unreadCounts = await notificationModel.countDocuments({ user: userId, seen: false });
   res.status(200).json({ notifications, unreadCounts });
 });
 

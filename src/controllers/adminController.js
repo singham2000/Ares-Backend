@@ -374,6 +374,7 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 
 exports.addSlot = catchAsyncError(async (req, res, next) => {
   const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
+  console.log(startDate, endDate);
   const [day, month, year] = startDate.split("/");
   const formattedDate = new Date(
     `${year}-${month < 10 && "0"}${month}-${day}T18:30:00.000Z`.toString(),

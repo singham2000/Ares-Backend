@@ -902,7 +902,7 @@ exports.getEvaluation = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler(" prescriptionId not received ", 404))
     }
     const form = await EvalutionsForm.findById(evaluationId);
-    const diagForm = await DiagnosisForm.find({ appointmentId: form.appointmentId });
+    const diagForm = await DiagnosisForm.findOne({ appointmentId: form.appointmentId });
     res.status(200).json({
         success: true,
         evaluationForm: form,

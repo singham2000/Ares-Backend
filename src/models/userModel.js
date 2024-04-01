@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  profilePic: {
+    type: String,
+    trim: true,
+    default: 'https://icon-library.com/images/icon-user/icon-user-15.jpg'
+  },
   suffix: {
     type: String,
     trim: true,
