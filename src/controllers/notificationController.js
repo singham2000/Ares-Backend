@@ -2,25 +2,8 @@ const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose')
 
-const createNotification = catchAsyncError(async (title, text, user) => {
-  console.log("notification");
-  try {
-    const notification = await notificationModel.create({
-      title, text, user: new mongoose.Types.ObjectId(user)
-    })
-    notification.save();
-    return true;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-})
-
-exports.getAllNotifications = catchAsyncError(async (req, res, next) => {
-  let a = await createNotification("hello", "hello", '65e6d521ee624ba25bd5f7a9')
-  console.log(a);
+exports.getAllNotifications = catchAsyncError(async (req, res) => {
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
@@ -95,7 +78,7 @@ exports.markAllRead = catchAsyncError(async (req, res, next) => {
 exports.deleteNotification = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
   if (!id) {
-    return next(ErrorHandler("Please provide Notification id in params"), 400);
+    return next(new ErrorHandler("Please provide Notification id in params"), 400);
   }
   const deleted = await notificationModel.findByIdAndDelete(id);
   if (!deleted) {

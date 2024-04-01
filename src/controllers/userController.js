@@ -17,6 +17,7 @@ const PrescriptionsForm = require("../models/PrescriptionForm.js");
 const DiagnosisForm = require('../models/DiagnosisForm.js');
 const DrillForm = require('../models/DrillFormModel.js');
 const DrillFormModel = require("../models/DrillModel.js");
+const { createNotification } = require('../utils/functions');
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -584,6 +585,17 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
     user.plan = plan;
     user.phase = planPhase;
     await user.save();
+    try {
+        const isSend = await createNotification("Doctor has selected your plan ", `A plan has been selected by doctor, your are in ${plan} and phase ${planPhase}`, user);
+        if (isSend);
+        res.status(200).json({
+            success: true,
+            message: `Plan updated, plan is: ${user.plan}. Notified to user`,
+            user,
+        });
+    } catch (e) {
+
+    }
     res.status(200).json({
         success: true,
         message: `Plan updated, your plan is: ${user.plan}.`,
@@ -963,6 +975,9 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     const { appointmentId, clientId, week } = req.query;
+
+    // total weeks, complete percentage, form submission
+
     const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
     const client = await userModel.findById(clientId);
 

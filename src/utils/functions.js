@@ -1,3 +1,7 @@
+const mongoose = require('mongoose');
+const notificationModel = require("../models/notificationModel");
+const catchAsyncError = require("./catchAsyncError");
+
 const timeForService = {
     MedicalOfficeVisit: 30,
     Consultation: 15,
@@ -89,4 +93,17 @@ const createArrayOfPairs = (arr) => {
     return pairsArray;
 };
 
-module.exports = { addDuration, createArrayOfPairs, calculateTimeDifference, sendData, timeValidate }
+const createNotification = catchAsyncError(async (title, text, user) => {
+    try {
+        const notification = await notificationModel.create({
+            title, text, user: new mongoose.Types.ObjectId(user)
+        })
+        notification.save();
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+});
+
+module.exports = { addDuration, createArrayOfPairs, calculateTimeDifference, sendData, timeValidate, createNotification }
