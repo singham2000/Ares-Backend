@@ -373,11 +373,17 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 });
 
 exports.addSlot = catchAsyncError(async (req, res, next) => {
-  const { startDate, endDate, doctor, address, startTime, endTime } = req.body;
+  let { startDate, endDate, doctor, address, startTime, endTime } = req.body;
+  let cdate = startDate.split('/')[0].length;
+  if (cdate === 1) {
+    startDate = `0${startDate}`;
+    endDate = `0${endDate}`;
+  }
   console.log(startDate, endDate);
+
   const [day, month, year] = startDate.split("/");
   const formattedDate = new Date(
-    `${year}-${month < 10 && "0"}${month}-${day}T18:30:00.000Z`.toString(),
+    `${year}-${month < 10 && "0"}${month}-${day}T00:00:00.000Z`.toString(),
   );
   formattedDate.setUTCHours(0);
   formattedDate.setUTCMinutes(0);
