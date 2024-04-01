@@ -31,7 +31,8 @@ const {
   completedReq,
   getPrescription,
   getEvaluation,
-  getDrillDetails
+  getDrillDetails,
+  drillUpdate
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -64,6 +65,7 @@ router.get('/getServiceTypes', auth, getServiceTypes);
 router.get('/get-all-appointments', auth, getAllAppointments);
 
 router.put("/reset-password", resetPassword);
+router.put('/update-drill', auth, drillUpdate);
 router.put("/select-plan", auth, selectPlan);
 router.put("/update-profile-client", auth, editClientProfile);
 router.put("/update-profile-doctor", auth, editDoctorProfile);

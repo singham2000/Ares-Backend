@@ -962,24 +962,54 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
-    const { plan, phase, appointmentId, clientId } = req.query;
-    const drill = await DrillForm.find({ appointmentId, clientId });
-    const form = await DrillFormModel.find({ plan, phase }).select('-_id -__v');
+    const { appointmentId, clientId, week } = req.query;
+    const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
+    const client = await userModel.findById(clientId);
+
+    const form = await DrillFormModel.find({ plan: client.plan, phase: client.phase }).select('-_id -__v');
+
     if (drill.length < 1) {
         const drillForm = await DrillForm.create({
             appointmentId: appointmentId,
             clientId: clientId,
             drill: form
         })
+        drillForm.save();
+        const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
         res.status(200).json({
             success: true,
-            drillForm
-        })
+            drill
+        });
     } else {
         res.status(200).json({
             success: true,
             drill
-        })
+        });
     }
 });
+
+exports.drillUpdate = catchAsyncError(async (req, res, next) => {
+    const targetId = req.query.id;
+    try {
+        const result = await DrillForm.updateOne(
+            { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
+            { $set: { "drill.$[].activities.$[elem].isComplete": true } },
+            { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
+        );
+
+        if (result.matchedCount > 0) {
+            res.status(200).json({ success: true, message: "Activity updated successfully" });
+        } else {
+            res.status(404).json({ success: false, message: "Activity not found" });
+        }
+    } catch (error) {
+        console.error("Error updating activity:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+
+
+
+
 
