@@ -579,7 +579,7 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
-    const appointment = await appointmentModel.find({ 'client._id':new mongoose.Types.ObjectId(userId) });
+    const appointment = await appointmentModel.find({ 'client._id': new mongoose.Types.ObjectId(userId) });
     if (!user) {
         return next(new ErrorHandler("user does not exist", 400));
     }
@@ -802,6 +802,7 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
     }
 
     const forms = await DiagnosisForm.find({ appointmentId });
+    const appointment = await appointmentModel.find({ appointment_id: appointmentId });
 
     if (forms.length > 0) {
         return next(new ErrorHandler("Form is already  filled for this", 404));
@@ -813,6 +814,8 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
     });
 
     await newEvalForm.save();
+    appointment.service_status = 'completed';
+    await appointment.save();
 
     res.status(200).json({
         success: true,
