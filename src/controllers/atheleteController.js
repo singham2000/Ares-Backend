@@ -192,14 +192,19 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getBookings = catchAsyncError(async (req, res, next) => {
-
+  const page = parseInt(req.query.page_no) || 1;
+  const limit = parseInt(req.query.per_page_count) || 10;
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
 
   req.userId = userId;
-  const appointments = await appointmentModel.find({ "client._id": new ObjectId(userId) }).select("-client");
+  const appointments = await appointmentModel.find({ "client._id": new ObjectId(userId) })
+    .sort({ createdAt: 'desc' })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .select("-client");
   res.status(200).json({
     success: true,
     appointments
