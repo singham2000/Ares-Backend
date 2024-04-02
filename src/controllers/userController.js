@@ -1001,7 +1001,6 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
         plan: { $regex: new RegExp(client.plan, 'i') },
         phase: { $regex: new RegExp(client.phase, 'i') }
     }).select('-_id -__v');
-    console.log(form);
     if (form.length < 1)
         return next(new ErrorHandler("The required form does not exists", 404))
 
@@ -1009,20 +1008,44 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
         {
             $match: {
                 plan: { $regex: new RegExp(client.plan, 'i') },
-                phase: { $regex: new RegExp(client.phase, 'i') }
+                phase: { $regex: new RegExp(client.phase, 'i') },
+                week: { $regex: new RegExp(week, 'i') }
             }
         },
         {
             $group: {
-                _id: { week: "$week" }, // Group by week
-                drills: { $push: "$$ROOT" } // Push all documents into an array called "drills"
+                _id: { week: "$week" },
+                week: { $first: "$week" },
+                drills: { $push: "$$ROOT" }
             }
         },
         {
             $group: {
                 _id: null,
                 totalWeeks: { $sum: 1 },
-                weeks: { $push: "$$ROOT" } // Push each week's data into an array
+                weeks: { $push: "$$ROOT" }
+            }
+        }
+    ]);
+    const WeekCount = await DrillFormModel.aggregate([
+        {
+            $match: {
+                plan: { $regex: new RegExp(client.plan, 'i') },
+                phase: { $regex: new RegExp(client.phase, 'i') },
+            }
+        },
+        {
+            $group: {
+                _id: { week: "$week" },
+                week: { $first: "$week" },
+                drills: { $push: "$$ROOT" }
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalWeeks: { $sum: 1 },
+                weeks: { $push: "$$ROOT" }
             }
         }
     ]);
@@ -1034,18 +1057,55 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
             drill: form
         })
         drillForm.save();
-        const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
         res.status(200).json({
             success: true,
-            totalWeeks: formFull[0].totalWeeks,
+            totalWeeks: WeekCount[0].totalWeeks,
             weeks: formFull[0].weeks
 
         });
     } else {
+        const aggregationPipeline = [
+            {
+                $match: {
+                    $or: [
+                        {
+                            appointmentId: new mongoose.Types.ObjectId(appointmentId),
+                            clientId: new mongoose.Types.ObjectId(clientId)
+                        },
+                        {
+                            appointmentId: new mongoose.Types.ObjectId(appointmentId),
+                            clientId: new mongoose.Types.ObjectId(clientId),
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind: "$drill"
+            },
+            {
+                $match: week ? { "drill.week": week.toString() } : {}
+            },
+            {
+                $group: {
+                    _id: "$drill.week",
+                    drills: { $push: "$drill" }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalWeeks: { $sum: 1 },
+                    weeks: { $push: { week: "$_id", drills: "$drills" } }
+                }
+            }
+        ];
+
+        const drill = await DrillForm.aggregate(aggregationPipeline);
+
         res.status(200).json({
             success: true,
-            totalWeeks: formFull[0].totalWeeks,
-            weeks: formFull[0].weeks
+            weeks: drill[0].weeks,
+            totalWeeks: WeekCount[0].totalWeeks,
         });
     }
 });
