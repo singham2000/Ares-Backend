@@ -204,15 +204,32 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
     process.env.JWT_SECRET
   );
 
+  const doctors = await userModel.find({ role: 'doctor' });
   req.userId = userId;
-  const appointments = await appointmentModel.find({ "client._id": new ObjectId(userId) })
-    .sort({ createdAt: 'desc' })
+  let sortedAppointments = [];
+  const appointments = await appointmentModel.find({
+    $or: [
+      { "client._id": new ObjectId(userId) },
+      { client: new ObjectId(userId) }
+    ]
+  }).sort({ createdAt: 'desc' })
     .skip((page - 1) * limit)
     .limit(limit)
     .select("-client");
+  appointments.map((app) => {
+    let appoint = {
+      ...app._doc,
+      doctorData: doctors.map((doc) => {
+        if (app.doctor_trainer === doc.firstName) {
+          return { email: doc.email, profilePic: doc.profilePic }
+        }
+      })
+    }
+    sortedAppointments.push(appoint);
+  });
   res.status(200).json({
     success: true,
-    appointments
+    sortedAppointments
   });
 });
 

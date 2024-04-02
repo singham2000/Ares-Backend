@@ -23,8 +23,9 @@ const appointmentSchema = new mongoose.Schema(
       enum: appointmentServiceEnum,
     },
     client: {
-      type: Object,
+      type: mongoose.Schema.Types.Mixed,
       required: true,
+      ref: 'User'
     },
     app_date: {
       type: String,
@@ -49,7 +50,7 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: paymentStatus,
-      default:'N.A.'
+      default: 'N.A.'
     },
     service_status: {
       type: String,
@@ -62,5 +63,11 @@ const appointmentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+appointmentSchema.pre('find', async function (next) {
+  this.populate('client client._id');
+  next();
+});
+
 
 module.exports = mongoose.model("appointment", appointmentSchema);

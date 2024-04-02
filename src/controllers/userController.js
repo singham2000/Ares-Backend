@@ -335,7 +335,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     //     return next(new ErrorHandler("Another Appointment is overlapping", 400));
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
-        client: client,
+        client: client_id,
         service_type,
         app_date,
         app_time,
@@ -987,13 +987,45 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     const { appointmentId, clientId, week } = req.query;
-
     // total weeks, complete percentage, form submission
 
-    const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
+    const drill = await DrillForm.find({
+        $or: [
+            { appointmentId, clientId },
+            { appointmentId, clientId, "drill.week": week }
+        ]
+    });
     const client = await userModel.findById(clientId);
 
-    const form = await DrillFormModel.find({ plan: client.plan, phase: client.phase }).select('-_id -__v');
+    const form = await DrillFormModel.find({
+        plan: { $regex: new RegExp(client.plan, 'i') },
+        phase: { $regex: new RegExp(client.phase, 'i') }
+    }).select('-_id -__v');
+    console.log(form);
+    if (form.length < 1)
+        return next(new ErrorHandler("The required form does not exists", 404))
+
+    const formFull = await DrillFormModel.aggregate([
+        {
+            $match: {
+                plan: { $regex: new RegExp(client.plan, 'i') },
+                phase: { $regex: new RegExp(client.phase, 'i') }
+            }
+        },
+        {
+            $group: {
+                _id: { week: "$week" }, // Group by week
+                drills: { $push: "$$ROOT" } // Push all documents into an array called "drills"
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalWeeks: { $sum: 1 },
+                weeks: { $push: "$$ROOT" } // Push each week's data into an array
+            }
+        }
+    ]);
 
     if (drill.length < 1) {
         const drillForm = await DrillForm.create({
@@ -1005,12 +1037,15 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
         const drill = await DrillForm.find({ appointmentId, clientId, "drill.week": week });
         res.status(200).json({
             success: true,
-            drill
+            totalWeeks: formFull[0].totalWeeks,
+            weeks: formFull[0].weeks
+
         });
     } else {
         res.status(200).json({
             success: true,
-            drill
+            totalWeeks: formFull[0].totalWeeks,
+            weeks: formFull[0].weeks
         });
     }
 });
