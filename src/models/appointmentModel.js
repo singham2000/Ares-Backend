@@ -65,7 +65,7 @@ const appointmentSchema = new mongoose.Schema(
 );
 
 appointmentSchema.pre('find', async function (next) {
-    this.populate('client client._id');
+    this.populate('client');
   next();
 });
 
