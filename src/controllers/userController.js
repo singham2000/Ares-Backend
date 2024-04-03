@@ -808,7 +808,7 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
     }
 
     const forms = await DiagnosisForm.find({ appointmentId });
-    const appointment = await appointmentModel.find({ appointment_id: appointmentId });
+    const appointment = await appointmentModel.findById(appointmentId);
 
     if (forms.length > 0) {
         return next(new ErrorHandler("Form is already  filled for this", 404));
@@ -821,7 +821,7 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
 
     await newEvalForm.save();
     appointment.service_status = 'completed';
-    appointment.save();
+    await appointment.save();
 
     res.status(200).json({
         success: true,
