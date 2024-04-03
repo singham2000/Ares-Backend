@@ -1112,7 +1112,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
 exports.drillUpdate = catchAsyncError(async (req, res, next) => {
     const targetId = req.query.id;
-    const form = req.body;
+    const form = req.body.form;
     try {
         if (form) {
             const result = await DrillForm.updateOne(
