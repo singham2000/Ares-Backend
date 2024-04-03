@@ -65,9 +65,10 @@ const appointmentSchema = new mongoose.Schema(
 );
 
 appointmentSchema.pre('find', async function (next) {
-  this.populate('client client._id');
+    this.populate('client client._id');
   next();
 });
+
 
 
 module.exports = mongoose.model("appointment", appointmentSchema);
