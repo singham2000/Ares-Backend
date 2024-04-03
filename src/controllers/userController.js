@@ -1112,17 +1112,30 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
 exports.drillUpdate = catchAsyncError(async (req, res, next) => {
     const targetId = req.query.id;
+    const form = req.body;
     try {
-        const result = await DrillForm.updateOne(
-            { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
-            { $set: { "drill.$[].activities.$[elem].isComplete": true } },
-            { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
-        );
-
-        if (result.matchedCount > 0) {
-            res.status(200).json({ success: true, message: "Activity updated successfully" });
+        if (form) {
+            const result = await DrillForm.updateOne(
+                { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
+                { $set: { "drill.$[].activities.$[elem].form": form } },
+                { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
+            );
+            if (result.matchedCount > 0) {
+                res.status(200).json({ success: true, message: "Form updated successfully" });
+            } else {
+                res.status(404).json({ success: false, message: "Form not found" });
+            }
         } else {
-            res.status(404).json({ success: false, message: "Activity not found" });
+            const result = await DrillForm.updateOne(
+                { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
+                { $set: { "drill.$[].activities.$[elem].isComplete": true } },
+                { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
+            );
+            if (result.matchedCount > 0) {
+                res.status(200).json({ success: true, message: "Activity updated successfully" });
+            } else {
+                res.status(404).json({ success: false, message: "Activity not found" });
+            }
         }
     } catch (error) {
         console.error("Error updating activity:", error);

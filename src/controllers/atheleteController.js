@@ -199,6 +199,19 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
 exports.getBookings = catchAsyncError(async (req, res, next) => {
   const page = parseInt(req.query.page_no) || 1;
   const limit = parseInt(req.query.per_page_count) || 10;
+  const { service_type, status, service_status } = req.query;
+
+  const query = {};
+
+  if (status)
+    query.status = status;
+
+  if (service_type)
+    query.service_type = service_type;
+
+  if (service_status)
+    query.service_status = service_status;
+
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
@@ -209,8 +222,8 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
   let sortedAppointments = [];
   const appointments = await appointmentModel.find({
     $or: [
-      { "client._id": new ObjectId(userId) },
-      { client: new ObjectId(userId) }
+      { "client._id": new ObjectId(userId), query },
+      { client: new ObjectId(userId), query }
     ]
   }).sort({ createdAt: 'desc' })
     .skip((page - 1) * limit)
