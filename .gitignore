@@ -12,6 +12,7 @@
 /build
 
 .env
+aws.env
 env
 /src/config/mail.env
 

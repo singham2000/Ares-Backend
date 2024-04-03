@@ -1,9 +1,8 @@
 const S3 = require("aws-sdk/clients/s3");
-const SDK = require("aws-sdk");
 require("aws-sdk/lib/maintenance_mode_message").suppress = true;
 const multer = require("multer");
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config({ path: "./aws.env" });
 
 exports.s3Uploadv2 = async (file, id) => {
     const s3 = new S3({
