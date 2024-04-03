@@ -664,7 +664,7 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
 
 exports.getSlots = catchAsyncError(async (req, res) => {
     const { doctor, date, service_type, location } = req.query;
-    let slots;
+    let slots=[];
     const query = {};
     if (date) {
         query.date = date;
