@@ -238,7 +238,7 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
         }
       })
     }
-    sortedAppointments.push(appoint);
+    appoint && sortedAppointments.push(appoint);
   });
   res.status(200).json({
     success: true,
