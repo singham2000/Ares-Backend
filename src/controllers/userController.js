@@ -673,7 +673,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         query.doctor = doctor;
     }
     if (date && doctor && service_type) {
-        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location, service_type });
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location });
         const doc = await slotModel.find(query);
         let Calcslots = [];
         if (dayAppointments.length > 1) {
@@ -965,7 +965,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
     const appointmentsArray = await appointmentModel.find(query)
         .sort({ createdAt: 'desc' })
         .skip((page - 1) * limit)
-        .limit(limit).select('service_type app_date app_time end_time client').exec();
+        .limit(limit).exec();
 
     await Promise.all(appointmentsArray.map(async (appoint) => {
         const Evalform = await EvalutionsForm.find({ appointmentId: appoint._id });
