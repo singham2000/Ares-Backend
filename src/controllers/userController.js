@@ -664,7 +664,7 @@ exports.getAppointment = catchAsyncError(async (req, res) => {
 
 exports.getSlots = catchAsyncError(async (req, res) => {
     const { doctor, date, service_type, location } = req.query;
-    let slots=[];
+    let slots = [];
     const query = {};
     if (date) {
         query.date = date;
@@ -987,7 +987,7 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     const { appointmentId, clientId, week } = req.query;
-    // total weeks, complete percentage, form submission
+    //  complete percentage
 
     const drill = await DrillForm.find({
         $or: [
@@ -1017,6 +1017,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
             $group: {
                 _id: { week: "$week" },
                 week: { $first: "$week" },
+                act: { $push: "$$ROOT.activities.isComplete" },
                 drills: { $push: "$$ROOT" }
             }
         },
@@ -1039,7 +1040,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
             $group: {
                 _id: { week: "$week" },
                 week: { $first: "$week" },
-                drills: { $push: "$$ROOT" }
+                drills: { $push: "$$ROOT" },
             }
         },
         {
@@ -1052,7 +1053,6 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     ]);
 
     if (drill.length < 1) {
-        console.log("rann");
         const drillForm = await DrillForm.create({
             appointmentId: appointmentId,
             clientId: clientId,
@@ -1066,7 +1066,6 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
         });
     } else {
-        console.log("ranned 2");
         const aggregationPipeline = [
             {
                 $match: {
@@ -1091,22 +1090,38 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
             {
                 $group: {
                     _id: "$drill.week",
-                    drills: { $push: "$drill" }
+                    drills: { $push: "$drill" },
+                    totalActivities: { $push: "$drill.activities.isComplete" },
+                    totalActivities: { $push: { $cond: { if: "$drill.activities.isComplete", then: "$drill.activities.isComplete", else: false } } }
                 }
             },
             {
                 $group: {
                     _id: null,
                     totalWeeks: { $sum: 1 },
+                    totalActivities: { $push: "$totalActivities" },
                     weeks: { $push: { week: "$_id", drills: "$drills" } }
                 }
             }
         ];
 
-        const drill = await DrillForm.aggregate(aggregationPipeline);
 
+        const drill = await DrillForm.aggregate(aggregationPipeline);
+        const runner = (drill) => {
+            const [data] = drill[0].totalActivities;
+            let totalActivitiesdone = 0;
+            let totalActivities = 0;
+            data.forEach((data) => {
+                data.forEach((list) => {
+                    ++totalActivities;
+                    list && ++totalActivitiesdone;
+                })
+            });
+            return percentage = (totalActivitiesdone / totalActivities) * 100;
+        }
         res.status(200).json({
             success: true,
+            completePercentage: runner(drill),
             weeks: drill[0].weeks,
             totalWeeks: WeekCount[0].totalWeeks,
         });
