@@ -4,6 +4,9 @@ const activity = new mongoose.Schema({
     day: {
         type: Number
     },
+    activityName: {
+        type: String
+    },
     videoLink: {
         type: String
     },
