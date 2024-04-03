@@ -1001,6 +1001,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
         plan: { $regex: new RegExp(client.plan, 'i') },
         phase: { $regex: new RegExp(client.phase, 'i') }
     }).select('-_id -__v');
+
     if (form.length < 1)
         return next(new ErrorHandler("The required form does not exists", 404))
 
@@ -1051,6 +1052,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     ]);
 
     if (drill.length < 1) {
+        console.log("rann");
         const drillForm = await DrillForm.create({
             appointmentId: appointmentId,
             clientId: clientId,
@@ -1064,6 +1066,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
         });
     } else {
+        console.log("ranned 2");
         const aggregationPipeline = [
             {
                 $match: {
