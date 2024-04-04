@@ -531,13 +531,6 @@ exports.addplan = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getPlan = catchAsyncError(async (req, res, next) => {
-  const plans = await PlanModel.find();
-  res.status(200).json({
-    success: true,
-    plans,
-  });
-});
 
 exports.addService = catchAsyncError(async (req, res, next) => {
   const { name, cost, duration } = req.body;
@@ -827,4 +820,27 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
     message: `Form added successfully.`,
     formNew,
   });
+});
+
+exports.getPlan = catchAsyncError(async (req, res, next) => {
+
+  const plans = await PlanModel.find();
+  res.status(200).json({
+    success: true,
+    plans
+  })
+
+});
+
+exports.updatePlan = catchAsyncError(async (req, res, next) => {
+  const planId = req.query.planId;
+  const data = req.query.data;
+
+  const plans = await PlanModel.findByIdAndUpdate(planId, data);
+
+  res.status(200).json({
+    success: true,
+    plans
+  })
+
 });

@@ -27,7 +27,9 @@ const {
   saveForm,
   fetchForm,
   getPlan,
-  createDrillForm
+  createDrillForm,
+  getPlan,
+  updatePlan,
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -53,10 +55,8 @@ router
 
 router
   .route("/plans")
-  .post(auth, addplan)
-  .put(auth, isAdmin, editService)
+  .put(auth, isAdmin, updatePlan)
   .get(auth, isAdmin, getPlan)
-  .delete(auth, isAdmin, delService);
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 
