@@ -26,7 +26,6 @@ const {
   getBookingsByDoctor,
   saveForm,
   fetchForm,
-  getPlan,
   createDrillForm,
   getPlan,
   updatePlan,

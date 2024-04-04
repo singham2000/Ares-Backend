@@ -283,8 +283,8 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
     }
 
     let user = await userModel.findOne({ email });
-    if (!user || user.role === 'admin')
-        return next(new ErrorHandler("User does not exists with this email", 400));
+    if (!user || user.role === 'admin' || user.role === 'doctor')
+        return next(new ErrorHandler("Athlete does not exists with this email", 400));
 
     res.status(200).json({
         success: true,
