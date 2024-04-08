@@ -744,8 +744,10 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
     .limit(limit)
     .exec();
   const totalRecords = await appointmentModel.countDocuments(query);
+
+  const fapp = appointments.filter((appoint) => appoint?.client?.role === 'athlete' || appoint.client === null)
   res.json({
-    appointments: appointments,
+    appointments: fapp,
     totalPages: Math.ceil(totalRecords / limit),
     currentPage: page,
   });
@@ -834,13 +836,18 @@ exports.getPlan = catchAsyncError(async (req, res, next) => {
 
 exports.updatePlan = catchAsyncError(async (req, res, next) => {
   const planId = req.query.planId;
-  const data = req.query.data;
+  const data = req.body.data;
 
-  const plans = await PlanModel.findByIdAndUpdate(planId, data);
+  const plan = await PlanModel.findByIdAndUpdate(planId, data);
+  if (!plan) {
+    return next(new ErrorHandler("Plan not found or updated", 400));
+  } else {
+    const plans = await PlanModel.find();
+    res.status(200).json({
+      success: true,
+      plans
+    })
+  }
 
-  res.status(200).json({
-    success: true,
-    plans
-  })
 
 });

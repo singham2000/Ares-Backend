@@ -140,7 +140,8 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please fill in all fields", 400));
   if (newPassword !== confirmPassword)
     return next(new ErrorHandler("Password does not match", 400));
-
+  if (newPassword === user.password)
+    return next(new ErrorHandler("Cannot use old password", 400));
   user.password = newPassword;
   await user.save();
 
