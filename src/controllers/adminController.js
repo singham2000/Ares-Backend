@@ -531,7 +531,6 @@ exports.addplan = catchAsyncError(async (req, res, next) => {
   });
 });
 
-
 exports.addService = catchAsyncError(async (req, res, next) => {
   const { name, cost, duration } = req.body;
 
@@ -704,16 +703,16 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
   const service_type = req.query.service_type;
   const date = req.query.date;
   const doctor = req.query.doctor;
+  const type = req.query.type;
   let query = {};
-
+  console.log(type);
   if (!doctor) {
     return next(new ErrorHandler("Doctor is required", 404));
   }
   if (doctor) {
-    query = {
-      ...query,
-      doctor_trainer: doctor,
-    };
+    if (type === 'doctor') {
+      query.doctor_trainer = doctor;
+    }
   }
 
   if (status) {
@@ -745,7 +744,12 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
     .exec();
   const totalRecords = await appointmentModel.countDocuments(query);
 
-  const fapp = appointments.filter((appoint) => appoint?.client?.role === 'athlete' || appoint.client === null)
+  let fapp = appointments.filter((appoint) => appoint?.client?.role === 'athlete' || appoint.client === null)
+  if (type === 'athlete') {
+    console.log('sdfsdf', doctor);
+    fapp = appointments.filter((appoint) => (appoint?.client?.role === 'athlete' && appoint?.client?.firstName === doctor))
+    console.log('sdfsdf', fapp);
+  }
   res.json({
     appointments: fapp,
     totalPages: Math.ceil(totalRecords / limit),
@@ -849,5 +853,9 @@ exports.updatePlan = catchAsyncError(async (req, res, next) => {
     })
   }
 
+
+});
+
+exports.getForms = catchAsyncError(async (req, res, next) => {
 
 });

@@ -81,7 +81,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
   if (!email || !password)
     return next(new ErrorHandler("Please enter your email and password", 400));
 
-  const user = await userModel.findOne({ email }).select("+password");
+  const user = await userModel.findOne({ email: { $regex: new RegExp(email, "i") } }).select("+password");
 
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
