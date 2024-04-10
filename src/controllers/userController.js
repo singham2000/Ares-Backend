@@ -679,23 +679,98 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('Z')[0] });
         const doc = await slotModel.find(query);
         let Calcslots = [];
-        if (dayAppointments.length > 0) {
-            console.log(dayAppointments.length);
+        if (dayAppointments.length > 2) {
             const promises = dayAppointments.map((app, index) => {
                 if (index === 0) {
-                    return calculateTimeDifference(doc[0].startTime, null, app.app_time, service_type);
+                    calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
+                        if (data.length > 0) {
+                            console.log("logger", data.length);
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                    });
                 } else if (index + 1 === dayAppointments.length) {
-                    return calculateTimeDifference(app.app_time, app.service_type, doc[0].startTime, service_type);
+                    calculateTimeDifference(app.app_time, app.service_type, doc[0].startTime, service_type).then((data) => {
+                        if (data.length > 0) {
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                        Calcslots = Calcslots.filter((slot) => slot !== undefined);
+                        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
+                        return res.status(200).json({ slots: slots });
+                    });
                 } else {
-                    return calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].app_time, service_type);
+                    calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].startTime, service_type).then((data) => {
+                        if (data.length > 0) {
+                            console.log("logger", data.length);
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                    });
                 }
             });
             Calcslots = await Promise.all(promises);
-        } else {
-            Calcslots = await calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type);
+        } if (dayAppointments.length === 2) {
+            const promises = dayAppointments.map((app, index) => {
+                if (index === 0) {
+                    calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
+                        if (data.length > 0) {
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                    });
+                } else if (index + 1 === dayAppointments.length) {
+                    calculateTimeDifference(dayAppointments[index - 1].end_time, null, app.app_time, service_type).then((data) => {
+                        if (data.length > 0) {
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                    });
+
+                    calculateTimeDifference(app.end_time, null, doc[0].endTime, service_type).then((data) => {
+                        if (data.length > 0) {
+                            data.map((slot) => (
+                                Calcslots.push(slot)
+                            ))
+                        }
+                        Calcslots = Calcslots.filter((slot) => slot !== undefined);
+                        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
+                        return res.status(200).json({ slots: slots });
+                    });
+                }
+            });
+            Calcslots = await Promise.all(promises);
+        } if (dayAppointments.length === 1) {
+            const promises = dayAppointments.map((app, index) => {
+                calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
+                    data.map((slot) => (
+                        Calcslots.push(slot)
+                    ))
+                });
+                calculateTimeDifference(app.app_time, app.service_type, doc[0].endTime, service_type).then((data) => {
+                    data.map((slot) => (
+                        Calcslots.push(slot)
+                    ));
+                    slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
+                    return res.status(200).json({ slots: slots });
+                });
+            });
+            await Promise.all(promises);
+        } if (dayAppointments.length === 0) {
+            calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type).then((data) => {
+                data.map((slot) => (
+                    Calcslots.push(slot)
+                ));
+                slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
+                return res.status(200).json({ slots: slots });
+            });
         }
-        slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
-        return res.status(200).json({ slots: slots });
+        return
     }
     if (!doctor && !date) {
         slots = await slotModel.find().select('date address');
@@ -709,7 +784,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         });
     }
 });
-
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1
