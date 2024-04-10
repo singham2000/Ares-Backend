@@ -883,6 +883,18 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
     });
     const sortedDates = Object.keys(groupedAppointments).sort();
     const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
+
+    let appointmentsPopulated = [];
+    for (const element of sortedAppointments[0].appointments) {
+        const client = await userModel.findById(new mongoose.Types.ObjectId(element.client));
+        let appointment = {
+            ...element
+        };
+        appointment.client = client;
+        appointmentsPopulated.push(appointment);
+    }
+    sortedAppointments[0].appointments=appointmentsPopulated;
+
     res.status(200).json({
         success: true,
         appointments: sortedAppointments

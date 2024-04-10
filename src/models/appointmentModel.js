@@ -10,6 +10,8 @@ const appointmentServiceEnum = [
 const paymentStatus = ["paid", "pending", "failed"];
 const appointmentStatus = ["completed", "upcoming", "cancelled"];
 
+
+
 const appointmentSchema = new mongoose.Schema(
   {
     appointment_id: {
@@ -65,15 +67,9 @@ const appointmentSchema = new mongoose.Schema(
 );
 
 appointmentSchema.pre('find', async function (next) {
-    this.populate('client');
+
+  this.populate('client');
   next();
 });
-
-appointmentSchema.pre('aggregate', async function (next) {
-  this.populate('client');
-next();
-});
-
-
 
 module.exports = mongoose.model("appointment", appointmentSchema);
