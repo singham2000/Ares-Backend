@@ -176,7 +176,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     if (!email || !password)
         return next(new ErrorHandler("Please enter your email and password", 400));
 
-        const user = await userModel.findOne({ email: { $regex: new RegExp(email, "i") }, role: 'doctor' }).select("+password");
+    const user = await userModel.findOne({ email: { $regex: new RegExp(email, "i") }, role: 'doctor' }).select("+password");
 
     if (!user) {
         return next(new ErrorHandler("Invalid email or password", 401));
@@ -285,6 +285,9 @@ exports.checkClient = catchAsyncError(async (req, res, next) => {
     let user = await userModel.findOne({ email });
     if (!user || user.role === 'admin' || user.role === 'doctor')
         return next(new ErrorHandler("Athlete does not exists with this email", 400));
+    if (user.isActive === false) {
+        return next(new ErrorHandler("Athlete is inactive with this email", 400));
+    }
 
     res.status(200).json({
         success: true,
