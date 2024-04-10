@@ -29,6 +29,8 @@ const {
   createDrillForm,
   getPlan,
   updatePlan,
+  getForms,
+  delSlot
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -57,9 +59,11 @@ router
   .put(auth, isAdmin, updatePlan)
   .get(auth, isAdmin, getPlan)
 
-router.delete("/delete_user", auth, isAdmin, delUser);
+router.delete("/delete_user", auth, delUser);
+router.delete("/delete_slot", auth, delSlot);
 
 router.get("/make_active_user", auth, isAdmin, activateUser);
+router.get("/get_all_form", auth, isAdmin, getForms);
 router.get("/make_active_clinic", auth, isAdmin, activateClinic);
 router.get("/get_bookings_by_doc", auth, isAdmin, getBookingsByDoctor);
 router.get("/get_all_doctor", auth, isAdmin, getAllDoc);

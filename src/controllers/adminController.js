@@ -22,6 +22,10 @@ const PlanModel = require("../models/planModel");
 const EvalForm = require("../models/FormModel");
 const DrillModel = require("../models/DrillModel");
 
+const EvalationModel = require("../models/EvaluationForms");
+const DiagnosisForm = require("../models/DiagnosisForm");
+const PrescriptionForm = require("../models/PrescriptionForm");
+
 const sendData = (user, statusCode, res) => {
   const token = user.getJWTToken();
 
@@ -412,7 +416,8 @@ exports.addSlot = catchAsyncError(async (req, res, next) => {
 
   const availablecheck = await slotModel.find({
     date: formattedDate,
-    doctor: doctor,
+    doctor,
+    address
   });
   if (availablecheck.length > 0) {
     return next(new ErrorHandler("Already created a slot", 400));
@@ -877,4 +882,38 @@ exports.updatePlan = catchAsyncError(async (req, res, next) => {
 
 exports.getForms = catchAsyncError(async (req, res, next) => {
 
+  const appointmentId = req.query.appointmentId;
+  console.log(appointmentId);
+  if (!appointmentId) {
+    return next(new ErrorHandler(" appointmentId not received ", 404))
+  }
+
+  const evalForm = await EvalationModel.findOne({ appointmentId: appointmentId });
+  const diagForm = await DiagnosisForm.findOne({ appointmentId: appointmentId });
+  const presForm = await PrescriptionForm.findOne({ appointmentId: appointmentId });
+
+  res.status(200).json({
+    success: true,
+    evalForm,
+    diagForm,
+    presForm
+  })
+
+});
+
+exports.delSlot = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  try {
+    const deletedSlot = await slotModel.findByIdAndDelete(id);
+    if (!deletedSlot) {
+      return next(new ErrorHandler("Not found!", 404));
+    }
+    res.status(200).json({
+      success: true,
+      message: "Slot deleted successfully",
+      data: deletedSlot,
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
