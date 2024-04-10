@@ -1,13 +1,27 @@
 const mongoose = require('mongoose');
+const ServiceModel = require('../models/ServiceTypeModel');
 const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("./catchAsyncError");
 
-const timeForService = {
-    MedicalOfficeVisit: 30,
-    Consultation: 15,
-    SportsVision: 90,
-    ConcussionEval: 60,
-    null: 0
+const timeForService = async (alias) => {
+    const serviceDurations = {
+        MedicalOfficeVisit: 30,
+        Consultation: 15,
+        SportsVision: 90,
+        ConcussionEval: 60,
+        null: 0
+    };
+
+    let time = serviceDurations[alias];
+
+    if (typeof time === 'undefined') {
+        const service = await ServiceModel.findOne({ alias }).select('+duration');
+        if (service) {
+            time = service.duration;
+        }
+    }
+
+    return time || 0;
 };
 
 const convertTo24HourFormat = (time12Hour) => {
@@ -28,7 +42,7 @@ const convertTo24HourFormat = (time12Hour) => {
 };
 
 const timeValidate = (service_type, validateTo, inputTime) => {
-    let time = timeForService[service_type];
+    let time = timeForService(service_type);
     const input = new Date(`2024-02-05T${convertTo24HourFormat(inputTime)}`);
     const target = new Date(`2024-02-05T${convertTo24HourFormat(validateTo)}`);
     const timeDifference = Math.abs(input.getTime() - target.getTime());
@@ -46,9 +60,8 @@ const sendData = (user, statusCode, res) => {
     });
 };
 
-const calculateTimeDifference = (time1, serviceType, time2, duration) => {
-
-    const [hours1, minutes1] = addDuration(convertTo24HourFormat(time1), timeForService[serviceType]).split(':').map(Number);
+const calculateTimeDifference = async (time1, serviceType, time2, duration) => {
+    const [hours1, minutes1] = addDuration(convertTo24HourFormat(time1), await timeForService(serviceType)).split(':').map(Number);
     const [hours2, minutes2] = convertTo24HourFormat(time2).split(':').map(Number);
 
     const totalMinutes1 = hours1 * 60 + minutes1;
@@ -56,12 +69,12 @@ const calculateTimeDifference = (time1, serviceType, time2, duration) => {
 
     const differenceInMinutes = Math.abs(totalMinutes2 - totalMinutes1);
 
-    const piecesCount = Math.ceil(differenceInMinutes / timeForService[duration]);
+    const piecesCount = Math.ceil(differenceInMinutes / await timeForService(duration));
 
     const timeDiffInPieces = [];
 
     for (let i = 0; i < piecesCount; i++) {
-        const currentMinutes = totalMinutes1 + i * timeForService[duration];
+        const currentMinutes = totalMinutes1 + i * await timeForService(duration);
         const hours = Math.floor(currentMinutes / 60) % 24;
         const minutes = currentMinutes % 60;
         const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -106,4 +119,4 @@ const createNotification = catchAsyncError(async (title, text, user) => {
     }
 });
 
-module.exports = { addDuration, createArrayOfPairs, calculateTimeDifference, sendData, timeValidate, createNotification }
+module.exports = { addDuration, timeForService, createArrayOfPairs, calculateTimeDifference, sendData, timeValidate, createNotification }

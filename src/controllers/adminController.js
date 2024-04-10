@@ -375,6 +375,25 @@ exports.getAllClinics = catchAsyncError(async (req, res) => {
 exports.addSlot = catchAsyncError(async (req, res, next) => {
   let { startDate, endDate, doctor, address, startTime, endTime } = req.body;
   let cdate = startDate.split('/')[0].length;
+
+  let stimeF = startTime.split(':')[0].length;
+  let stimeS = startTime.split(':')[1].length;
+
+  let etimeF = endTime.split(':')[0].length;
+  let etimeS = endTime.split(':')[1].length;
+
+  if (stimeF === 1) {
+    startTime = `0${startTime.split(':')[0]}:${startTime.split(':')[1]}`;
+  }
+  if (stimeS === 1) {
+    startTime = `${startTime.split(':')[0]}:0${startTime.split(':')[1]}`;
+  }
+  if (etimeF === 1) {
+    endTime = `0${endTime.split(':')[0]}:${endTime.split(':')[1]}`;
+  }
+  if (etimeS === 1) {
+    endTime = `${endTime.split(':')[0]}:0${endTime.split(':')[1]}`;
+  }
   if (cdate === 1) {
     startDate = `0${startDate}`;
     endDate = `0${endDate}`;

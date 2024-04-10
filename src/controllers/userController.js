@@ -17,7 +17,7 @@ const PrescriptionsForm = require("../models/PrescriptionForm.js");
 const DiagnosisForm = require('../models/DiagnosisForm.js');
 const DrillForm = require('../models/DrillFormModel.js');
 const DrillFormModel = require("../models/DrillModel.js");
-const { createNotification } = require('../utils/functions');
+const { createNotification, timeForService } = require('../utils/functions');
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -411,7 +411,7 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
     const searchQuery = req.query.searchQuery;
     let appointments = [];
     const query = {
-        service_type: { $in: ["MedicalOfficeVisit", "Consultation"] },
+        service_type: { $in: ["MedicalOfficeVisit", "Consultation", 'Medical/OfficeVisit', 'ConsultationCall'] },
     };
     if (service_type) {
         query.service_type = { $in: [service_type] }
@@ -476,7 +476,7 @@ exports.inQueueRequests = catchAsyncError(async (req, res) => {
     if (service_type) {
         query.service_type = { $in: [service_type] }
     } else {
-        query.service_type = { $in: ['ConcussionEval', 'SportsVision'] };
+        query.service_type = { $in: ['ConcussionEval', 'SportsVision', 'Post-ConcussionEvaluation', 'SportsVisionPerformanceEvaluation'] };
     }
     if (date) {
         const startDate = new Date(date);
@@ -538,7 +538,7 @@ exports.inQueueEvaluation = catchAsyncError(async (req, res) => {
     if (service_type) {
         query.service_type = { $in: [service_type] }
     } else {
-        query.service_type = { $nin: ['MedicalOfficeVisit', 'TrainingSession'] }
+        query.service_type = { $nin: ['MedicalOfficeVisit', 'TrainingSession', "Medical/OfficeVisit", 'AddTrainingSessions'] }
     }
     if (date) {
         const startDate = new Date(date);
@@ -676,21 +676,23 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         query.doctor = doctor;
     }
     if (date && doctor && service_type) {
-        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('T')[0], location });
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('Z')[0] });
         const doc = await slotModel.find(query);
         let Calcslots = [];
-        if (dayAppointments.length > 1) {
-            dayAppointments.map((app, index) => {
+        if (dayAppointments.length > 0) {
+            console.log(dayAppointments.length);
+            const promises = dayAppointments.map((app, index) => {
                 if (index === 0) {
-                    Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, app.app_time, service_type)];
+                    return calculateTimeDifference(doc[0].startTime, null, app.app_time, service_type);
                 } else if (index + 1 === dayAppointments.length) {
-                    Calcslots = [...Calcslots, ...calculateTimeDifference(app.app_time, app.service_type, doc[0].startTime, service_type)];
+                    return calculateTimeDifference(app.app_time, app.service_type, doc[0].startTime, service_type);
                 } else {
-                    Calcslots = [...Calcslots, ...calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].app_time, service_type)]
+                    return calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].app_time, service_type);
                 }
-            })
+            });
+            Calcslots = await Promise.all(promises);
         } else {
-            Calcslots = [...Calcslots, ...calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type)]
+            Calcslots = await calculateTimeDifference(doc[0].startTime, null, doc[0].endTime, service_type);
         }
         slots = Calcslots.map((slot, index) => ([slot, Calcslots[index + 1] == null ? doc[0].endTime : Calcslots[index + 1]]));
         return res.status(200).json({ slots: slots });
@@ -707,6 +709,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         });
     }
 });
+
 
 exports.getAllDoc = catchAsyncError(async (req, res) => {
     const page = parseInt(req.query.page_no) || 1
@@ -893,7 +896,7 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         appointment.client = client;
         appointmentsPopulated.push(appointment);
     }
-    sortedAppointments[0].appointments=appointmentsPopulated;
+    sortedAppointments[0].appointments = appointmentsPopulated;
 
     res.status(200).json({
         success: true,
@@ -950,12 +953,13 @@ exports.getEvaluation = catchAsyncError(async (req, res, next) => {
 });
 
 exports.completedReq = catchAsyncError(async (req, res) => {
+
     const { service_status, payment_status, date } = req.query;
     const page = parseInt(req.query.page_no) || 1;
     const limit = parseInt(req.query.per_page_count) || 10;
     const searchQuery = req.query.searchQuery;
     const query = {};
-    query.service_type = { $in: ['ConcussionEval', 'SportsVision'] };
+    query.service_type = { $in: ['ConcussionEval', 'SportsVision', 'Post-ConcussionEvaluation', 'SportsVisionPerformanceEvaluation'] };
     query.status = 'paid';
     if (service_status) {
         query.service_status = service_status;
