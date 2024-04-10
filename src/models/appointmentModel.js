@@ -64,12 +64,15 @@ const appointmentSchema = new mongoose.Schema(
   }
 );
 
-appointmentSchema.pre(['find', 'aggregate'], async function (next) {
-  await this.populate('client').execPopulate();
+appointmentSchema.pre('find', async function (next) {
+    this.populate('client');
   next();
 });
 
-
+appointmentSchema.pre('aggregate', async function (next) {
+  this.populate('client');
+next();
+});
 
 
 
