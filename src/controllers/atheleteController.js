@@ -217,19 +217,19 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
-
+  console.log(userId);
   const doctors = await userModel.find({ role: 'doctor' });
   req.userId = userId;
   let sortedAppointments = [];
+
   const appointments = await appointmentModel.find({
     $or: [
-      { "client._id": new ObjectId(userId), query },
-      { client: new ObjectId(userId), query }
+      { "client._id": new ObjectId(userId), ...query },
+      { "client": userId, ...query }
     ]
   }).sort({ createdAt: 'desc' })
     .skip((page - 1) * limit)
     .limit(limit)
-    .select("-client");
   appointments.map((app) => {
     let appoint = {
       ...app._doc,

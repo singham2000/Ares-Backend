@@ -527,7 +527,7 @@ exports.editDoc = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("User does not exists", 400));
 
   if (fullname) user.fullname = fullname;
- 
+
   await user.save();
   sendData(user, 200, res);
 });
@@ -729,7 +729,6 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
   const doctor = req.query.doctor;
   const type = req.query.type;
   let query = {};
-  console.log(type);
   if (!doctor) {
     return next(new ErrorHandler("Doctor is required", 404));
   }
@@ -770,9 +769,7 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
 
   let fapp = appointments.filter((appoint) => appoint?.client?.role === 'athlete' || appoint.client === null)
   if (type === 'athlete') {
-    console.log('sdfsdf', doctor);
     fapp = appointments.filter((appoint) => (appoint?.client?.role === 'athlete' && appoint?.client?.firstName === doctor))
-    console.log('sdfsdf', fapp);
   }
   res.json({
     appointments: fapp,
@@ -783,7 +780,6 @@ exports.getBookingsByDoctor = catchAsyncError(async (req, res, next) => {
 
 exports.fetchForm = catchAsyncError(async (req, res, next) => {
   const name = req.query.name;
-  console.log(name);
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ success: false, message: "Invalid input" });
   }
@@ -878,6 +874,20 @@ exports.updatePlan = catchAsyncError(async (req, res, next) => {
   }
 
 
+});
+
+exports.updateUser = catchAsyncError(async (req, res, next) => {
+  const id = req.query.id;
+  const formdata = req.body;
+  const user = await userModel.findByIdAndUpdate(id, formdata);
+  if (!user) {
+    return next(new ErrorHandler("Plan not found or updated", 400));
+  } else {
+    res.status(200).json({
+      success: true,
+      user
+    })
+  }
 });
 
 exports.getForms = catchAsyncError(async (req, res, next) => {

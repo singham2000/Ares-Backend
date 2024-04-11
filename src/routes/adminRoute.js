@@ -30,7 +30,8 @@ const {
   getPlan,
   updatePlan,
   getForms,
-  delSlot
+  delSlot,
+  updateUser
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -59,8 +60,8 @@ router
   .put(auth, isAdmin, updatePlan)
   .get(auth, isAdmin, getPlan)
 
-router.delete("/delete_user", auth, delUser);
-router.delete("/delete_slot", auth, delSlot);
+router.delete("/delete_user", auth, isAdmin, delUser);
+router.delete("/delete_slot", auth, isAdmin, delSlot);
 
 router.get("/make_active_user", auth, isAdmin, activateUser);
 router.get("/get_all_form", auth, isAdmin, getForms);
@@ -73,5 +74,6 @@ router.get("/get_all_users", auth, isAdmin, getAllUsers);
 
 router.delete("/delete_doc", auth, isAdmin, delDoc);
 router.put("/edit_doc", auth, isAdmin, editDoc);
+router.put('/update_user', auth, isAdmin, updateUser);
 
 module.exports = router;
