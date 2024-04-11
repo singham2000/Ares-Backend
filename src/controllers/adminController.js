@@ -520,14 +520,14 @@ exports.delUser = catchAsyncError(async (req, res, next) => {
 });
 
 exports.editDoc = catchAsyncError(async (req, res, next) => {
-  const { fullname, email } = req.body;
+  const formdata = req.body.formdata;
   const { id } = req.query;
   let user = await userModel.findById(id);
-  if (!user || user.role != "doctor")
-    return next(new ErrorHandler("User does not exists as Doctor", 400));
+  if (!user)
+    return next(new ErrorHandler("User does not exists", 400));
 
   if (fullname) user.fullname = fullname;
-  if (email) user.email = email;
+ 
   await user.save();
   sendData(user, 200, res);
 });

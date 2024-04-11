@@ -128,7 +128,7 @@ exports.sendForgotPasswordCode = catchAsyncError(async (req, res, next) => {
     const { email } = req.body;
     const user = await userModel.findOne({ email });
 
-    if (!user) return next(new ErrorHandler("User Not Found.", 404));
+    if (!user || user.role !== 'doctor') return next(new ErrorHandler("User Not Found.", 404));
 
     const code = generateCode(6);
 
@@ -912,6 +912,8 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
+    const searchQuery = req.query.searchQuery;
+    console.log("helllo");
     const appointmentsByDate = await appointmentModel.aggregate([
         {
             $addFields: {
@@ -962,15 +964,17 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
     const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
 
     let appointmentsPopulated = [];
-    for (const element of sortedAppointments[0].appointments) {
-        const client = await userModel.findById(new mongoose.Types.ObjectId(element.client));
-        let appointment = {
-            ...element
-        };
-        appointment.client = client;
-        appointmentsPopulated.push(appointment);
+    for (let index = 0; index < sortedAppointments.length; index++) {
+        for (const element of sortedAppointments[index].appointments) {
+            const client = await userModel.findById(new mongoose.Types.ObjectId(element.client));
+            let appointment = {
+                ...element
+            };
+            appointment.client = client;
+            appointmentsPopulated.push(appointment);
+        }
+        sortedAppointments[index].appointments = appointmentsPopulated;
     }
-    sortedAppointments[0].appointments = appointmentsPopulated;
 
     res.status(200).json({
         success: true,
