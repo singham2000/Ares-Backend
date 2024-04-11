@@ -913,7 +913,6 @@ exports.submitDiagnosis = catchAsyncError(async (req, res, next) => {
 
 exports.getAllAppointments = catchAsyncError(async (req, res) => {
     const searchQuery = req.query.searchQuery;
-    console.log("helllo");
     const appointmentsByDate = await appointmentModel.aggregate([
         {
             $addFields: {
@@ -962,9 +961,6 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
     });
     const sortedDates = Object.keys(groupedAppointments).sort();
     const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
-
-
-    console.log(sortedAppointments);
     for (let index = 0; index < sortedAppointments.length; index++) {
         let appointmentsPopulated = [];
         for (const element of sortedAppointments[index].appointments) {
@@ -977,7 +973,6 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         }
         sortedAppointments[index].appointments = appointmentsPopulated;
     }
-    console.log(sortedAppointments);
     res.status(200).json({
         success: true,
         appointments: sortedAppointments

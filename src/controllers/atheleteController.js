@@ -50,12 +50,12 @@ exports.register = catchAsyncError(async (req, res, next) => {
     return next(
       new ErrorHandler("Password should have minimum 8 characters", 400)
     );
-  const result = await s3Uploadv2(file);
-  const location = result.Location && result.Location;
+  // const result = await s3Uploadv2(file);
+  // const location = result.Location && result.Location;
   user = await userModel.create({
     firstName,
     lastName,
-    profilePic: location,
+    profilePic: 'picture',
     suffix,
     email,
     city,
