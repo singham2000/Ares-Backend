@@ -22,7 +22,6 @@ const appointmentSchema = new mongoose.Schema(
     service_type: {
       type: String,
       required: true,
-      enum: appointmentServiceEnum,
     },
     client: {
       type: mongoose.Schema.Types.Mixed,
