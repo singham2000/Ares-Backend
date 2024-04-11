@@ -427,13 +427,16 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
 
     if (searchQuery) {
         const regex = new RegExp(`^${searchQuery}`, 'i');
-        query.$or = [
+        const q = {};
+        q.$or = [
             { 'client.firstName': regex },
             { 'client.lastName': regex },
             { 'client.first_name': regex },
             { 'client.last_name': regex },
             { 'client.email': regex }
         ];
+        const user = await userModel.find(q);
+        console.log(user);
     }
 
     const appointmentsArray = await appointmentModel.find(query)
@@ -1229,7 +1232,12 @@ exports.drillUpdate = catchAsyncError(async (req, res, next) => {
         if (form) {
             const result = await DrillForm.updateOne(
                 { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
-                { $set: { "drill.$[].activities.$[elem].form": form } },
+                {
+                    $set: {
+                        "drill.$[].activities.$[elem].form": form,
+                        "drill.$[].activities.$[elem].isComplete": true
+                    }
+                },
                 { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
             );
             if (result.matchedCount > 0) {
