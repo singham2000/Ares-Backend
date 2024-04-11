@@ -963,8 +963,10 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
     const sortedDates = Object.keys(groupedAppointments).sort();
     const sortedAppointments = sortedDates.flatMap(date => groupedAppointments[date]);
 
-    let appointmentsPopulated = [];
+
+    console.log(sortedAppointments);
     for (let index = 0; index < sortedAppointments.length; index++) {
+        let appointmentsPopulated = [];
         for (const element of sortedAppointments[index].appointments) {
             const client = await userModel.findById(new mongoose.Types.ObjectId(element.client));
             let appointment = {
@@ -975,7 +977,7 @@ exports.getAllAppointments = catchAsyncError(async (req, res) => {
         }
         sortedAppointments[index].appointments = appointmentsPopulated;
     }
-
+    console.log(sortedAppointments);
     res.status(200).json({
         success: true,
         appointments: sortedAppointments
