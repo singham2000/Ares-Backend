@@ -345,7 +345,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         end_time,
         doctor_trainer,
         location,
-        status: 'pending'
+        status: (service_type === 'Consultation' || service_type === 'ConsultationCall') ? "paid" : 'pending'
     });
 
     await appointment.save();
@@ -429,14 +429,15 @@ exports.recentPrescriptions = catchAsyncError(async (req, res) => {
         const regex = new RegExp(`^${searchQuery}`, 'i');
         const q = {};
         q.$or = [
-            { 'client.firstName': regex },
-            { 'client.lastName': regex },
-            { 'client.first_name': regex },
-            { 'client.last_name': regex },
-            { 'client.email': regex }
+            { 'firstName': regex },
+            { 'lastName': regex },
+            { 'first_name': regex },
+            { 'last_name': regex },
+            { 'email': regex }
         ];
-        const user = await userModel.find(q);
-        console.log(user);
+        const users = await userModel.find(q);
+        const ids = users.map(user => user._id.toString());
+        query.client = { $in: ids };
     }
 
     const appointmentsArray = await appointmentModel.find(query)

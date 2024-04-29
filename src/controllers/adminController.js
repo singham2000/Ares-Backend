@@ -927,3 +927,52 @@ exports.delSlot = catchAsyncError(async (req, res, next) => {
     return next(error);
   }
 });
+
+exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
+  const { plan } = req.query;
+  //  complete percentage
+  console.log(plan);
+
+  if (!plan) {
+    res.status(404).json({
+      success: false,
+      message: "Send plan parameter"
+    })
+  }
+
+  // const drill = await DrillModel.find({ plan });
+  const drill = await DrillModel.aggregate([
+    {
+      $match: {
+        plan: { $regex: new RegExp(plan, 'i') },
+      }
+    },
+    {
+      $group: {
+        _id: { week: "$week" },
+        week: { $first: "$week" },
+        drills: { $push: "$$ROOT" }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalWeeks: { $sum: 1 },
+        weeks: { $push: "$$ROOT" }
+      }
+    }
+  ]);
+
+  if (!drill) {
+    res.status(404).json({
+      success: false,
+      message: "Plan not found"
+    })
+  }
+
+  res.status(200).json({
+    success: true,
+    drill: drill
+  })
+
+});
