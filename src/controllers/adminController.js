@@ -929,9 +929,7 @@ exports.delSlot = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
-  const { plan } = req.query;
-  //  complete percentage
-  console.log(plan);
+  const { plan, day, phase, week } = req.query;
 
   if (!plan) {
     res.status(404).json({
@@ -940,28 +938,28 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     })
   }
 
-  // const drill = await DrillModel.find({ plan });
-  const drill = await DrillModel.aggregate([
-    {
-      $match: {
-        plan: { $regex: new RegExp(plan, 'i') },
-      }
-    },
-    {
-      $group: {
-        _id: { week: "$week" },
-        week: { $first: "$week" },
-        drills: { $push: "$$ROOT" }
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        totalWeeks: { $sum: 1 },
-        weeks: { $push: "$$ROOT" }
-      }
-    }
-  ]);
+  const drill = await DrillModel.find({ plan, week, day, phase });
+  // const drill = await DrillModel.aggregate([
+  //   {
+  //     $match: {
+  //       plan: { $regex: new RegExp(plan, 'i') },
+  //     }
+  //   },
+  //   {
+  //     $group: {
+  //       _id: { week: "$week" },
+  //       week: { $first: "$week" },
+  //       drills: { $push: "$$ROOT" }
+  //     }
+  //   },
+  //   {
+  //     $group: {
+  //       _id: null,
+  //       totalWeeks: { $sum: 1 },
+  //       weeks: { $push: "$$ROOT" }
+  //     }
+  //   }
+  // ]);
 
   if (!drill) {
     res.status(404).json({
