@@ -8,6 +8,8 @@ const mongoose = require('mongoose');
 const { Types: { ObjectId } } = require('mongoose');
 const generateCode = require("../utils/generateCode");
 const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
+const transactionModel = require('../models/transactionModel');
+const { CloudWatch } = require("aws-sdk");
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
@@ -245,6 +247,22 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
     success: true,
     sortedAppointments
   });
+});
+
+exports.getTransactions = catchAsyncError(async (req, res, next) => {
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
+
+  const transactions = await transactionModel.find({ clientId: new mongoose.Types.ObjectId(userId) });
+
+  res.status(200).json({
+    success: true,
+    message: 'Fetched transactions',
+    transactions: transactions
+  });
+
 });
 
 // ==========================APPOINTMENT STUFF =============================================>

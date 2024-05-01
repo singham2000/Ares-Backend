@@ -18,6 +18,7 @@ const DiagnosisForm = require('../models/DiagnosisForm.js');
 const DrillForm = require('../models/DrillFormModel.js');
 const DrillFormModel = require("../models/DrillModel.js");
 const { createNotification, timeForService } = require('../utils/functions');
+const transactionModel = require("../models/transactionModel.js");
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
@@ -336,6 +337,13 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     // }
     // if (appointmentOnDate)
     //     return next(new ErrorHandler("Another Appointment is overlapping", 400));
+    console.log({
+        doctor: doctor_trainer,
+        service_type,
+        date: app_date,
+        payment_status: "pending",
+        clientId: client_id
+    });
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
         client: client_id,
@@ -348,7 +356,17 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         status: (service_type === 'Consultation' || service_type === 'ConsultationCall') ? "paid" : 'pending'
     });
 
+    const transaction = await transactionModel.create({
+        doctor: doctor_trainer,
+        service_type,
+        date: app_date,
+        payment_status: "pending",
+        clientId: client_id
+    });
+
+
     await appointment.save();
+    await transaction.save();
 
     res.status(200).json({
         success: true,

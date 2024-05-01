@@ -950,3 +950,8 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
   })
 
 });
+
+exports.getClinicStatus = catchAsyncError(async (req, res, next) => {
+  const { date, clinicName } = req.query;
+  
+});
