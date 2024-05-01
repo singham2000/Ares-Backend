@@ -815,7 +815,7 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
 
 exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   const formdata = req.body.formdata;
-
+  const file = req.files;
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
@@ -953,5 +953,5 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
 exports.getClinicStatus = catchAsyncError(async (req, res, next) => {
   const { date, clinicName } = req.query;
-  
+
 });

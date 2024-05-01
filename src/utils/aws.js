@@ -1,6 +1,7 @@
 const S3 = require("aws-sdk/clients/s3");
 require("aws-sdk/lib/maintenance_mode_message").suppress = true;
-
+const multer = require("multer");
+const storage = multer.memoryStorage();
 exports.s3Uploadv2 = async (file, id) => {
     const s3 = new S3({
         accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -21,7 +22,7 @@ exports.s3Uploadv2 = async (file, id) => {
     if (file.mimetype.split("/")[0] === "image") {
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `uploads/profiles/${Date.now().toString()}-${file.originalname}`,
+            Key: `uploads/images/${Date.now().toString()}-${file.originalname}`,
             Body: file.buffer,
         };
 
@@ -52,3 +53,11 @@ exports.s3UpdateImage = async (file, oldFile) => {
 
     return await s3.upload(params).promise();
 };
+
+exports.upload = multer({
+    storage,
+    limits: {
+        fileSize: 51006600,
+        files: 5,
+    },
+});

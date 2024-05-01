@@ -1,5 +1,6 @@
 const express = require("express");
 const { auth, isAdmin } = require("../middlewares/auth");
+const { upload } = require("../utils/aws");
 const {
   registerDoctor,
   registerAdmin,
@@ -47,7 +48,7 @@ router.post("/register_clinic", auth, isAdmin, registerClinic);
 router.post("/set_pres_form", auth, isAdmin, prescriptionFormMake);
 router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
-router.post('/set_drillform_form', auth, isAdmin, createDrillForm);
+router.post('/set_drillform_form', upload.any(), auth, isAdmin, createDrillForm);
 
 router
   .route("/service")
@@ -61,7 +62,7 @@ router
   .put(auth, isAdmin, updatePlan)
   .get(auth, isAdmin, getPlan)
 
-router.route('/drill').get( getDrillDetails)
+router.route('/drill').get(getDrillDetails)
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 router.delete("/delete_slot", auth, isAdmin, delSlot);
