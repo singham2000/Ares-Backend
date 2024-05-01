@@ -69,15 +69,12 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     zip,
     state,
     email,
-    phone,
-    password,
-  } = req.body;
+    phone } = req.body;
 
   if (
     !firstName ||
     !lastName ||
     !email ||
-    !password ||
     !startTime ||
     !endTime
   ) {
@@ -107,7 +104,7 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     state,
     email,
     phone,
-    password,
+    password: `${firstName}${phone}`,
     role: "doctor",
   });
   newAccount(email, `${firstName}${lastName}`, password);
@@ -939,27 +936,6 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
   }
 
   const drill = await DrillModel.find({ plan, week, day, phase });
-  // const drill = await DrillModel.aggregate([
-  //   {
-  //     $match: {
-  //       plan: { $regex: new RegExp(plan, 'i') },
-  //     }
-  //   },
-  //   {
-  //     $group: {
-  //       _id: { week: "$week" },
-  //       week: { $first: "$week" },
-  //       drills: { $push: "$$ROOT" }
-  //     }
-  //   },
-  //   {
-  //     $group: {
-  //       _id: null,
-  //       totalWeeks: { $sum: 1 },
-  //       weeks: { $push: "$$ROOT" }
-  //     }
-  //   }
-  // ]);
 
   if (!drill) {
     res.status(404).json({
