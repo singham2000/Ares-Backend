@@ -35,7 +35,8 @@ const {
   updateUser,
   getDrillDetails,
   delClinic,
-  updateClinic
+  updateClinic,
+  getClinicStatus
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -77,6 +78,7 @@ router.get("/get_all_doctor", auth, isAdmin, getAllDoc);
 router.get("/get_all_clinics", auth, isAdmin, getAllClinics);
 router.get("/get_all_slots", auth, isAdmin, getAllSlots);
 router.get("/get_all_users", auth, isAdmin, getAllUsers);
+router.get('/clinic_status', auth, isAdmin, getClinicStatus);
 
 router.delete("/delete_doc", auth, isAdmin, delDoc);
 router.delete("/delete_clinic", auth, isAdmin, delClinic);

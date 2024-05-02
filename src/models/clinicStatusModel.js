@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const statusSchema = mongoose.Schema({
     date: {
-        type: Date,
+        type: String,
         required: true
     },
     clinicName: {

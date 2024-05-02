@@ -25,7 +25,11 @@ const DrillModel = require("../models/DrillModel");
 const EvalationModel = require("../models/EvaluationForms");
 const DiagnosisForm = require("../models/DiagnosisForm");
 const PrescriptionForm = require("../models/PrescriptionForm");
+const ClinicStatusModel = require("../models/clinicStatusModel");
+
 const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
+
+const mongoose = require("mongoose");
 
 const sendData = (user, statusCode, res) => {
   const token = user.getJWTToken();
@@ -718,15 +722,17 @@ exports.activateUser = catchAsyncError(async (req, res, next) => {
 });
 
 exports.activateClinic = catchAsyncError(async (req, res, next) => {
-  const { id } = req.query;
+  const { id, date } = req.query;
+
   try {
-    const activateClinic = await clinicModel.findById(id);
-    activateClinic.isActive = !activateClinic.isActive;
+    const clinic = await clinicModel.findById(id);
+    const activateClinic = await ClinicStatusModel.findOne({ clinicName: clinic.name, date: date.split('T')[0] });
+    activateClinic.isActiveStatus = !activateClinic.isActiveStatus;
     await activateClinic.save();
     if (!activateClinic) {
       return next(new ErrorHandler("Not found!", 404));
     }
-    const clinics = await clinicModel.find();
+    const clinics = await ClinicStatusModel.find({ date: date.split('T')[0] });
 
     res.status(200).json({
       success: true,
@@ -975,15 +981,40 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getClinicStatus = catchAsyncError(async (req, res, next) => {
-  const { date, clinicName } = req.query;
+  const { date } = req.query;
+  let dateFormatted = date.split("T")[0];
+  let status;
+  if (!date) {
+    return next(new ErrorHandler("Date parameter is required", 404));
+  }
+  status = await ClinicStatusModel.find({ date: dateFormatted });
+  if (status.length === 0) {
+    const clinics = await clinicModel.find();
+    clinics.map((clinic) => (
+      ClinicStatusModel.create({
+        date: dateFormatted,
+        clinicName: clinic.name,
+        isActiveStatus: true
+      })
+    ));
+    status = await ClinicStatusModel.find({ date: dateFormatted });
+    res.status(200).json({
+      success: true,
+      status
+    })
+  } else {
+    res.status(200).json({
+      success: true,
+      status
+    })
+  }
 
 });
 
 exports.updateClinic = catchAsyncError(async (req, res, next) => {
   const clinicId = req.query.clinicId;
   const data = req.body.data;
-
-  const clinic = await PlanModel.findByIdAndUpdate(clinicId, data);
+  const clinic = await clinicModel.findByIdAndUpdate(new mongoose.Types.ObjectId(clinicId), data);
   if (!clinic) {
     return next(new ErrorHandler("Clinic not found or updated", 400));
   } else {
@@ -993,6 +1024,4 @@ exports.updateClinic = catchAsyncError(async (req, res, next) => {
       data: clinics
     })
   }
-
-
 });
