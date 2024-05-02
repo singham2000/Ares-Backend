@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
     enum: roleEnum,
     default: "athlete",
   },
+  is_online: {
+    type: Boolean,
+    default: true
+  },
   temp_code: {
     type: String,
   },

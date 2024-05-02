@@ -39,7 +39,8 @@ exports.register = catchAsyncError(async (req, res, next) => {
       !state ||
       !dob ||
       !gender ||
-      !zip,
+      !zip ||
+      !is_online ||
       !password)
   ) {
     return next(new ErrorHandler("Please enter all the fields"));
@@ -52,8 +53,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     return next(
       new ErrorHandler("Password should have minimum 8 characters", 400)
     );
-  // const result = await s3Uploadv2(file);
-  // const location = result.Location && result.Location;
+
   user = await userModel.create({
     firstName,
     lastName,
@@ -67,6 +67,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     gender,
     address,
     zip,
+    is_online,
     password,
     role: "athlete",
   });
