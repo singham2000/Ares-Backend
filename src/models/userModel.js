@@ -96,7 +96,8 @@ const userSchema = new mongoose.Schema({
   },
   is_online: {
     type: Boolean,
-    default: true
+    default: true,
+    required: true,
   },
   temp_code: {
     type: String,
