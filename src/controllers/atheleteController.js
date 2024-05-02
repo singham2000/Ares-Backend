@@ -25,6 +25,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     gender,
     address,
     zip,
+    is_online,
     password,
   } = req.body;
   const file = req.file;
