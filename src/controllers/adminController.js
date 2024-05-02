@@ -978,3 +978,21 @@ exports.getClinicStatus = catchAsyncError(async (req, res, next) => {
   const { date, clinicName } = req.query;
 
 });
+
+exports.updateClinic = catchAsyncError(async (req, res, next) => {
+  const clinicId = req.query.clinicId;
+  const data = req.body.data;
+
+  const clinic = await PlanModel.findByIdAndUpdate(clinicId, data);
+  if (!clinic) {
+    return next(new ErrorHandler("Clinic not found or updated", 400));
+  } else {
+    const clinics = await clinicModel.find();
+    res.status(200).json({
+      success: true,
+      data: clinics
+    })
+  }
+
+
+});

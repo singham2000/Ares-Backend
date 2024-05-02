@@ -34,7 +34,8 @@ const {
   delSlot,
   updateUser,
   getDrillDetails,
-  delClinic
+  delClinic,
+  updateClinic
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -81,5 +82,6 @@ router.delete("/delete_doc", auth, isAdmin, delDoc);
 router.delete("/delete_clinic", auth, isAdmin, delClinic);
 router.put("/edit_doc", auth, isAdmin, editDoc);
 router.put('/update_user', auth, isAdmin, updateUser);
+router.put('/update_clinic', auth, isAdmin, updateClinic);
 
 module.exports = router;
