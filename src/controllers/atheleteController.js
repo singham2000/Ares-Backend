@@ -28,21 +28,20 @@ exports.register = catchAsyncError(async (req, res, next) => {
     is_online,
     password,
   } = req.body;
-  const file = req.file;
+
   if (
-    (!firstName ||
-      !lastName ||
-      !suffix ||
-      !address ||
-      !email ||
-      !city ||
-      !phone ||
-      !state ||
-      !dob ||
-      !gender ||
-      !zip ||
-      !is_online ||
-      !password)
+    !firstName ||
+    !lastName ||
+    !suffix ||
+    !email ||
+    !city ||
+    !phone ||
+    !state ||
+    !dob ||
+    !gender ||
+    !address ||
+    !zip ||
+    !password
   ) {
     return next(new ErrorHandler("Please enter all the fields"));
   }
