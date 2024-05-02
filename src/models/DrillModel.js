@@ -7,8 +7,12 @@ const activity = new mongoose.Schema({
     activityName: {
         type: String
     },
-    videoLink: {
+    description: {
         type: String
+    },
+    fileLinks: {
+        type: Array,
+        of: String
     },
     form: {
         type: Array

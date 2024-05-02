@@ -25,6 +25,7 @@ const DrillModel = require("../models/DrillModel");
 const EvalationModel = require("../models/EvaluationForms");
 const DiagnosisForm = require("../models/DiagnosisForm");
 const PrescriptionForm = require("../models/PrescriptionForm");
+const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
 
 const sendData = (user, statusCode, res) => {
   const token = user.getJWTToken();
@@ -130,6 +131,7 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
     gender,
     address,
     zip,
+    is_online
   } = req.body;
 
   if (
@@ -516,6 +518,25 @@ exports.delUser = catchAsyncError(async (req, res, next) => {
   }
 });
 
+exports.delClinic = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  try {
+    const deletedClinic = await clinicModel.findByIdAndDelete(id);
+
+    if (!deletedClinic) {
+      return next(new ErrorHandler("User not found!", 404));
+    }
+    const clinics = await clinicModel.find();
+    res.status(200).json({
+      success: true,
+      message: "clinic deleted successfully",
+      data: clinics,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 exports.editDoc = catchAsyncError(async (req, res, next) => {
   const formdata = req.body.formdata;
   const { id } = req.query;
@@ -815,7 +836,7 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
 
 exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   const formdata = req.body.formdata;
-  const file = req.files;
+  const files = req.files;
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
@@ -827,6 +848,8 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   });
   if (form.length < 1)
     return next(new ErrorHandler("Already created", 404))
+
+  await s3UploadMultiv2(files)
 
   const formNew = await DrillModel.create({
     plan: formdata.plan,

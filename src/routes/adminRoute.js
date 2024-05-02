@@ -33,7 +33,8 @@ const {
   getForms,
   delSlot,
   updateUser,
-  getDrillDetails
+  getDrillDetails,
+  delClinic
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -77,6 +78,7 @@ router.get("/get_all_slots", auth, isAdmin, getAllSlots);
 router.get("/get_all_users", auth, isAdmin, getAllUsers);
 
 router.delete("/delete_doc", auth, isAdmin, delDoc);
+router.delete("/delete_clinic", auth, isAdmin, delClinic);
 router.put("/edit_doc", auth, isAdmin, editDoc);
 router.put('/update_user', auth, isAdmin, updateUser);
 
