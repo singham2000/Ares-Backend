@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 
-const activity = new mongoose.Schema({
-    day: {
-        type: Number
+const file = new mongoose.Schema({
+    link: {
+        type: String,
+        required: true
     },
+    type: {
+        type: String,
+        required: true
+    }
+})
+
+const activity = new mongoose.Schema({
     activityName: {
         type: String
     },
@@ -12,7 +20,7 @@ const activity = new mongoose.Schema({
     },
     fileLinks: {
         type: Array,
-        of: String
+        of: file
     },
     form: {
         type: Array
