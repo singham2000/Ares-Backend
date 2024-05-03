@@ -842,7 +842,6 @@ exports.saveForm = catchAsyncError(async (req, res, next) => {
 
 exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   const formdata = req.body.formdata;
-  const files = req.files;
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
@@ -854,8 +853,6 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   });
   if (form.length < 1)
     return next(new ErrorHandler("Already created", 404))
-
-  await s3UploadMultiv2(files)
 
   const formNew = await DrillModel.create({
     plan: formdata.plan,
@@ -1025,3 +1022,27 @@ exports.updateClinic = catchAsyncError(async (req, res, next) => {
     })
   }
 });
+
+exports.uploadXFile = catchAsyncError(async (req, res, next) => {
+  const Files = req.files;
+  if (!Files)
+    res.status(404).json({
+      success: false,
+      message: "No files were uploaded"
+    });
+
+  try {
+    const link = await s3Uploadv2(Files[0]);
+    res.status(200).json({
+      success: true,
+      link: link.Location
+    })
+  } catch (error) {
+    return next(new ErrorHandler(error, 400));
+  }
+});
+
+exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
+  const { plan, phase, productImages, productName, productDescription, name, address, mobile } = req.body;
+  
+})

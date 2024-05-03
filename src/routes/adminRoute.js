@@ -36,7 +36,8 @@ const {
   getDrillDetails,
   delClinic,
   updateClinic,
-  getClinicStatus
+  getClinicStatus,
+  uploadXFile
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -52,6 +53,8 @@ router.post("/set_pres_form", auth, isAdmin, prescriptionFormMake);
 router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
 router.post('/set_drillform_form', upload.any(), auth, isAdmin, createDrillForm);
+
+router.post('/upload_file', upload.any(), uploadXFile)
 
 router
   .route("/service")
