@@ -3,7 +3,7 @@ require("aws-sdk/lib/maintenance_mode_message").suppress = true;
 const multer = require("multer");
 const storage = multer.memoryStorage();
 
-exports.s3Uploadv2 = async (file, id) => {
+exports.s3Uploadv2 = async (file) => {
     const s3 = new S3({
         accessKeyId: process.env.AWS_ACCESS_KEY,
         secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -63,6 +63,31 @@ exports.s3UploadMultiv2 = async (files, id) => {
     return Promise.all(uploads);
 };
 
+exports.s3Delete = async (file) => {
+    const s3 = new S3({
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY,
+        region: process.env.AWS_BUCKET_REGION,
+    });
+
+    const key1 = file.split("/")[5];
+    const fileType = file.split("/")[4];
+    if (fileType === 'videos') {
+        const param = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `uploads/images/${key1}`,
+        };
+
+        return await s3.deleteObject(param).promise();
+    } else if (fileType === 'images') {
+        const param = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `uploads/images/${key1}`,
+        };
+
+        return await s3.deleteObject(param).promise();
+    }
+};
 
 exports.s3UpdateImage = async (file, oldFile) => {
     const s3 = new S3({

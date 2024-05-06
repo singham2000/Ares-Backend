@@ -1042,7 +1042,43 @@ exports.uploadXFile = catchAsyncError(async (req, res, next) => {
   }
 });
 
+exports.deleteXFile = catchAsyncError(async (req, res, next) => {
+  const { link } = req.query;
+});
+
 exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
-  const { plan, phase, productImages, productName, productDescription, name, address, mobile } = req.body;
-  
+  const { plan, phase, productImages, productName, productDescription, name, address, mobile, status, id } = req.body;
+
+  try {
+    const newShipment = new Shipment({
+      plan,
+      phase,
+      ClientId: mongoose.Types.ObjectId(id),
+      productImages,
+      productName,
+      productDescription,
+      shipmentStatus: {
+        status,
+        startDate,
+        endDatee
+      },
+      shippingAddress: {
+        name,
+        address,
+        mobile
+      }
+    });
+
+    await newShipment.save();
+
+    res.status(200).json({
+      success: true,
+      shipment: newShipment
+    })
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+
+
+
 })

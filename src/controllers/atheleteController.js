@@ -9,7 +9,6 @@ const { Types: { ObjectId } } = require('mongoose');
 const generateCode = require("../utils/generateCode");
 const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
-const { CloudWatch } = require("aws-sdk");
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
