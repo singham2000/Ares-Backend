@@ -38,7 +38,9 @@ const {
   updateClinic,
   getClinicStatus,
   uploadXFile,
-  shipmentDetailer
+  shipmentDetailer,
+  getShipments,
+  updateShipment
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -56,7 +58,11 @@ router.post("/add_slot", auth, isAdmin, addSlot);
 router.post('/set_drillform_form', upload.any(), auth, isAdmin, createDrillForm);
 router.post('/upload_file', upload.any(), auth, isAdmin, uploadXFile);
 
-router.route('/shipment').post(auth, isAdmin, shipmentDetailer);
+router
+  .route('/shipment')
+  .post(auth, isAdmin, shipmentDetailer)
+  .get(auth, isAdmin, getShipments)
+  .put(auth, isAdmin, updateShipment);
 
 
 router

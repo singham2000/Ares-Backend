@@ -1105,6 +1105,10 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
     const { clientId, week } = req.query;
     //  complete percentage
 
+    if (!clientId) {
+        return next(new ErrorHandler("Client ID is required", 400));
+    }
+
     const drill = await DrillForm.find({
         $or: [
             { clientId },

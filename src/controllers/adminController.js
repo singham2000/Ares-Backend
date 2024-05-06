@@ -1086,10 +1086,46 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 400));
   }
 
+});
+
+exports.getShipments = catchAsyncError(async (req, res, next) => {
+  const { plan, phase, productName, name, address, mobile, status, id } = req.query;
+  const query = {};
+
+  if (plan) query.plan = plan;
+  if (phase) query.phase = phase;
+  if (productName) query.productName = productName;
+  if (name) query.shippingAddress.name = name;
+  if (address) query.shippingAddress.address = address;
+  if (mobile) query.shippingAddress.mobile = mobile;
+  if (status) query.shipmentStatus.status = status;
+  if (id) query.ClientId = mongoose.Types.ObjectId(id);
+
+  const shipment = await ShipmentModel.find(query);
+
+  if (shipment.length === 0) {
+    return next(new ErrorHandler("No shipment found", 404));
+  }
+
+  return res.status(200).json({
+    success: true,
+    shipments: shipment
+  });
 
 
 });
 
-exports.getShipments = catchAsyncError(async (req, res, next) => {
-  const { } = req.query;
+exports.updateShipment = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  const formdata = req.body.data;
+  const shipment = await ShipmentModel.findByIdAndUpdate(new mongoose.Types.ObjectId(id), formdata);
+  if (!shipment) {
+    return next(new ErrorHandler("Shipment not found or updated", 400));
+  } else {
+    const shipment = await ShipmentModel.find();
+    res.status(200).json({
+      success: true,
+      data: shipment
+    })
+  }
 });
