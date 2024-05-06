@@ -1060,7 +1060,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
     const newShipment = await ShipmentModel.create({
       plan,
       phase,
-      ClientId:new mongoose.Types.ObjectId(id),
+      ClientId: new mongoose.Types.ObjectId(id),
       productImages,
       productName,
       productDescription,
@@ -1135,6 +1135,8 @@ exports.updateShipment = catchAsyncError(async (req, res, next) => {
 exports.updateDrill = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body.data;
+
+  console.log(id, formdata);
 
   if (!id || !formdata)
     return next(new ErrorHandler("id and formdata are required", 400));
