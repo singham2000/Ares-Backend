@@ -9,6 +9,8 @@ const { Types: { ObjectId } } = require('mongoose');
 const generateCode = require("../utils/generateCode");
 const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
+const DrillModel = require("../models/DrillModel.js");
+const DrillFormModel = require("../models/DrillFormModel.js");
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
@@ -274,8 +276,26 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
 });
 
 exports.dashboard = catchAsyncError(async (req, res, next) => {
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
+
+  const userDetails = userModel.findById(userId);
+  const drill = DrillFormModel.findOne({ clientId: new mongoose.Types.ObjectId(userId) });
+
+  Promise.all([userDetails, drill]).then((results) => {
+    return res.status(200).json({
+      success: true,
+      results
+    });
+  }).catch((err) => {
+    return next(new ErrorHandler(err, 400));
+  });
 
 });
+
+exports.shipment = catchAsyncError(async (req, res, next) => { });
 
 // ==========================APPOINTMENT STUFF =============================================>
 
