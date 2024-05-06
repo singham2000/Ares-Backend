@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
 const drillSchema = new mongoose.Schema({
-    appointmentId: {
-        type: ObjectId,
-    },
     clientId: {
         type: ObjectId,
     },

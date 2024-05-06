@@ -250,12 +250,24 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
+  const { date, service_type } = req.query;
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
+  let query = { clientId: new mongoose.Types.ObjectId(userId) };
+  if (date) {
 
-  const transactions = await transactionModel.find({ clientId: new mongoose.Types.ObjectId(userId) });
+  }
+  if (service_type) {
+    query.service_type = service_type;
+  }
+
+
+
+
+
+  const transactions = await transactionModel.find(query);
 
   res.status(200).json({
     success: true,

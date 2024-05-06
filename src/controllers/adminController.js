@@ -852,7 +852,7 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
     day: formdata.day,
     week: formdata.week
   });
-  if (form.length < 1)
+  if (form.length > 0)
     return next(new ErrorHandler("Already created", 404))
 
   const formNew = await DrillModel.create({
@@ -1088,4 +1088,8 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
 
 
 
-})
+});
+
+exports.getShipments = catchAsyncError(async (req, res, next) => {
+  const { } = req.query;
+});

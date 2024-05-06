@@ -1,12 +1,4 @@
 const mongoose = require("mongoose");
-
-const appointmentServiceEnum = [
-  "MedicalOfficeVisit",
-  "SportsVision",
-  "Consultation",
-  "TrainingSessions",
-  "ConcussionEval",
-];
 const paymentStatus = ["paid", "pending", "failed"];
 const appointmentStatus = ["completed", "upcoming", "cancelled"];
 

@@ -1102,13 +1102,13 @@ exports.completedReq = catchAsyncError(async (req, res) => {
 });
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
-    const { appointmentId, clientId, week } = req.query;
+    const { clientId, week } = req.query;
     //  complete percentage
 
     const drill = await DrillForm.find({
         $or: [
-            { appointmentId, clientId },
-            { appointmentId, clientId, "drill.week": week }
+            { clientId },
+            { clientId, "drill.week": week }
         ]
     });
     const client = await userModel.findById(clientId);
@@ -1170,7 +1170,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
     if (drill.length < 1) {
         const drillForm = await DrillForm.create({
-            appointmentId: appointmentId,
+
             clientId: clientId,
             drill: form
         })
@@ -1187,11 +1187,9 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
                 $match: {
                     $or: [
                         {
-                            appointmentId: new mongoose.Types.ObjectId(appointmentId),
                             clientId: new mongoose.Types.ObjectId(clientId)
                         },
                         {
-                            appointmentId: new mongoose.Types.ObjectId(appointmentId),
                             clientId: new mongoose.Types.ObjectId(clientId),
                         }
                     ]
