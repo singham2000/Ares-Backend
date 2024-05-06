@@ -257,15 +257,11 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   );
   let query = { clientId: new mongoose.Types.ObjectId(userId) };
   if (date) {
-
+    query.date = date;
   }
   if (service_type) {
     query.service_type = service_type;
   }
-
-
-
-
 
   const transactions = await transactionModel.find(query);
 
