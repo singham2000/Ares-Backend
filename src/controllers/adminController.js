@@ -1030,6 +1030,12 @@ exports.uploadXFile = catchAsyncError(async (req, res, next) => {
       success: false,
       message: "No files were uploaded"
     });
+  if (Files.length > 1) {
+    res.status(404).json({
+      success: false,
+      message: "More than one file is not allowed"
+    });
+  }
 
   try {
     const link = await s3Uploadv2(Files[0]);
