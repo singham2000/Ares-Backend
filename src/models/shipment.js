@@ -27,7 +27,7 @@ const shipmentSchema = new mongoose.Schema({
         required: true
     },
     shipmentStatus: {
-        status: String,
+        status: Array,
         startDate: Date,
         endDate: Date
     },
