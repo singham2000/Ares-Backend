@@ -1,5 +1,12 @@
-const { Mobile } = require('aws-sdk');
 const mongoose = require('mongoose');
+
+const ShipmentStatus = new mongoose.Schema({
+    status: {
+        type: String,
+        startDate: Date,
+        endDate: Date
+    }
+})
 
 const shipmentSchema = new mongoose.Schema({
     plan: {
@@ -27,9 +34,8 @@ const shipmentSchema = new mongoose.Schema({
         required: true
     },
     shipmentStatus: {
-        status: Array,
-        startDate: Date,
-        endDate: Date
+        type: Array,
+        of: ShipmentStatus,
     },
     shippingAddress: {
         name: String,

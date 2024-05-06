@@ -40,7 +40,8 @@ const {
   uploadXFile,
   shipmentDetailer,
   getShipments,
-  updateShipment
+  updateShipment,
+  updateDrill
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -77,7 +78,10 @@ router
   .put(auth, isAdmin, updatePlan)
   .get(auth, isAdmin, getPlan)
 
-router.route('/drill').get(getDrillDetails)
+router
+  .route('/drill')
+  .get(auth, isAdmin, getDrillDetails)
+  .put(auth, isAdmin, updateDrill)
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 router.delete("/delete_slot", auth, isAdmin, delSlot);

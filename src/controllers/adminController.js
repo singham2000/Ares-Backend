@@ -1064,11 +1064,11 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
       productImages,
       productName,
       productDescription,
-      shipmentStatus: {
+      shipmentStatus: [{
         status,
         startDate,
-        endDatee
-      },
+        endDate
+      }],
       shippingAddress: {
         name,
         address,
@@ -1089,7 +1089,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getShipments = catchAsyncError(async (req, res, next) => {
-  const { plan, phase, productName, name, address, mobile, status, id } = req.query;
+  const { plan, phase, productName, name, address, mobile, ShipmentId, clientId } = req.query;
   const query = {};
 
   if (plan) query.plan = plan;
@@ -1098,20 +1098,22 @@ exports.getShipments = catchAsyncError(async (req, res, next) => {
   if (name) query.shippingAddress.name = name;
   if (address) query.shippingAddress.address = address;
   if (mobile) query.shippingAddress.mobile = mobile;
-  if (status) query.shipmentStatus.status = status;
-  if (id) query.ClientId = mongoose.Types.ObjectId(id);
-
+  if (clientId) query.ClientId = mongoose.Types.ObjectId(clientId);
+  if (ShipmentId) {
+    const shipment = await ShipmentModel.findById(ShipmentId);
+    return res.status(200).json({
+      success: true,
+      shipment
+    });
+  }
   const shipment = await ShipmentModel.find(query);
-
   if (shipment.length === 0) {
     return next(new ErrorHandler("No shipment found", 404));
   }
-
   return res.status(200).json({
     success: true,
     shipments: shipment
   });
-
 
 });
 
@@ -1126,6 +1128,25 @@ exports.updateShipment = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: shipment
+    })
+  }
+});
+
+exports.updateDrill = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  const formdata = req.body.data;
+
+  if (!id || !formdata)
+    return next(new ErrorHandler("id and formdata are required", 400));
+
+  const drill = await DrillModel.findByIdAndUpdate(id, formdata);
+  if (!drill) {
+    return next(new ErrorHandler("Drill not found or updated", 400));
+  } else {
+    const drills = await DrillModel.find();
+    res.status(200).json({
+      success: true,
+      data: drills
     })
   }
 });
