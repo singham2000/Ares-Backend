@@ -1054,7 +1054,7 @@ exports.deleteXFile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
-  const { plan, phase, productImages, productName, productDescription, name, address, mobile, status, id } = req.body;
+  const { plan, phase, productImages, productName, productDescription, name, startDate, endDate, address, mobile, status, id } = req.body;
 
   try {
     const newShipment = await ShipmentModel.create({
@@ -1135,8 +1135,6 @@ exports.updateShipment = catchAsyncError(async (req, res, next) => {
 exports.updateDrill = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body.data;
-
-  console.log(id, formdata);
 
   if (!id || !formdata)
     return next(new ErrorHandler("id and formdata are required", 400));
