@@ -11,7 +11,7 @@ const shipmentSchema = new mongoose.Schema({
         required: true
     },
     ClientId: {
-        type: new mongoose.Types.ObjectId,
+        type: mongoose.Types.ObjectId,
     },
     productImages: {
         type: Array,
