@@ -3,8 +3,12 @@ const mongoose = require('mongoose');
 const ShipmentStatus = new mongoose.Schema({
     status: {
         type: String,
-        startDate: Date,
-        endDate: Date
+    },
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date
     }
 })
 
