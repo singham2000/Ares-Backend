@@ -1060,7 +1060,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
     const newShipment = await ShipmentModel.create({
       plan,
       phase,
-      ClientId: mongoose.Types.ObjectId(id),
+      ClientId:new mongoose.Types.ObjectId(id),
       productImages,
       productName,
       productDescription,

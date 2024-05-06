@@ -273,6 +273,10 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
 
 });
 
+exports.dashboard = catchAsyncError(async (req, res, next) => {
+
+});
+
 // ==========================APPOINTMENT STUFF =============================================>
 
 exports.getUpcomingAppointments = catchAsyncError(async (req, res, next) => {
