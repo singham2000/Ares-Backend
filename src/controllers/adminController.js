@@ -26,6 +26,7 @@ const EvalationModel = require("../models/EvaluationForms");
 const DiagnosisForm = require("../models/DiagnosisForm");
 const PrescriptionForm = require("../models/PrescriptionForm");
 const ClinicStatusModel = require("../models/clinicStatusModel");
+const ShipmentModel = require("../models/shipment");
 
 const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
 
@@ -1056,7 +1057,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
   const { plan, phase, productImages, productName, productDescription, name, address, mobile, status, id } = req.body;
 
   try {
-    const newShipment = new Shipment({
+    const newShipment = await ShipmentModel.create({
       plan,
       phase,
       ClientId: mongoose.Types.ObjectId(id),
