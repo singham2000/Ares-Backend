@@ -349,7 +349,7 @@ exports.shipment = catchAsyncError(async (req, res, next) => {
 
   const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) });
 
-  if (shipment.length === 0) {
+  if (!shipment) {
     return next(new ErrorHandler("No shipment found", 400));
   }
   return res.status(200).json({
