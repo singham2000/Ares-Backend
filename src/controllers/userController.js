@@ -1174,7 +1174,6 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
     if (drill.length < 1) {
         const drillForm = await DrillForm.create({
-
             clientId: clientId,
             drill: form
         })

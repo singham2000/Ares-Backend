@@ -9,7 +9,6 @@ const { Types: { ObjectId } } = require('mongoose');
 const generateCode = require("../utils/generateCode");
 const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
-const DrillModel = require("../models/DrillModel.js");
 const DrillFormModel = require("../models/DrillFormModel.js");
 
 
@@ -281,21 +280,84 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     process.env.JWT_SECRET
   );
 
-  const userDetails = userModel.findById(userId);
-  const drill = DrillFormModel.findOne({ clientId: new mongoose.Types.ObjectId(userId) });
+  console.log(userId);
 
-  Promise.all([userDetails, drill]).then((results) => {
-    return res.status(200).json({
-      success: true,
-      results
+  const week = 2;
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        $or: [
+          {
+            clientId: new mongoose.Types.ObjectId(userId)
+          },
+          {
+            clientId: new mongoose.Types.ObjectId(userId),
+          }
+        ]
+      }
+    },
+    {
+      $unwind: "$drill"
+    },
+    {
+      $match: week ? { "drill.week": week.toString() } : {}
+    },
+    {
+      $group: {
+        _id: "$drill.week",
+        drills: { $push: "$drill" },
+        totalActivities: { $push: "$drill.activities.isComplete" },
+        totalActivities: { $push: { $cond: { if: "$drill.activities.isComplete", then: "$drill.activities.isComplete", else: false } } }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalWeeks: { $sum: 1 },
+        totalActivities: { $push: "$totalActivities" },
+        weeks: { $push: { week: "$_id", drills: "$drills" } }
+      }
+    }
+  ];
+
+
+  const drill = await DrillFormModel.aggregate(aggregationPipeline);
+
+  const runner = (drill) => {
+    const [data] = drill[0].totalActivities;
+    let totalActivitiesdone = 0;
+    let totalActivities = 0;
+    data.forEach((data) => {
+      data.forEach((list) => {
+        ++totalActivities;
+        list && ++totalActivitiesdone;
+      })
     });
-  }).catch((err) => {
-    return next(new ErrorHandler(err, 400));
+    return {
+      totalDrills: totalActivities,
+      completedDrills: totalActivitiesdone
+    }
+  }
+  console.log(runner(drill));
+  const userDetails = await userModel.findById(userId);
+  console.log();
+  return res.status(200).json({
+    success: true,
+    userDetails,
+    drillDetails: runner(drill)
   });
+
 
 });
 
-exports.shipment = catchAsyncError(async (req, res, next) => { });
+exports.shipment = catchAsyncError(async (req, res, next) => {
+  const { userId } = jwt.verify(
+    req.headers.authorization.split(" ")[1],
+    process.env.JWT_SECRET
+  );
+
+});
 
 // ==========================APPOINTMENT STUFF =============================================>
 
