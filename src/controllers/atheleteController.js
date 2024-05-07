@@ -10,6 +10,7 @@ const generateCode = require("../utils/generateCode");
 const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
 const DrillFormModel = require("../models/DrillFormModel.js");
+const ShipmentModel = require("../models/shipment.js");
 
 
 exports.register = catchAsyncError(async (req, res, next) => {
@@ -345,6 +346,16 @@ exports.shipment = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
+
+  const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) });
+
+  if (shipment.length === 0) {
+    return next(new ErrorHandler("No shipment found", 400));
+  }
+  return res.status(200).json({
+    success: true,
+    shipment
+  });
 
 });
 
