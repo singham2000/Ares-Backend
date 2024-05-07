@@ -56,7 +56,7 @@ router.post("/register_clinic", auth, isAdmin, registerClinic);
 router.post("/set_pres_form", auth, isAdmin, prescriptionFormMake);
 router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
-router.post('/set_drillform_form', upload.any(), auth, isAdmin, createDrillForm);
+router.post('/set_drillform_form', auth, isAdmin, createDrillForm);
 router.post('/upload_file', upload.any(), auth, isAdmin, uploadXFile);
 
 router
