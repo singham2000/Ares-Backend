@@ -279,11 +279,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
-
-  console.log(userId);
-
   const week = 2;
-
   const aggregationPipeline = [
     {
       $match: {
@@ -320,10 +316,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       }
     }
   ];
-
-
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
-
   const runner = (drill) => {
     const [data] = drill[0].totalActivities;
     let totalActivitiesdone = 0;
@@ -339,16 +332,12 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       completedDrills: totalActivitiesdone
     }
   }
-  console.log(runner(drill));
   const userDetails = await userModel.findById(userId);
-  console.log();
   return res.status(200).json({
     success: true,
     userDetails,
     drillDetails: runner(drill)
   });
-
-
 });
 
 exports.shipment = catchAsyncError(async (req, res, next) => {
