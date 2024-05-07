@@ -1098,7 +1098,7 @@ exports.getShipments = catchAsyncError(async (req, res, next) => {
   if (name) query.shippingAddress.name = name;
   if (address) query.shippingAddress.address = address;
   if (mobile) query.shippingAddress.mobile = mobile;
-  if (clientId) query.ClientId = mongoose.Types.ObjectId(clientId);
+  if (clientId) query.ClientId = new mongoose.Types.ObjectId(clientId);
   if (ShipmentId) {
     const shipment = await ShipmentModel.findById(ShipmentId);
     return res.status(200).json({
