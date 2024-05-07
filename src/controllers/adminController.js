@@ -846,7 +846,7 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
-  const form =await DrillModel.find({
+  const form = await DrillModel.find({
     plan: formdata.plan,
     phase: formdata.phase,
     day: formdata.day,
@@ -1130,6 +1130,23 @@ exports.updateShipment = catchAsyncError(async (req, res, next) => {
       data: shipment
     })
   }
+});
+
+exports.deleteShipment = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id)
+    return next(new ErrorHandler("Id parameter is not sent", 400));
+
+  const result = await ShipmentModel.findByIdAndDelete(id);
+
+  if (result) {
+    res.status(404).json({
+      success: true,
+      message: "Shipment deleted successfully"
+    })
+  }
+
 });
 
 exports.updateDrill = catchAsyncError(async (req, res, next) => {
