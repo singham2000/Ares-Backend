@@ -280,7 +280,6 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
-  const week = 2;
   const aggregationPipeline = [
     {
       $match: {

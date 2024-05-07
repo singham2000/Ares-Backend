@@ -846,7 +846,7 @@ exports.createDrillForm = catchAsyncError(async (req, res, next) => {
   if (!formdata) {
     return next(new ErrorHandler("Empty field", 404))
   }
-  const form = DrillModel.find({
+  const form =await DrillModel.find({
     plan: formdata.plan,
     phase: formdata.phase,
     day: formdata.day,
