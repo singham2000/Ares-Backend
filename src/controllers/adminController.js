@@ -1141,7 +1141,7 @@ exports.deleteShipment = catchAsyncError(async (req, res, next) => {
   const result = await ShipmentModel.findByIdAndDelete(id);
 
   if (result) {
-    res.status(404).json({
+    res.status(200).json({
       success: true,
       message: "Shipment deleted successfully"
     })
