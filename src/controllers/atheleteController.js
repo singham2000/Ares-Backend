@@ -359,20 +359,29 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
 
+  console.log(drill.length);
+
   const runner = (drill) => {
-    const [data] = drill[0].totalActivities;
-    let totalActivitiesdone = 0;
-    let totalActivities = 0;
-    data.forEach((data) => {
-      data.forEach((list) => {
-        ++totalActivities;
-        list && ++totalActivitiesdone;
-      })
-    });
+    if (drill.length !== 0) {
+      const [data] = drill[0].totalActivities;
+      let totalActivitiesdone = 0;
+      let totalActivities = 0;
+      data.forEach((data) => {
+        data.forEach((list) => {
+          ++totalActivities;
+          list && ++totalActivitiesdone;
+        })
+      });
+      return {
+        totalDrills: totalActivities,
+        completedDrills: totalActivitiesdone,
+        drillProgress: (totalActivitiesdone / totalActivities) * 100
+      }
+    }
     return {
-      totalDrills: totalActivities,
-      completedDrills: totalActivitiesdone,
-      drillProgress: (totalActivitiesdone / totalActivities) * 100
+      totalDrills: 0,
+      completedDrills: 0,
+      drillProgress: 0
     }
   }
 
@@ -384,12 +393,11 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     }
     return null;
   }
-
   const userDetails = await userModel.findById(userId);
   return res.status(200).json({
     success: true,
     userDetails,
-    drillActiveStatus: findFalseStatus(drillday[0].activeDay[0]),
+    drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : [],
     drillDetails: runner(drill)
   });
 });
