@@ -297,13 +297,9 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       $unwind: "$drill"
     },
     {
-      $match: week ? { "drill.week": week.toString() } : {}
-    },
-    {
       $group: {
         _id: "$drill.week",
         drills: { $push: "$drill" },
-        totalActivities: { $push: "$drill.activities.isComplete" },
         totalActivities: { $push: { $cond: { if: "$drill.activities.isComplete", then: "$drill.activities.isComplete", else: false } } }
       }
     },
@@ -316,7 +312,52 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       }
     }
   ];
+
+  const pipelineForActiveDay = [
+    {
+      $match: {
+        $or: [
+          {
+            clientId: new mongoose.Types.ObjectId(userId)
+          },
+          {
+            clientId: new mongoose.Types.ObjectId(userId),
+          }
+        ]
+      }
+    },
+    {
+      $unwind: "$drill"
+    },
+    {
+      $unwind: "$drill.activities"
+    },
+    {
+      $group: {
+        _id: null,
+        activeDay: {
+          $push: {
+            $cond: {
+              if: "$drill.activities.isComplete",
+              then: { $concat: ["$drill.week", "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] },
+              // then: 'd',
+              else: { $concat: ["$drill.week", "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] }
+            }
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        activeDay: { $push: "$activeDay" },
+      }
+    }
+  ];
+
+  const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
+
   const runner = (drill) => {
     const [data] = drill[0].totalActivities;
     let totalActivitiesdone = 0;
@@ -336,6 +377,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     userDetails,
+    drillActiveStatus: drillday[0].activeDay[0],
     drillDetails: runner(drill)
   });
 });
