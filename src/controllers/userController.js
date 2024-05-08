@@ -1224,6 +1224,10 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 
 
         const drill = await DrillForm.aggregate(aggregationPipeline);
+        console.log(drill);
+        if (drill.length === 0) {
+            return next(new ErrorHandler("Drill cannot be found or created", 400))
+        }
         const runner = (drill) => {
             const [data] = drill[0].totalActivities;
             let totalActivitiesdone = 0;
