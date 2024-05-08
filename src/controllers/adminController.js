@@ -1133,7 +1133,7 @@ exports.updateShipment = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deleteShipment = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
+  const { id } = req.query;
 
   if (!id)
     return next(new ErrorHandler("Id parameter is not sent", 400));
