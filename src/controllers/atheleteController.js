@@ -253,13 +253,15 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
 
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const { date, service_type } = req.query;
+  const fdate = new Date(date);
+  fdate.setUTCHours(0, 0, 0, 0);
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
   let query = { clientId: new mongoose.Types.ObjectId(userId) };
   if (date) {
-    query.date = date;
+    query.date = fdate;
   }
   if (service_type) {
     query.service_type = service_type;

@@ -337,13 +337,6 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     // }
     // if (appointmentOnDate)
     //     return next(new ErrorHandler("Another Appointment is overlapping", 400));
-    console.log({
-        doctor: doctor_trainer,
-        service_type,
-        date: app_date,
-        payment_status: "pending",
-        clientId: client_id
-    });
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
         client: client_id,
@@ -355,11 +348,12 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location,
         status: (service_type === 'Consultation' || service_type === 'ConsultationCall') ? "paid" : 'pending'
     });
-
+    const date = new Date(app_date);
+    date.setUTCHours(0, 0, 0, 0);
     const transaction = await transactionModel.create({
         doctor: doctor_trainer,
         service_type,
-        date: app_date,
+        date,
         payment_status: "pending",
         clientId: client_id
     });
