@@ -1120,7 +1120,7 @@ exports.getShipments = catchAsyncError(async (req, res, next) => {
 exports.updateShipment = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body.data;
-  const shipment = await ShipmentModel.findByIdAndUpdate(new mongoose.Types.ObjectId(id), formdata);
+  const shipment = await ShipmentModel.findByIdAndUpdate(id, formdata);
   if (!shipment) {
     return next(new ErrorHandler("Shipment not found or updated", 400));
   } else {
