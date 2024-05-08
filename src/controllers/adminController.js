@@ -1174,3 +1174,19 @@ exports.updateDrill = catchAsyncError(async (req, res, next) => {
     })
   }
 });
+
+exports.deleteDrill = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+
+  if (!id)
+    return next(new ErrorHandler("Id parameter is not sent", 400));
+
+  const result = await DrillModel.findByIdAndDelete(id);
+
+  if (result) {
+    res.status(200).json({
+      success: true,
+      message: "Drill deleted successfully"
+    })
+  }
+});
