@@ -1153,6 +1153,8 @@ exports.updateDrill = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body.data;
 
+  console.log(formdata.plan);
+
   if (!id || !formdata)
     return next(new ErrorHandler("id and formdata are required", 400));
 
@@ -1160,7 +1162,12 @@ exports.updateDrill = catchAsyncError(async (req, res, next) => {
   if (!drill) {
     return next(new ErrorHandler("Drill not found or updated", 400));
   } else {
-    const drills = await DrillModel.find();
+    const drills = await DrillModel.find({
+      plan: formdata.plan,
+      week: formdata.week,
+      day: formdata.day,
+      phase: formdata.phase
+    });
     res.status(200).json({
       success: true,
       data: drills

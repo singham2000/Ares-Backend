@@ -339,9 +339,10 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
           $push: {
             $cond: {
               if: "$drill.activities.isComplete",
-              then: { $concat: ["$drill.week", "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] },
+              // then: {  $concat: [{ $toInt: "$drill.week" }, "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] },
+              then: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } },
               // then: 'd',
-              else: { $concat: ["$drill.week", "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] }
+              else: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } }
             }
           }
         }
@@ -373,11 +374,21 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       completedDrills: totalActivitiesdone
     }
   }
+
+  function findFalseStatus(activities) {
+    for (const activity of activities) {
+      if (activity.status === "false") {
+        return { week: parseInt(activity.week), day: parseInt(activity.day) };
+      }
+    }
+    return null;
+  }
+
   const userDetails = await userModel.findById(userId);
   return res.status(200).json({
     success: true,
     userDetails,
-    drillActiveStatus: drillday[0].activeDay[0],
+    drillActiveStatus: findFalseStatus(drillday[0].activeDay[0]),
     drillDetails: runner(drill)
   });
 });
