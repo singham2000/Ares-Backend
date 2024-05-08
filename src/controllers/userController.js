@@ -398,13 +398,17 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
     }
     if (searchQuery) {
         const regex = new RegExp(`^${searchQuery}`, 'i');
-        query.$or = [
-            { 'client.firstName': regex },
-            { 'client.lastName': regex },
-            { 'client.first_name': regex },
-            { 'client.last_name': regex },
-            { 'client.email': regex }
+        const q = {};
+        q.$or = [
+            { 'firstName': regex },
+            { 'lastName': regex },
+            { 'first_name': regex },
+            { 'last_name': regex },
+            { 'email': regex }
         ];
+        const users = await userModel.find(q);
+        const ids = users.map(user => user._id.toString());
+        query.client = { $in: ids };
     }
 
 
