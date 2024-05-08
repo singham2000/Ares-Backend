@@ -1022,9 +1022,18 @@ exports.appointmentStatus = catchAsyncError(async (req, res, next) => {
 
 exports.getPrescription = catchAsyncError(async (req, res, next) => {
     const prescriptionId = req.query.prescriptionId;
+    const appointmentId = req.query.appointmentId;
 
     if (!prescriptionId) {
         return next(new ErrorHandler(" prescriptionId not received ", 404))
+    }
+
+    if (appointmentId) {
+        const form = await PrescriptionsForm.findOne({ appointmentId: new mongoose.Types.ObjectId(appointmentId) });
+        return res.status(200).json({
+            success: true,
+            form
+        });
     }
     const form = await PrescriptionsForm.findById(prescriptionId);
 
