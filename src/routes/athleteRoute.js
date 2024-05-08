@@ -22,7 +22,7 @@ router.post("/login", login);
 router.get("/get-profile", auth, getProfile);
 router.route('/transaction').get(auth, getTransactions);
 router.get("/get-bookings", auth, getBookings);
-router.get("/upcoming-bookings", auth, getUpcomingAppointments);
+router.get("/upcoming-appointments", auth, getUpcomingAppointments);
 
 router.put("/reset-password", resetPassword);
 router.put("/edit-profile", auth, editProfile);

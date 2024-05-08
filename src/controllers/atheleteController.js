@@ -371,7 +371,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     });
     return {
       totalDrills: totalActivities,
-      completedDrills: totalActivitiesdone
+      completedDrills: totalActivitiesdone,
+      drillProgress: (totalActivitiesdone / totalActivities) * 100
     }
   }
 
@@ -416,19 +417,13 @@ exports.shipment = catchAsyncError(async (req, res, next) => {
 exports.getUpcomingAppointments = catchAsyncError(async (req, res, next) => {
   const currentDateTime = new Date();
   const currentDate = currentDateTime.toISOString().split("T")[0];
-  const currentTime = currentDateTime.toTimeString().split(" ")[0].slice(0, 5); // we need to remove timezone info so splitting and im getting first element
-  // take the first 4 cuz we dont need seconds acoording to schema
+  const currentTime = currentDateTime.toTimeString().split(" ")[0].slice(0, 5);
   console.log(currentDate);
   console.log(currentTime);
   const upcomingAppointments = await appointmentModel
     .find({
-      $or: [
-        { app_date: { $gt: currentDate } }, // Future dates
-        {
-          app_date: currentDate, // Current date
-          app_time: { $gte: currentTime }, // Time greater than or equal to current time
-        },
-      ],
+      app_date: currentDate, // Current date
+      app_time: { $gte: currentTime }, // Time greater than or equal to current time
     })
     .select("app_date app_time -client");
 
