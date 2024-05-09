@@ -513,12 +513,12 @@ exports.updateSlot = catchAsyncError(async (req, res, next) => {
   }
 
   const slot = await slotModel.findByIdAndUpdate(id, {
-    startDate: formdata.startDate !== null ? formdata.startDate : formdata.endTime,
-    endDate: formdata.endDate !== null ? formdata.endDate : formdata.endTime,
-    doctor: formdata.doctor !== null ? formdata.doctor : formdata.endTime,
-    address: formdata.address !== null ? formdata.address : formdata.endTime,
-    startTime: formdata.startTime !== null ? formdata.startTime : formdata.startTime,
-    endTime: formdata.endTime !== null ? formdata.endTime : formdata.endTime
+    startDate: formdata.startDate !== null && slot.startDate,
+    endDate: formdata.endDate !== null && slot.endDate,
+    doctor: formdata.doctor !== null && slot.doctor,
+    address: formdata.address !== null && slot.address,
+    startTime: formdata.startTime !== null && slot.startTime,
+    endTime: formdata.endTime !== null && slot.endTime
   }, { new: true });
 
 

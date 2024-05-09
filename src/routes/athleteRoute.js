@@ -25,7 +25,7 @@ router.get("/get-bookings", auth, getBookings);
 router.get("/upcoming-appointments", auth, getUpcomingAppointments);
 
 router.put("/reset-password", resetPassword);
-router.put("/edit-profile", auth, editProfile);
+router.put("/edit-profile", editProfile);
 router.route('/dashboard').get(auth, dashboard);
 
 router.route('/shipment').get(auth, shipment);

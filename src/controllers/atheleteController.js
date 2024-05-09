@@ -180,8 +180,8 @@ exports.editProfile = catchAsyncError(async (req, res, next) => {
     zip,
   } = req.body;
   const athlete = await userModel.findById(userId).select("-password");
-  const result = await s3UpdateImage(file, athlete.profilePic);
-  const location = result.Location && result.Location;
+  // const result = await s3UpdateImage(file, athlete.profilePic);
+  // const location = result.Location && result.Location;
 
   firstName && (athlete.firstName = firstName);
   lastName && (athlete.lastName = lastName);
@@ -365,18 +365,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     }
   ];
 
-
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
-
-  if (!drill) {
-    const form = await DrillForm.find({
-      plan: { $regex: new RegExp(client.plan, 'i') },
-      phase: { $regex: new RegExp(client.phase, 'i') }
-    }).select('-_id -__v');
-  }
-
-  console.log(drill.length);
 
   const runner = (drill) => {
     if (drill.length !== 0) {
