@@ -285,6 +285,7 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
 });
 
 exports.dashboard = catchAsyncError(async (req, res, next) => {
+  const week = 1;
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
