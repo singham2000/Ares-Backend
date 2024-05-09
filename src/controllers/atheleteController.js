@@ -254,6 +254,7 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const { date, service_type } = req.query;
   const fdate = new Date(date);
+  console.log(date, fdate);
   fdate.setUTCHours(0, 0, 0, 0);
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],

@@ -613,10 +613,12 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
             }
         }
     );
+    const dater = new Date();
+    const fdate = dater.setUTCHours(0, 0, 0, 0);
     const transaction = await transactionModel.create({
         plan: plan,
         phase: planPhase,
-        date: new Date(),
+        date: fdate,
         payment_status: "pending",
         clientId: userId
     });
