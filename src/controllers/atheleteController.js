@@ -252,7 +252,7 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
-  const { date, service_type } = req.query;
+  const { date, service_type, plan, phase } = req.query;
   const fdate = new Date(date);
   console.log(date, fdate);
   fdate.setUTCHours(0, 0, 0, 0);
@@ -266,6 +266,12 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   }
   if (service_type) {
     query.service_type = service_type;
+  }
+  if (plan) {
+    query.plan = plan;
+  }
+  if (phase) {
+    query.phase = phase;
   }
 
   const transactions = await transactionModel.find(query);
