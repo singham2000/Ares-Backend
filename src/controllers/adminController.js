@@ -491,8 +491,6 @@ exports.updateSlot = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body;
 
-  console.log("Slot", formdata);
-
   let stimeF = formdata?.startTime?.split(':')[0].length;
   let stimeS = formdata?.startTime?.split(':')[1].length;
 

@@ -1291,12 +1291,20 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 });
 
 exports.drillUpdate = catchAsyncError(async (req, res, next) => {
-    const targetId = req.query.id;
+    const { id: targetId, user: userId = jwt.verify(
+        req.headers.authorization.split(" ")[1],
+        process.env.JWT_SECRET
+    ) } = req.query;
+
+
     const form = req.body.form;
     try {
         if (form) {
             const result = await DrillForm.updateOne(
-                { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
+                {
+                    "drill.activities._id": new mongoose.Types.ObjectId(targetId),
+                    "clientId": new mongoose.Types.ObjectId(userId)
+                },
                 {
                     $set: {
                         "drill.$[].activities.$[elem].form": form,
@@ -1312,7 +1320,10 @@ exports.drillUpdate = catchAsyncError(async (req, res, next) => {
             }
         } else {
             const result = await DrillForm.updateOne(
-                { "drill.activities._id": new mongoose.Types.ObjectId(targetId) },
+                {
+                    "drill.activities._id": new mongoose.Types.ObjectId(targetId),
+                    "clientId": new mongoose.Types.ObjectId(userId)
+                },
                 { $set: { "drill.$[].activities.$[elem].isComplete": true } },
                 { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(targetId) }] }
             );
