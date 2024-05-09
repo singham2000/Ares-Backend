@@ -603,6 +603,17 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
     }
     const user = await userModel.findById(userId);
 
+    const form = await DrillFormModel.find({
+        plan: { $regex: new RegExp(plan, 'i') },
+        phase: { $regex: new RegExp(planPhase, 'i') }
+    }).select('-_id -__v');
+    if (form.length !== 0) {
+        const drillForm = await DrillForm.create({
+            clientId: userId,
+            drill: form
+        });
+        drillForm.save();
+    }
     const appointment = await appointmentModel.updateMany(
         { 'client._id': new mongoose.Types.ObjectId(userId) },
         {
@@ -1199,6 +1210,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
         res.status(200).json({
             success: true,
             totalWeeks: WeekCount[0].totalWeeks,
+            completePercentage: 0,
             weeks: formFull[0].weeks
 
         });

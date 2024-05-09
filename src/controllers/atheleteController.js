@@ -11,7 +11,7 @@ const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
 const DrillFormModel = require("../models/DrillFormModel.js");
 const ShipmentModel = require("../models/shipment.js");
-
+const DrillForm = require('../models/DrillModel.js')
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -365,8 +365,16 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     }
   ];
 
+
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
+
+  if (!drill) {
+    const form = await DrillForm.find({
+      plan: { $regex: new RegExp(client.plan, 'i') },
+      phase: { $regex: new RegExp(client.phase, 'i') }
+    }).select('-_id -__v');
+  }
 
   console.log(drill.length);
 
@@ -406,7 +414,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     userDetails,
-    drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : [],
+    drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : { week: 1, day: 1 },
     drillDetails: runner(drill)
   });
 });
