@@ -620,6 +620,7 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         phase: planPhase,
         date: fdate,
         payment_status: "pending",
+        service_type: "planPurchase",
         clientId: userId
     });
     transaction.save();
