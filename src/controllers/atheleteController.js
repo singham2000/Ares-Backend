@@ -306,6 +306,9 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       $unwind: "$drill"
     },
     {
+      $match: week ? { "drill.week": week.toString() } : {}
+    },
+    {
       $group: {
         _id: "$drill.week",
         drills: { $push: "$drill" },
@@ -364,20 +367,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       }
     }
   ];
-
-
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(aggregationPipeline);
-
-  if (!drill) {
-    const form = await DrillForm.find({
-      plan: { $regex: new RegExp(client.plan, 'i') },
-      phase: { $regex: new RegExp(client.phase, 'i') }
-    }).select('-_id -__v');
-  }
-
-  console.log(drill.length);
-
   const runner = (drill) => {
     if (drill.length !== 0) {
       const [data] = drill[0].totalActivities;

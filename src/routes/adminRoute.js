@@ -41,7 +41,7 @@ const {
   shipmentDetailer,
   getShipments,
   updateShipment,
-  updateDrill, deleteShipment, deleteDrill
+  updateDrill, deleteShipment, deleteDrill, updateSlot
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -87,6 +87,8 @@ router
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 router.delete("/delete_slot", auth, isAdmin, delSlot);
+
+router.route('/slot').put(auth, isAdmin, updateSlot);
 
 router.get("/make_active_user", auth, isAdmin, activateUser);
 router.get("/get_all_form", auth, isAdmin, getForms);

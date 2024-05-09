@@ -487,6 +487,84 @@ exports.getAllSlots = catchAsyncError(async (req, res) => {
   });
 });
 
+exports.updateSlot = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  const formdata = req.body;
+
+  console.log("Slot", formdata);
+
+  let stimeF = formdata?.startTime?.split(':')[0].length;
+  let stimeS = formdata?.startTime?.split(':')[1].length;
+
+  let etimeF = formdata?.endTime?.split(':')[0].length;
+  let etimeS = formdata?.endTime?.split(':')[1].length;
+
+  if (stimeF === 1) {
+    formdata.startTime = `0${startTime?.split(':')[0]}:${startTime?.split(':')[1]}`;
+  }
+  if (stimeS === 1) {
+    formdata.startTime = `${startTime?.split(':')[0]}:0${startTime?.split(':')[1]}`;
+  }
+  if (etimeF === 1) {
+    formdata.endTime = `0${endTime?.split(':')[0]}:${endTime?.split(':')[1]}`;
+  }
+  if (etimeS === 1) {
+    formdata.endTime = `${endTime?.split(':')[0]}:0${endTime?.split(':')[1]}`;
+  }
+
+  const slot = await slotModel.findByIdAndUpdate(id, {
+    startDate: formdata.startDate !== null ? formdata.startDate : formdata.endTime,
+    endDate: formdata.endDate !== null ? formdata.endDate : formdata.endTime,
+    doctor: formdata.doctor !== null ? formdata.doctor : formdata.endTime,
+    address: formdata.address !== null ? formdata.address : formdata.endTime,
+    startTime: formdata.startTime !== null ? formdata.startTime : formdata.startTime,
+    endTime: formdata.endTime !== null ? formdata.endTime : formdata.endTime
+  }, { new: true });
+
+
+  if (!slot) {
+    return next(new ErrorHandler("Slot not found or updated", 400));
+  } else {
+    const { date } = req.query;
+    const filter = {};
+
+    if (date) {
+      const formattedDate = new Date(date);
+      formattedDate.setUTCHours(0);
+      formattedDate.setUTCMinutes(0);
+      formattedDate.setUTCSeconds(0);
+      formattedDate.setUTCMilliseconds(0);
+      const endDate = new Date(formattedDate);
+      endDate.setDate(endDate.getDate() + 1);
+      endDate.setHours(0);
+      endDate.setMinutes(0);
+      filter.date = { $gte: formattedDate, $lt: endDate };
+    }
+    const slots = await slotModel.find(filter).sort("desc");
+    res.status(200).json({
+      success: true,
+      data: slots
+    })
+  }
+});
+
+exports.delSlot = catchAsyncError(async (req, res, next) => {
+  const { id } = req.query;
+  try {
+    const deletedSlot = await slotModel.findByIdAndDelete(id);
+    if (!deletedSlot) {
+      return next(new ErrorHandler("Not found!", 404));
+    }
+    res.status(200).json({
+      success: true,
+      message: "Slot deleted successfully",
+      data: deletedSlot,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 exports.delDoc = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
 
@@ -933,23 +1011,6 @@ exports.getForms = catchAsyncError(async (req, res, next) => {
     presForm
   })
 
-});
-
-exports.delSlot = catchAsyncError(async (req, res, next) => {
-  const { id } = req.query;
-  try {
-    const deletedSlot = await slotModel.findByIdAndDelete(id);
-    if (!deletedSlot) {
-      return next(new ErrorHandler("Not found!", 404));
-    }
-    res.status(200).json({
-      success: true,
-      message: "Slot deleted successfully",
-      data: deletedSlot,
-    });
-  } catch (error) {
-    return next(error);
-  }
 });
 
 exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
