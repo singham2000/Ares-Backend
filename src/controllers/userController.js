@@ -618,7 +618,7 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         phase: planPhase,
         date: new Date(),
         payment_status: "pending",
-        clientId: client_id
+        clientId: userId
     });
     transaction.save();
     if (!user) {
