@@ -613,6 +613,14 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
             }
         }
     );
+    const transaction = await transactionModel.create({
+        plan: plan,
+        phase: planPhase,
+        date: new Date(),
+        payment_status: "pending",
+        clientId: client_id
+    });
+    transaction.save();
     if (!user) {
         return next(new ErrorHandler("user does not exist", 400));
     }
