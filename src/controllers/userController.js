@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const ErrorHandler = require("../utils/errorHandler");
 const { resetPasswordCode, newAccount } = require("../utils/mails");
 const generateCode = require("../utils/generateCode");
+const jwt = require('jsonwebtoken');
 const { generateAppointmentId } = require("../utils/generateId");
 const { calculateTimeDifference, sendData } = require('../utils/functions');
 const ServiceTypeModel = require("../models/ServiceTypeModel.js");
@@ -19,6 +20,7 @@ const DrillForm = require('../models/DrillFormModel.js');
 const DrillFormModel = require("../models/DrillModel.js");
 const { createNotification, timeForService } = require('../utils/functions');
 const transactionModel = require("../models/transactionModel.js");
+
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
