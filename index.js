@@ -41,8 +41,9 @@ app.get("/", (req, res) =>
 );
 
 try {
-  app.listen(() => {
-    console.log("App is listening on ");
+  const server = app.listen(() => {
+    const port = server.address().port;
+    console.log("App is listening on ",port);
   });
 } catch (e) {
   console.log("Hello-JS");
