@@ -1293,12 +1293,14 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
 });
 
 exports.drillUpdate = catchAsyncError(async (req, res, next) => {
-    const { id: targetId, user: userId = jwt.verify(
-        req.headers.authorization.split(" ")[1],
-        process.env.JWT_SECRET
-    ) } = req.query;
-
-
+    const { id: targetId, user } = req.query;
+    let userId = user;
+    if (!user) {
+        userId = jwt.verify(
+            req.headers.authorization.split(" ")[1],
+            process.env.JWT_SECRET
+        ).userId
+    }
     const form = req.body.form;
     try {
         if (form) {
