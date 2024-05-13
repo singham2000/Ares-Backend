@@ -289,38 +289,41 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
-  const aggregationPipeline = [
+
+  const calcPipe = [
     {
-      $match: {
-        $or: [
-          {
-            clientId: new mongoose.Types.ObjectId(userId)
-          },
-          {
-            clientId: new mongoose.Types.ObjectId(userId),
+      "$match": {
+        "clientId": new mongoose.Types.ObjectId(userId)
+      }
+    },
+    {
+      "$unwind": "$drill"
+    },
+    {
+      "$group": {
+        "_id": "$_id",
+        "totalActivities": { "$sum": { "$size": "$drill.activities" } },
+        "completedActivities": {
+          "$sum": {
+            "$size": {
+              "$filter": {
+                "input": "$drill.activities",
+                "as": "activity",
+                "cond": { "$eq": ["$$activity.isComplete", true] }
+              }
+            }
           }
-        ]
+        }
       }
     },
     {
-      $unwind: "$drill"
-    },
-    {
-      $group: {
-        _id: "$drill.week",
-        drills: { $push: "$drill" },
-        totalActivities: { $push: { $cond: { if: "$drill.activities.isComplete", then: "$drill.activities.isComplete", else: false } } }
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        totalWeeks: { $sum: 1 },
-        totalActivities: { $push: "$totalActivities" },
-        weeks: { $push: { week: "$_id", drills: "$drills" } }
+      "$project": {
+        "_id": 0,
+        "totalActivities": 1,
+        "completedActivities": 1
       }
     }
-  ];
+  ]
 
   const pipelineForActiveDay = [
     {
@@ -366,29 +369,15 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   ];
 
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
-  const drill = await DrillFormModel.aggregate(aggregationPipeline);
+  const drill = await DrillFormModel.aggregate(calcPipe);
+  console.log(drill.length);
+  console.log(drill);
 
   const runner = (drill) => {
-    if (drill.length !== 0) {
-      const [data] = drill[0].totalActivities;
-      let totalActivitiesdone = 0;
-      let totalActivities = 0;
-      data.forEach((data) => {
-        data.forEach((list) => {
-          ++totalActivities;
-          list && ++totalActivitiesdone;
-        })
-      });
-      return {
-        totalDrills: totalActivities,
-        completedDrills: totalActivitiesdone,
-        drillProgress: (totalActivitiesdone / totalActivities) * 100
-      }
-    }
     return {
-      totalDrills: 0,
-      completedDrills: 0,
-      drillProgress: 0
+      totalDrills: drill[0].totalActivities,
+      completedDrills: drill[0].completedActivities,
+      drillProgress: (drill[0].completedActivities / drill[0].totalActivities) * 100
     }
   }
 
