@@ -370,8 +370,6 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
 
   const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
   const drill = await DrillFormModel.aggregate(calcPipe);
-  console.log(drill.length);
-  console.log(drill);
 
   const runner = (drill) => {
     return {
