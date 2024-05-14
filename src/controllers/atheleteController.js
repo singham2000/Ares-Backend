@@ -11,7 +11,8 @@ const { s3Uploadv2, s3UpdateImage } = require('../utils/aws.js');
 const transactionModel = require('../models/transactionModel');
 const DrillFormModel = require("../models/DrillFormModel.js");
 const ShipmentModel = require("../models/shipment.js");
-const DrillForm = require('../models/DrillModel.js')
+const DrillForm = require('../models/DrillModel.js');
+const PrescriptionsForm = require('../models/PrescriptionForm.js')
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -460,42 +461,55 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
   let query = {};
 
   if (status) {
-      query.status = status;
+    query.status = status;
   }
   if (service_type) {
-      query.service_type = { $in: service_type.split(',') };
+    query.service_type = { $in: service_type.split(',') };
   }
   if (date) {
-      const startDate = new Date(date);
-      const endDate = new Date(date);
-      endDate.setDate(endDate.getDate() + 1);
-      query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+    query.app_date = { $gte: startDate.toISOString().split('T')[0], $lt: endDate.toISOString().split('T')[0] };
   }
   if (searchQuery) {
-      const regex = new RegExp(`^${searchQuery}`, 'i');
-      const q = {};
-      q.$or = [
-          { 'firstName': regex },
-          { 'lastName': regex },
-          { 'first_name': regex },
-          { 'last_name': regex },
-          { 'email': regex }
-      ];
-      const users = await userModel.find(q);
-      const ids = users.map(user => user._id.toString());
-      query.client = { $in: ids };
+    const regex = new RegExp(`^${searchQuery}`, 'i');
+    const q = {};
+    q.$or = [
+      { 'firstName': regex },
+      { 'lastName': regex },
+      { 'first_name': regex },
+      { 'last_name': regex },
+      { 'email': regex }
+    ];
+    const users = await userModel.find(q);
+    const ids = users.map(user => user._id.toString());
+    query.client = { $in: ids };
   }
 
+  let appointments = [];
 
-  const appointments = await appointmentModel.find(query)
-      .sort({ createdAt: 'desc' })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
-  const totalRecords = await appointmentModel.countDocuments(query);
+  const appointmentsArray = await appointmentModel.find(query)
+    .sort({ createdAt: 'desc' })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .exec();
+
+  await Promise.all(appointmentsArray.map(async (appoint) => {
+    const Presform = await PrescriptionsForm.find({ appointmentId: appoint._id });
+    let appointmentWithEval = {
+      ...appoint.toObject(),
+      isFilled: Boolean(Presform.length),
+      presId: Boolean(Presform.length) ? Presform[0]._id : null
+    };
+    appointments.push(appointmentWithEval);
+
+  }));
+
+  const totalRecords = appointments.length;
   res.json({
-      appointments: appointments,
-      totalPages: Math.ceil(totalRecords / limit),
-      currentPage: page,
+    appointments: appointments,
+    totalPages: Math.ceil(totalRecords / limit),
+    currentPage: page,
   });
 });

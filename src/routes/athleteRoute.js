@@ -23,7 +23,7 @@ router.get("/get-profile", auth, getProfile);
 router.route('/transaction').get(auth, getTransactions);
 router.get("/get-bookings", auth, getBookings);
 router.get("/upcoming-appointments", auth, getUpcomingAppointments);
-router.get("/recent-bookings", auth, recentBookings);
+router.get("/recent-bookings",  recentBookings);
 
 router.put("/reset-password", resetPassword);
 router.put("/edit-profile", editProfile);
