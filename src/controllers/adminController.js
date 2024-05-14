@@ -21,6 +21,7 @@ const ServiceTypeModel = require("../models/ServiceTypeModel");
 const PlanModel = require("../models/planModel");
 const EvalForm = require("../models/FormModel");
 const DrillModel = require("../models/DrillModel");
+const TransactionalModel = require("../models/transactionModel");
 
 const EvalationModel = require("../models/EvaluationForms");
 const DiagnosisForm = require("../models/DiagnosisForm");
@@ -1157,7 +1158,7 @@ exports.getShipments = catchAsyncError(async (req, res, next) => {
   if (name) query.shippingAddress.name = name;
   if (address) query.shippingAddress.address = address;
   if (mobile) query.shippingAddress.mobile = mobile;
-  if (trackingId) query.trackingId= trackingId;
+  if (trackingId) query.trackingId = trackingId;
   if (clientId) query.ClientId = new mongoose.Types.ObjectId(clientId);
   if (ShipmentId) {
     const shipment = await ShipmentModel.findById(ShipmentId);
@@ -1249,4 +1250,44 @@ exports.deleteDrill = catchAsyncError(async (req, res, next) => {
       message: "Drill deleted successfully"
     })
   }
+});
+
+exports.getTransactions = catchAsyncError(async (req, res, next) => {
+  const page = parseInt(req.query.page_no) || 1;
+  const limit = parseInt(req.query.per_page_count) || 10;
+  const startDate = req.query.start_date;
+  const endDate = req.query.end_date;
+
+  const transactions = await TransactionalModel.find({
+    date: { $gte: new Date(startDate), $lte: new Date(endDate) }
+  }).sort({ createdAt: "desc" })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .exec();
+
+  res.status(200).json({
+    success: true,
+    transactions
+  })
+
+});
+
+exports.updateTransaction = catchAsyncError(async (req, res, next) => {
+  const { id, status } = req.query;
+
+  if (!id || !status)
+    return next(new ErrorHandler(`Transaction is not found`, 404));
+
+  try {
+    const transaction = await TransactionalModel.findById(id);
+    transaction.payment_status = status;
+    await transaction.save();
+    return res.status(200).json({
+      success: true,
+      transaction
+    })
+  } catch (error) {
+    return next(new ErrorHandler(`Transaction is not updated for ref.${error}`, 400));
+  }
+
 });

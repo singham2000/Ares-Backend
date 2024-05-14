@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
+const paymentsEnum = ['pending', 'paid', 'failed'];
+
 const transactionSchema = new Schema({
     doctor: {
         type: String,
@@ -20,12 +22,13 @@ const transactionSchema = new Schema({
     },
     payment_status: {
         type: String,
-        required: true
+        required: true,
+        enum: paymentsEnum
     },
     clientId: {
         type: Schema.Types.ObjectId,
         required: true
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('transaction', transactionSchema);

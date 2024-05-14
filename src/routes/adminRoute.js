@@ -41,7 +41,12 @@ const {
   shipmentDetailer,
   getShipments,
   updateShipment,
-  updateDrill, deleteShipment, deleteDrill, updateSlot
+  updateDrill,
+  deleteShipment,
+  deleteDrill,
+  updateSlot,
+  getTransactions,
+  updateTransaction
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -66,6 +71,10 @@ router
   .put(auth, isAdmin, updateShipment)
   .delete(auth, isAdmin, deleteShipment);
 
+router
+  .route('/transaction')
+  .get(getTransactions)
+  .put(updateTransaction)
 
 router
   .route("/service")
