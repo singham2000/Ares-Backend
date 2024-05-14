@@ -45,6 +45,10 @@ const shipmentSchema = new mongoose.Schema({
         name: String,
         address: String,
         mobile: String
+    },
+    trackingId: {
+        type: String,
+        required: true
     }
 });
 

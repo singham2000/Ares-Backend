@@ -1148,7 +1148,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getShipments = catchAsyncError(async (req, res, next) => {
-  const { plan, phase, productName, name, address, mobile, ShipmentId, clientId } = req.query;
+  const { plan, phase, trackingId, productName, name, address, mobile, ShipmentId, clientId } = req.query;
   const query = {};
 
   if (plan) query.plan = plan;
@@ -1157,6 +1157,7 @@ exports.getShipments = catchAsyncError(async (req, res, next) => {
   if (name) query.shippingAddress.name = name;
   if (address) query.shippingAddress.address = address;
   if (mobile) query.shippingAddress.mobile = mobile;
+  if (trackingId) query.trackingId= trackingId;
   if (clientId) query.ClientId = new mongoose.Types.ObjectId(clientId);
   if (ShipmentId) {
     const shipment = await ShipmentModel.findById(ShipmentId);
