@@ -73,8 +73,8 @@ router
 
 router
   .route('/transaction')
-  .get(getTransactions)
-  .put(updateTransaction)
+  .get(auth, isAdmin, getTransactions)
+  .put(auth, isAdmin, updateTransaction)
 
 router
   .route("/service")
