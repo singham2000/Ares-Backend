@@ -1291,3 +1291,27 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
   }
 
 });
+
+exports.getBookings = catchAsyncError(async (req, res, next) => {
+  const id = req.params.id;
+
+  try {
+    if (id) {
+      const appointment = await appointmentModel.findById(id);
+      return res.status(200).json({
+        success: true,
+        bookings: appointment
+      })
+    }
+
+    const appointments = await appointmentModel.find();
+    return res.status(200).json({
+      success: true,
+      bookings: appointments
+    });
+
+  } catch (error) {
+    return next(new ErrorHandler(error, 400));
+  }
+
+});

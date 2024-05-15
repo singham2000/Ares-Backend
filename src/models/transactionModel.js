@@ -28,6 +28,10 @@ const transactionSchema = new Schema({
     clientId: {
         type: Schema.Types.ObjectId,
         required: true
+    },
+    amount: {
+        type: Number,
+        required: true
     }
 }, { timestamps: true });
 
