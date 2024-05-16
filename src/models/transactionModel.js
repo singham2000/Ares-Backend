@@ -27,7 +27,8 @@ const transactionSchema = new Schema({
     },
     clientId: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'User'
     },
     amount: {
         type: Number,

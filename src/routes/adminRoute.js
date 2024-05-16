@@ -47,7 +47,8 @@ const {
   updateSlot,
   getTransactions,
   updateTransaction,
-  getBookings
+  getBookings,
+  updateBooking
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -99,6 +100,7 @@ router
 router
   .route('/bookings')
   .get(auth, isAdmin, getBookings)
+  .put(updateBooking)
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 router.delete("/delete_slot", auth, isAdmin, delSlot);

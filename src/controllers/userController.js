@@ -350,14 +350,19 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location,
         status: (service_type === 'Consultation' || service_type === 'ConsultationCall') ? "paid" : 'pending'
     });
+
     const date = new Date(app_date);
     date.setUTCHours(0, 0, 0, 0);
+
+    const service = await ServiceTypeModel.findOne({ alias: service_type })
+
     const transaction = await transactionModel.create({
         doctor: doctor_trainer,
         service_type,
         date,
         payment_status: "pending",
-        clientId: client_id
+        clientId: user._id,
+        amount: service.cost
     });
 
 
@@ -639,13 +644,18 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
     );
     const dater = new Date();
     const fdate = dater.setUTCHours(0, 0, 0, 0);
+    const planCost = await planModel.findOne({
+        name: plan
+    });
+    const basicPhase = planCost.phases.find(phase => phase.name === planPhase);
     const transaction = await transactionModel.create({
         plan: plan,
         phase: planPhase,
         date: fdate,
         payment_status: "pending",
         service_type: "planPurchase",
-        clientId: userId
+        clientId: userId,
+        amount: basicPhase.cost
     });
     transaction.save();
     if (!user) {

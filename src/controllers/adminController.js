@@ -1260,7 +1260,7 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
 
   const transactions = await TransactionalModel.find({
     date: { $gte: new Date(startDate), $lte: new Date(endDate) }
-  }).sort({ createdAt: "desc" })
+  }).populate('clientId').sort({ createdAt: "desc" })
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
@@ -1313,5 +1313,29 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
   } catch (error) {
     return next(new ErrorHandler(error, 400));
   }
+
+});
+
+exports.updateBooking = catchAsyncError(async (req, res, next) => {
+  const { id, status, service_status } = req.query;
+  if (!id) {
+    return next(new ErrorHandler("Booking id not provided !"));
+  }
+
+  if (!status || !service_status) {
+    return next(new ErrorHandler("Booking status, service_status not provided !"));
+  }
+
+  const appointment = await appointmentModel.findById(id);
+  appointment.status = status;
+  appointment.service_status = service_status;
+
+  appointment.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Updated successfully",
+    appointment
+  })
 
 });
