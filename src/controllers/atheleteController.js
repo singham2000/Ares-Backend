@@ -290,7 +290,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   );
 
   const isDrill = await DrillFormModel.find({ clientId: userId })
-
+  const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) });
   if (isDrill.length > 0) {
     const calcPipe = [
       {
@@ -394,7 +394,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       success: true,
       userDetails,
       drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : { week: 1, day: 1 },
-      drillDetails: runner(drill)
+      drillDetails: runner(drill),
+      isShipment: Boolean(shipment)
     });
   }
   const userDetails = await userModel.findById(userId);
@@ -406,7 +407,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       totalDrills: 0,
       completedDrills: 0,
       drillProgress: 0
-    }
+    },
+    isShipment: Boolean(shipment)
   });
 
 });
@@ -517,20 +519,20 @@ exports.getPrescription = catchAsyncError(async (req, res, next) => {
   const appointmentId = req.query.appointmentId;
 
   if (!prescriptionId) {
-      return next(new ErrorHandler(" prescriptionId not received ", 404))
+    return next(new ErrorHandler(" prescriptionId not received ", 404))
   }
 
   if (appointmentId) {
-      const form = await PrescriptionsForm.findOne({ appointmentId: new mongoose.Types.ObjectId(appointmentId) });
-      return res.status(200).json({
-          success: true,
-          form
-      });
+    const form = await PrescriptionsForm.findOne({ appointmentId: new mongoose.Types.ObjectId(appointmentId) });
+    return res.status(200).json({
+      success: true,
+      form
+    });
   }
   const form = await PrescriptionsForm.findById(prescriptionId);
 
   res.status(200).json({
-      success: true,
-      form
+    success: true,
+    form
   });
 });
