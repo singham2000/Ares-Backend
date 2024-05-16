@@ -99,7 +99,7 @@ router
 
 router
   .route('/bookings')
-  .get(auth, isAdmin, getBookings)
+  .get( getBookings)
   .put(updateBooking)
 
 router.delete("/delete_user", auth, isAdmin, delUser);

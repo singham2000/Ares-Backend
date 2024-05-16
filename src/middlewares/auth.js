@@ -31,7 +31,6 @@ exports.auth = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    console.log(error);
     return res
       .status(401)
       .send({
@@ -53,7 +52,6 @@ exports.isAdmin = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log(error);
     return next(new ErrorHandler("Unauthorized is admin error", 401));
   }
 };

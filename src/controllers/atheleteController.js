@@ -222,7 +222,6 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.split(" ")[1],
     process.env.JWT_SECRET
   );
-  console.log(userId);
   const doctors = await userModel.find({ role: 'doctor' });
   req.userId = userId;
   let sortedAppointments = [];
@@ -255,7 +254,6 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
 exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const { date, service_type, plan, phase } = req.query;
   const fdate = new Date(date);
-  console.log(date, fdate);
   fdate.setUTCHours(0, 0, 0, 0);
   const { userId } = jwt.verify(
     req.headers.authorization.split(" ")[1],

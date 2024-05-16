@@ -749,7 +749,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
                 if (index === 0) {
                     calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
                         if (data.length > 0) {
-                            console.log("logger", data.length);
                             data.map((slot) => (
                                 Calcslots.push(slot)
                             ))
@@ -769,7 +768,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
                 } else {
                     calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].startTime, service_type).then((data) => {
                         if (data.length > 0) {
-                            console.log("logger", data.length);
                             data.map((slot) => (
                                 Calcslots.push(slot)
                             ))

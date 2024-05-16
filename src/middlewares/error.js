@@ -22,7 +22,6 @@ module.exports = (err, req, res, next) => {
       // mongoose duplicate key error
       if (err.code === 11000) {
         const field = Object.keys(err.keyValue)[0];
-        console.log(typeof field);
         let message;
         switch (field) {
           case "name":

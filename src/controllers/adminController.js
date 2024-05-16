@@ -994,7 +994,6 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
 exports.getForms = catchAsyncError(async (req, res, next) => {
 
   const appointmentId = req.query.appointmentId;
-  console.log(appointmentId);
   if (!appointmentId) {
     return next(new ErrorHandler(" appointmentId not received ", 404))
   }
@@ -1214,8 +1213,6 @@ exports.updateDrill = catchAsyncError(async (req, res, next) => {
   const { id } = req.query;
   const formdata = req.body.data;
 
-  console.log(formdata.plan);
-
   if (!id || !formdata)
     return next(new ErrorHandler("id and formdata are required", 400));
 
@@ -1294,7 +1291,10 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
 
 exports.getBookings = catchAsyncError(async (req, res, next) => {
   const id = req.params.id;
-
+  const page = parseInt(req.query.page_no) || 1;
+  const limit = parseInt(req.query.per_page_count) || 10;
+  const startDate = req.query.start_date;
+  const endDate = req.query.end_date;
   try {
     if (id) {
       const appointment = await appointmentModel.findById(id);
@@ -1303,8 +1303,24 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
         bookings: appointment
       })
     }
+    if (startDate && endDate) {
+      const appointments = await appointmentModel.find({
+        app_date: { $gte: new Date(startDate).toISOString(), $lte: new Date(endDate).toISOString() }
+      }).sort({ createdAt: "desc" })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec();
 
-    const appointments = await appointmentModel.find();
+      return res.status(200).json({
+        success: true,
+        bookings: appointments
+      });
+    }
+    const appointments = await appointmentModel.find().sort({ createdAt: "desc" })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+
     return res.status(200).json({
       success: true,
       bookings: appointments
