@@ -31,19 +31,21 @@ const userRoute = require("./src/routes/userRoute");
 const adminRoute = require("./src/routes/adminRoute");
 const athleteRoute = require("./src/routes/athleteRoute");
 const notificationRoute = require("./src/routes/notificationRoute");
+const paymentRoute = require("./src/routes/paymentRoute");
 app.use("/api/doctor", userRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/athlete", athleteRoute);
 app.use("/api/notification", notificationRoute);
+app.use("/api/payments", paymentRoute);
 
 app.get("/", (req, res) =>
   res.send(`<h1>Its working. Click to visit Link.</h1>`)
 );
 
 try {
-  const server = app.listen(5000,() => {
+  const server = app.listen(5000, () => {
     const port = server.address().port;
-    console.log("App is listening on ",port);
+    console.log("App is listening on ", port);
   });
 } catch (e) {
   console.log("Hello-JS");
