@@ -159,10 +159,6 @@ exports.registerAthlete = catchAsyncError(async (req, res, next) => {
   let user = await userModel.findOne({ email });
   if (user)
     return next(new ErrorHandler("User already exists with this email", 400));
-  if (password.length < 8)
-    return next(
-      new ErrorHandler("Password should have minimum 8 characters", 400),
-    );
 
   user = await userModel.create({
     firstName,
@@ -1354,4 +1350,11 @@ exports.updateBooking = catchAsyncError(async (req, res, next) => {
     appointment
   })
 
+});
+
+exports.dashboard = catchAsyncError(async (req, res, next) => {
+  const { date } = req.query;
+  const totalAthlete = userModel.find({ role: 'athlete' }).length;
+  const totalTodaysAppointment = appointmentModel.find({ app_date: date, app_date: { $gte: date.toISOString().split('T')[0], $lt: date.toISOString().split('T')[0] } }).length;
+  const totalRevenueOfMonth = TransactionalModel.find();
 });
