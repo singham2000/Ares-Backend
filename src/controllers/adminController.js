@@ -1353,8 +1353,40 @@ exports.updateBooking = catchAsyncError(async (req, res, next) => {
 });
 
 exports.dashboard = catchAsyncError(async (req, res, next) => {
-  const { date } = req.query;
-  const totalAthlete = userModel.find({ role: 'athlete' }).length;
-  const totalTodaysAppointment = appointmentModel.find({ app_date: date, app_date: { $gte: date.toISOString().split('T')[0], $lt: date.toISOString().split('T')[0] } }).length;
-  const totalRevenueOfMonth = TransactionalModel.find();
+  const date = new Date();
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString();
+  const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).toISOString();
+  const startOfMonth = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString();
+  const endOfMonth = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
+  const totalAthlete = userModel.countDocuments({ role: 'athlete' });
+  const todaysAppointments = await appointmentModel.find({
+    app_date: {
+      $gte: startOfDay,
+      $lt: endOfDay
+    }
+  }).exec();
+  const totalTodaysAppointment = todaysAppointments.length;
+  const totalRevenue = TransactionalModel.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: new Date(startOfMonth),
+          $lte: new Date(endOfMonth)
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalAmount: { $sum: "$amount" }
+      }
+    }
+  ]);
+
+  const result = await Promise.all([totalAthlete, totalTodaysAppointment, totalRevenue]);
+  res.status(200).json({
+    totalAthletes: result[0],
+    totalTodaysAppointments: result[1],
+    totalRevenue: result[2][0]?.totalAmount || 0
+  });
 });

@@ -48,7 +48,8 @@ const {
   getTransactions,
   updateTransaction,
   getBookings,
-  updateBooking
+  updateBooking,
+  dashboard
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -65,6 +66,10 @@ router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
 router.post('/set_drillform_form', auth, isAdmin, createDrillForm);
 router.post('/upload_file', upload.any(), auth, isAdmin, uploadXFile);
+
+router
+  .route('/dashboard')
+  .get(dashboard)
 
 router
   .route('/shipment')
@@ -99,7 +104,7 @@ router
 
 router
   .route('/bookings')
-  .get( getBookings)
+  .get(getBookings)
   .put(updateBooking)
 
 router.delete("/delete_user", auth, isAdmin, delUser);
