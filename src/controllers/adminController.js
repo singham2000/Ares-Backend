@@ -1109,7 +1109,7 @@ exports.deleteXFile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
-  const { plan, phase, productImages, productName, productDescription, name, startDate, endDate, address, mobile, status, id } = req.body;
+  const { plan, phase, trackingId, productImages, productName, productDescription, name, startDate, endDate, address, mobile, status, id } = req.body;
 
   try {
     const newShipment = await ShipmentModel.create({
@@ -1119,6 +1119,7 @@ exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {
       productImages,
       productName,
       productDescription,
+      trackingId,
       shipmentStatus: [{
         status,
         startDate,
@@ -1359,6 +1360,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   const startOfMonth = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)).toISOString();
   const endOfMonth = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
   const totalAthlete = userModel.countDocuments({ role: 'athlete' });
+  const totalDoctors = userModel.countDocuments({ role: 'doctor' });
   const todaysAppointments = await appointmentModel.find({
     app_date: {
       $gte: startOfDay,
@@ -1383,10 +1385,11 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     }
   ]);
 
-  const result = await Promise.all([totalAthlete, totalTodaysAppointment, totalRevenue]);
+  const result = await Promise.all([totalAthlete, totalDoctors, totalTodaysAppointment, totalRevenue]);
   res.status(200).json({
     totalAthletes: result[0],
-    totalTodaysAppointments: result[1],
-    totalRevenue: result[2][0]?.totalAmount || 0
+    totalDoctors: result[1],
+    totalTodaysAppointments: result[2],
+    totalRevenue: result[3][0]?.totalAmount || 0
   });
 });
