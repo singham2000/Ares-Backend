@@ -361,7 +361,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         service_type,
         date,
         payment_status: "pending",
-        clientId: user._id,
+        clientId: client_id,
         amount: service.cost
     });
 
