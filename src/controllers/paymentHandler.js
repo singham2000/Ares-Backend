@@ -5,7 +5,6 @@ const PlanModel = require("../models/planModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     const product = req.body.product;
-    console.log(product);
 
     if (!product) {
         return res.status(404).send({
