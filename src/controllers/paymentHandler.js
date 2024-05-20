@@ -2,10 +2,14 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const PlanModel = require("../models/planModel");
+const UserModel = require("../models/userModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     const product = req.body.product;
-
+    const user = await UserModel.findById(product.userId);
+    if (!user.plan) {
+        return res.status(400).json({ message: "Did'nt have any plan" });
+    }
     if (!product) {
         return res.status(404).send({
             success: false,
@@ -14,9 +18,9 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     } else {
         if (product.type === 'planPurchase') {
             const planCost = await PlanModel.findOne({
-                name: product.name
+                name: user.plan
             });
-            const plan = planCost.phases.find(phase => phase.name === product.phase);
+            const plan = planCost.phases.find(phase => phase.name === user.phase);
             try {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: plan.cost * 100,
@@ -33,10 +37,5 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.capturePayment = catchAsyncError(async (req, res, next) => {
-
-    const { session_id } = req.query;
-
-    const session = await stripe.checkout.sessions.retrieve(session_id);
-    const paymentStatus = session.payment_status;
+exports.completedPayment = catchAsyncError(async (req, res, next) => {
 });

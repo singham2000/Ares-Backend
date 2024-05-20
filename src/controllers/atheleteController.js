@@ -12,7 +12,8 @@ const transactionModel = require('../models/transactionModel');
 const DrillFormModel = require("../models/DrillFormModel.js");
 const ShipmentModel = require("../models/shipment.js");
 const DrillForm = require('../models/DrillModel.js');
-const PrescriptionsForm = require('../models/PrescriptionForm.js')
+const PrescriptionsForm = require('../models/PrescriptionForm.js');
+const EvaluationForm = require('../models/EvaluationForms.js');
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -497,10 +498,12 @@ exports.recentBookings = catchAsyncError(async (req, res) => {
 
   await Promise.all(appointmentsArray.map(async (appoint) => {
     const Presform = await PrescriptionsForm.find({ appointmentId: appoint._id });
+    const Evalform = await EvaluationForm.find({ appointmentId: appoint._id });
     let appointmentWithEval = {
       ...appoint.toObject(),
       isFilled: Boolean(Presform.length),
-      presId: Boolean(Presform.length) ? Presform[0]._id : null
+      presId: Boolean(Presform.length) ? Presform[0]._id : null,
+      evalId: Boolean(Evalform.length) ? Evalform[0]._id : null
     };
     appointments.push(appointmentWithEval);
 
