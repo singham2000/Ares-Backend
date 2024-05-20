@@ -1292,6 +1292,8 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
   const limit = parseInt(req.query.per_page_count) || 10;
   const startDate = req.query.start_date;
   const endDate = req.query.end_date;
+  const end = new Date(endDate);
+  end.setDate(end.getDate() + 1);
   try {
     if (id) {
       const appointment = await appointmentModel.findById(id);
@@ -1302,7 +1304,7 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
     }
     if (startDate && endDate) {
       const appointments = await appointmentModel.find({
-        app_date: { $gte: new Date(startDate).toISOString(), $lte: new Date(endDate).toISOString() }
+        app_date: { $gte: new Date(startDate).toISOString(), $lte: new Date(end).toISOString() }
       }).sort({ createdAt: "desc" })
         .skip((page - 1) * limit)
         .limit(limit)
