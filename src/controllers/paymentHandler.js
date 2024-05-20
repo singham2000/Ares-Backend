@@ -4,7 +4,8 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const PlanModel = require("../models/planModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
-    const product = req.body;
+    const product = req.body.product;
+    console.log(product);
 
     if (!product) {
         return res.status(404).send({
@@ -21,7 +22,7 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: plan.cost * 100,
                     currency: 'usd',
-                    payment_method_types: ['card', 'us_bank_account', 'afterpay_clearpay', 'apple_pay', 'google_pay'],
+                    payment_method_types: ['card'],
                 });
                 res.status(200).send({
                     clientSecret: paymentIntent.client_secret,
