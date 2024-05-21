@@ -6,9 +6,7 @@ const UserModel = require("../models/userModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     const product = req.body.product;
-    console.log(product);
     const user = await UserModel.findById(product.userId);
-    console.log(user);
     if (user.plan === null) {
         return res.status(400).json({ message: "Did'nt have any plan" });
     }

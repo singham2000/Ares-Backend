@@ -166,7 +166,8 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please fill in all fields", 400));
     if (newPassword !== confirmPassword)
         return next(new ErrorHandler("Password does not match", 400));
-
+    if (user.password === newPassword)
+        return next(new ErrorHandler("Choose a new password"));
     user.password = newPassword;
     await user.save();
 
@@ -343,7 +344,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         appointment_id: app_id,
         client: client_id,
         service_type,
-        app_date,
+        app_date: `${date.split('T')[0]}T00:00:00.000`,
         app_time,
         end_time,
         doctor_trainer,
@@ -741,9 +742,11 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         query.doctor = doctor;
     }
     if (date && doctor && service_type) {
-        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: date.split('Z')[0] });
+        let fdate = `${date.split('T')[0]}T00:00:00.000Z`
+        const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: fdate });
         const doc = await slotModel.find(query);
         let Calcslots = [];
+        console.log(dayAppointments.length);
         if (dayAppointments.length > 2) {
             const promises = dayAppointments.map((app, index) => {
                 if (index === 0) {
@@ -766,7 +769,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
                         return res.status(200).json({ slots: slots });
                     });
                 } else {
-                    calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].startTime, service_type).then((data) => {
+                    calculateTimeDifference(app.app_time, app.service_type, dayAppointments[index + 1].app_time, service_type).then((data) => {
                         if (data.length > 0) {
                             data.map((slot) => (
                                 Calcslots.push(slot)
@@ -810,6 +813,7 @@ exports.getSlots = catchAsyncError(async (req, res) => {
             Calcslots = await Promise.all(promises);
         } if (dayAppointments.length === 1) {
             const promises = dayAppointments.map((app, index) => {
+                console.log("zero", doc[0].startTime, app.app_time)
                 calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
                     data.map((slot) => (
                         Calcslots.push(slot)
