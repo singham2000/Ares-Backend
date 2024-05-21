@@ -746,7 +746,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
         const dayAppointments = await appointmentModel.find({ doctor_trainer: doctor, app_date: fdate });
         const doc = await slotModel.find(query);
         let Calcslots = [];
-        console.log(dayAppointments.length);
         if (dayAppointments.length > 2) {
             const promises = dayAppointments.map((app, index) => {
                 if (index === 0) {
@@ -813,7 +812,6 @@ exports.getSlots = catchAsyncError(async (req, res) => {
             Calcslots = await Promise.all(promises);
         } if (dayAppointments.length === 1) {
             const promises = dayAppointments.map((app, index) => {
-                console.log("zero", doc[0].startTime, app.app_time)
                 calculateTimeDifference(doc[0].startTime, null, app.app_time, app.service_type).then((data) => {
                     data.map((slot) => (
                         Calcslots.push(slot)
@@ -1276,10 +1274,7 @@ exports.getDrillDetails = catchAsyncError(async (req, res, next) => {
                 }
             }
         ];
-
-
         const drill = await DrillForm.aggregate(aggregationPipeline);
-        console.log(drill);
         if (drill.length === 0) {
             return next(new ErrorHandler("Drill cannot be found or created", 400))
         }
