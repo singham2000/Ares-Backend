@@ -24,7 +24,7 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
             try {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: plan.cost * 100,
-                    currency: 'usd',
+                    currency: 'inr',
                     payment_method_types: ['card'],
                 });
                 res.status(200).send({
