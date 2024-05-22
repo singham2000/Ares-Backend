@@ -29,6 +29,7 @@ const PrescriptionForm = require("../models/PrescriptionForm");
 const ClinicStatusModel = require("../models/clinicStatusModel");
 const ShipmentModel = require("../models/shipment");
 const TermsAndConditionsModel = require("../models/termsAndConditions");
+const PrivacyPolicyModel = require("../models/privacyPolicy");
 
 const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
 
@@ -1427,5 +1428,38 @@ exports.getTermsAndConditions = catchAsyncError(async (req, res, next) => {
   return res.status(200).json({
     success: true,
     termsAndConditions
+  });
+});
+
+exports.AddPrivacyPolicy = catchAsyncError(async (req, res, next) => {
+  const { text } = req.body;
+  if (!text) {
+    return next(new ErrorHandler('Text is not sent', 200));
+  }
+  const privacyPolicy = await PrivacyPolicyModel.findOne().sort({ createdAt: -1 });
+  if (privacyPolicy) {
+    privacyPolicy.text = text;
+    privacyPolicy.save();
+    return res.status(200).json({
+      success: true,
+      privacyPolicy
+    });
+  }
+  const newPrivacyPolicy = await PrivacyPolicyModel.create({
+    text
+  });
+  newPrivacyPolicy.save();
+  return res.status(200).json({
+    success: true,
+    privacyPolicy: newPrivacyPolicy
+  });
+
+});
+
+exports.getPrivacyPolicy = catchAsyncError(async (req, res, next) => {
+  const privacyPolicy = await PrivacyPolicyModel.findOne().sort({ createdAt: -1 });
+  return res.status(200).json({
+    success: true,
+    privacyPolicy
   });
 });

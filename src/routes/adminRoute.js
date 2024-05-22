@@ -51,6 +51,8 @@ const {
   updateBooking,
   AddtermsAndConditions,
   getTermsAndConditions,
+  AddPrivacyPolicy,
+  getPrivacyPolicy,
   dashboard
 } = require("../controllers/adminController");
 
@@ -77,6 +79,11 @@ router
   .route('/terms_and_conditions')
   .post(auth, isAdmin, AddtermsAndConditions)
   .get(auth, isAdmin, getTermsAndConditions)
+
+router
+  .route('/privacy_policy')
+  .post(auth, isAdmin, AddPrivacyPolicy)
+  .get(auth, isAdmin, getPrivacyPolicy)
 
 router
   .route('/shipment')
