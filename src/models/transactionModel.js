@@ -30,6 +30,9 @@ const transactionSchema = new Schema({
         required: true,
         ref: 'User'
     },
+    bookingId: {
+        type: Schema.Types.ObjectId,
+    },
     amount: {
         type: Number,
         required: true

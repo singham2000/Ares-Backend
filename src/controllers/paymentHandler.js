@@ -55,6 +55,11 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
             return cost || 0;
         };
         const booking = await AppointmentModel.findById(product.bookingId);
+        if (!booking)
+            return res.status(404).json({
+                success: true,
+                message: 'Booking not found'
+            })
         let cost = await costForService(booking.service_type);
 
         try {
@@ -75,3 +80,6 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     }
 });
 
+exports.updatePayment = catchAsyncError(async (req, res) => {
+
+});
