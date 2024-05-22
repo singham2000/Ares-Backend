@@ -27,7 +27,9 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: plan.cost * 100,
                     currency: 'inr',
-                    payment_method_types: ['card'],
+                    automatic_payment_methods: {
+                        enabled: true,
+                    },
                 });
                 res.status(200).send({
                     clientSecret: paymentIntent.client_secret,
@@ -55,7 +57,9 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: cost * 100,
                     currency: 'inr',
-                    payment_method_types: ['card'],
+                    automatic_payment_methods: {
+                        enabled: true,
+                    },
                 });
                 res.status(200).send({
                     clientSecret: paymentIntent.client_secret,
