@@ -83,27 +83,62 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
 
 exports.updatePayment = catchAsyncError(async (req, res) => {
     const { type, userId, bookingId, isPaid } = req.body;
-    if (type === 'planPurchase') {
-        const user = await UserModel.findById(userId);
-        const transantion = await TransactionModel.find({ clientId: new mongoose.Types.ObjectId(userId) })
-        user.plan_payment = isPaid ? 'paid' : 'failed';
-        transantion.payment_status = isPaid ? 'paid' : 'failed';
-        user.save();
-        transantion.save();
-        res.status.json({
-            success: true,
-            message: 'Updated'
-        });
-    } else if (type === 'booking') {
-        const booking = await AppointmentModel.findById(bookingId);
-        const transantion = await TransactionModel.find({ bookingId: new mongoose.Types.ObjectId(bookingId) })
-        booking.status = isPaid ? 'paid' : 'failed';
-        transantion.payment_status = isPaid ? 'paid' : 'failed';
-        user.save();
-        transantion.save();
-        res.status.json({
-            success: true,
-            message: 'Updated'
+    
+    try {
+        if (type === 'planPurchase') {
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            
+            const transaction = await TransactionModel.findOne({ clientId: new mongoose.Types.ObjectId(userId) });
+            if (!transaction) {
+                return res.status(404).json({ success: false, message: 'Transaction not found' });
+            }
+
+            user.plan_payment = isPaid ? 'paid' : 'failed';
+            transaction.payment_status = isPaid ? 'paid' : 'failed';
+
+            await user.save();
+            await transaction.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Updated'
+            });
+
+        } else if (type === 'booking') {
+            const booking = await AppointmentModel.findById(bookingId);
+            if (!booking) {
+                return res.status(404).json({ success: false, message: 'Booking not found' });
+            }
+            
+            const transaction = await TransactionModel.findOne({ bookingId: new mongoose.Types.ObjectId(bookingId) });
+            if (!transaction) {
+                return res.status(404).json({ success: false, message: 'Transaction not found' });
+            }
+
+            booking.status = isPaid ? 'paid' : 'failed';
+            transaction.payment_status = isPaid ? 'paid' : 'failed';
+
+            await booking.save();
+            await transaction.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Updated'
+            });
+
+        } else {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid type'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
         });
     }
 });
