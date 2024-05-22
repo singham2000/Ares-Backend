@@ -357,17 +357,18 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
 
     const service = await ServiceTypeModel.findOne({ alias: service_type })
 
+    await appointment.save();
     const transaction = await transactionModel.create({
         doctor: doctor_trainer,
         service_type,
         date,
         payment_status: "pending",
+        bookingId: appointment._id,
         clientId: client_id,
         amount: service.cost
     });
 
 
-    await appointment.save();
     await transaction.save();
 
     res.status(200).json({
