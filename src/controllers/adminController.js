@@ -28,6 +28,7 @@ const DiagnosisForm = require("../models/DiagnosisForm");
 const PrescriptionForm = require("../models/PrescriptionForm");
 const ClinicStatusModel = require("../models/clinicStatusModel");
 const ShipmentModel = require("../models/shipment");
+const TermsAndConditionsModel = require("../models/termsAndConditions");
 
 const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
 
@@ -1393,5 +1394,38 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     totalDoctors: result[1],
     totalTodaysAppointments: result[2],
     totalRevenue: result[3][0]?.totalAmount || 0
+  });
+});
+
+exports.AddtermsAndConditions = catchAsyncError(async (req, res, next) => {
+  const { text } = req.body;
+  if (!text) {
+    return next(new ErrorHandler('Text is not sent', 200));
+  }
+  const termsAndConditions = await TermsAndConditionsModel.findOne().sort({ createdAt: -1 });
+  if (termsAndConditions) {
+    termsAndConditions.text = text;
+    termsAndConditions.save();
+    return res.status(200).json({
+      success: true,
+      termsAndConditions
+    });
+  }
+  const newtermsAndConditions = await TermsAndConditionsModel.create({
+    text
+  });
+  newtermsAndConditions.save();
+  return res.status(200).json({
+    success: true,
+    termsAndConditions: newtermsAndConditions
+  });
+
+});
+
+exports.getTermsAndConditions = catchAsyncError(async (req, res, next) => {
+  const termsAndConditions = await TermsAndConditionsModel.findOne().sort({ createdAt: -1 });
+  return res.status(200).json({
+    success: true,
+    termsAndConditions
   });
 });

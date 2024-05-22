@@ -49,6 +49,8 @@ const {
   updateTransaction,
   getBookings,
   updateBooking,
+  AddtermsAndConditions,
+  getTermsAndConditions,
   dashboard
 } = require("../controllers/adminController");
 
@@ -69,7 +71,12 @@ router.post('/upload_file', upload.any(), auth, isAdmin, uploadXFile);
 
 router
   .route('/dashboard')
-  .get(dashboard)
+  .get(auth, isAdmin, dashboard)
+
+router
+  .route('/terms_and_conditions')
+  .post(auth, isAdmin, AddtermsAndConditions)
+  .get(auth, isAdmin, getTermsAndConditions)
 
 router
   .route('/shipment')
@@ -104,8 +111,8 @@ router
 
 router
   .route('/bookings')
-  .get(getBookings)
-  .put(updateBooking)
+  .get(auth, isAdmin, getBookings)
+  .put(auth, isAdmin, updateBooking)
 
 router.delete("/delete_user", auth, isAdmin, delUser);
 router.delete("/delete_slot", auth, isAdmin, delSlot);

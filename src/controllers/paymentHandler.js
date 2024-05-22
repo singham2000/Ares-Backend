@@ -3,17 +3,18 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const PlanModel = require("../models/planModel");
 const UserModel = require("../models/userModel");
+const ServiceModel = require("../models/ServiceTypeModel");
 const AppointmentModel = require("../models/appointmentModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     const product = req.body.product;
-
     if (!product) {
         return res.status(404).send({
             success: false,
             message: 'Product not found or not sent!'
         })
-    } else if (product.type === 'planPurchase') {
+    }
+    if (product.type === 'planPurchase') {
         const user = await UserModel.findById(product.userId);
         if (user.plan === null) {
             return res.status(400).json({ message: "Did'nt have any plan" });
@@ -37,40 +38,40 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
             } catch (error) {
                 res.status(500).send({ error: error.message });
             }
-        } else if (product.type === 'booking') {
-            const costForService = async (alias) => {
-                let cost;
+        }
+    }
+    if (product.type === 'booking') {
+        console.log(typeof product.type);
+        const costForService = async (alias) => {
+            let cost;
 
-                if (typeof cost === 'undefined') {
-                    const service = await ServiceModel.findOne({ alias }).select('+cost');
-                    if (service) {
-                        cost = service.cost;
-                    }
+            if (typeof cost === 'undefined') {
+                const service = await ServiceModel.findOne({ alias }).select('+cost');
+                if (service) {
+                    cost = service.cost;
                 }
-
-                return cost || 0;
-            };
-            const booking = await AppointmentModel.findById(product.bookingId);
-            let cost = await costForService(booking.service_type);
-
-            try {
-                const paymentIntent = await stripe.paymentIntents.create({
-                    amount: cost * 100,
-                    currency: 'inr',
-                    automatic_payment_methods: {
-                        enabled: true,
-                    },
-                });
-                res.status(200).send({
-                    clientSecret: paymentIntent.client_secret,
-                });
-            } catch (error) {
-                res.status(500).send({ error: error.message });
             }
 
+            return cost || 0;
+        };
+        const booking = await AppointmentModel.findById(product.bookingId);
+        let cost = await costForService(booking.service_type);
+
+        try {
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: cost * 100,
+                currency: 'inr',
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+            res.status(200).send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        } catch (error) {
+            res.status(500).send({ error: error.message });
         }
+
     }
 });
 
-exports.completedPayment = catchAsyncError(async (req, res, next) => {
-});
