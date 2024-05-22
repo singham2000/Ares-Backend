@@ -1,10 +1,12 @@
 const catchAsyncError = require("../utils/catchAsyncError");
+const mongoose = require("mongoose");
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const PlanModel = require("../models/planModel");
 const UserModel = require("../models/userModel");
 const ServiceModel = require("../models/ServiceTypeModel");
 const AppointmentModel = require("../models/appointmentModel");
+const TransactionModel = require("../models/transactionModel");
 
 exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
     const product = req.body.product;
@@ -41,7 +43,6 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
         }
     }
     if (product.type === 'booking') {
-        console.log(typeof product.type);
         const costForService = async (alias) => {
             let cost;
 
@@ -81,5 +82,28 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updatePayment = catchAsyncError(async (req, res) => {
-
+    const { type, userId, bookingId, isPaid } = req.body;
+    if (type === 'planPurchase') {
+        const user = await UserModel.findById(userId);
+        const transantion = await TransactionModel.find({ clientId: new mongoose.Types.ObjectId(userId) })
+        user.plan_payment = isPaid ? 'paid' : 'failed';
+        transantion.payment_status = isPaid ? 'paid' : 'failed';
+        user.save();
+        transantion.save();
+        res.status.json({
+            success: true,
+            message: 'Updated'
+        });
+    } else if (type === 'booking') {
+        const booking = await AppointmentModel.findById(bookingId);
+        const transantion = await TransactionModel.find({ bookingId: new mongoose.Types.ObjectId(bookingId) })
+        booking.status = isPaid ? 'paid' : 'failed';
+        transantion.payment_status = isPaid ? 'paid' : 'failed';
+        user.save();
+        transantion.save();
+        res.status.json({
+            success: true,
+            message: 'Updated'
+        });
+    }
 });
