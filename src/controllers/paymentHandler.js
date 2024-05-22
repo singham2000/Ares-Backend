@@ -13,12 +13,12 @@ exports.createPaymentIntent = catchAsyncError(async (req, res, next) => {
             success: false,
             message: 'Product not found or not sent!'
         })
-    } else {
+    } else if (product.type === 'planPurchase') {
         const user = await UserModel.findById(product.userId);
         if (user.plan === null) {
             return res.status(400).json({ message: "Did'nt have any plan" });
         }
-        if (product.type === 'planPurchase' || user.plan_payment !== 'paid') {
+        if (user.plan_payment !== 'paid') {
             const planCost = await PlanModel.findOne({
                 name: user.plan
             });
