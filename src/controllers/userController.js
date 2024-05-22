@@ -344,7 +344,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         appointment_id: app_id,
         client: client_id,
         service_type,
-        app_date: `${date.split('T')[0]}T00:00:00.000`,
+        app_date: `${app_date.split('T')[0]}T00:00:00.000`,
         app_time,
         end_time,
         doctor_trainer,
