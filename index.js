@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "PUT"] }));
 
 connectDB();
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
 
 app.use((req, res, next) => {
   const logEntry = new Log({ message: `${req.method} ${req.url}` });

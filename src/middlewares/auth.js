@@ -6,14 +6,14 @@ const { token } = require("morgan");
 dotenv.config();
 
 exports.auth = async (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).send({
+      error: {
+        message: `Unauthorized.Please Send token in request header`,
+      },
+    });
+  }
   try {
-    if (!req.headers.authorization) {
-      return res.status(401).send({
-        error: {
-          message: `Unauthorized.Please Send token in request header`,
-        },
-      });
-    }
 
     const { userId } = jwt.verify(
       req.headers.authorization.split(" ")[1],
