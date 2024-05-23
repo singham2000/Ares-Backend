@@ -1399,13 +1399,14 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
 });
 
 exports.AddtermsAndConditions = catchAsyncError(async (req, res, next) => {
-  const { text } = req.body;
+  const { text, role } = req.body;
   if (!text) {
     return next(new ErrorHandler('Text is not sent', 200));
   }
-  const termsAndConditions = await TermsAndConditionsModel.findOne().sort({ createdAt: -1 });
+  const termsAndConditions = await TermsAndConditionsModel.findOne({ role }).sort({ createdAt: -1 });
   if (termsAndConditions) {
     termsAndConditions.text = text;
+    termsAndConditions.role = role;
     termsAndConditions.save();
     return res.status(200).json({
       success: true,
@@ -1413,7 +1414,7 @@ exports.AddtermsAndConditions = catchAsyncError(async (req, res, next) => {
     });
   }
   const newtermsAndConditions = await TermsAndConditionsModel.create({
-    text
+    text, role
   });
   newtermsAndConditions.save();
   return res.status(200).json({
@@ -1424,7 +1425,8 @@ exports.AddtermsAndConditions = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTermsAndConditions = catchAsyncError(async (req, res, next) => {
-  const termsAndConditions = await TermsAndConditionsModel.findOne().sort({ createdAt: -1 });
+  const { role } = req.query;
+  const termsAndConditions = await TermsAndConditionsModel.findOne({ role }).sort({ createdAt: -1 });
   return res.status(200).json({
     success: true,
     termsAndConditions
@@ -1432,13 +1434,14 @@ exports.getTermsAndConditions = catchAsyncError(async (req, res, next) => {
 });
 
 exports.AddPrivacyPolicy = catchAsyncError(async (req, res, next) => {
-  const { text } = req.body;
+  const { text, role } = req.body;
   if (!text) {
     return next(new ErrorHandler('Text is not sent', 200));
   }
-  const privacyPolicy = await PrivacyPolicyModel.findOne().sort({ createdAt: -1 });
+  const privacyPolicy = await PrivacyPolicyModel.findOne({ role }).sort({ createdAt: -1 });
   if (privacyPolicy) {
     privacyPolicy.text = text;
+    privacyPolicy.role = role;
     privacyPolicy.save();
     return res.status(200).json({
       success: true,
@@ -1446,7 +1449,7 @@ exports.AddPrivacyPolicy = catchAsyncError(async (req, res, next) => {
     });
   }
   const newPrivacyPolicy = await PrivacyPolicyModel.create({
-    text
+    text, role
   });
   newPrivacyPolicy.save();
   return res.status(200).json({
@@ -1457,7 +1460,8 @@ exports.AddPrivacyPolicy = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getPrivacyPolicy = catchAsyncError(async (req, res, next) => {
-  const privacyPolicy = await PrivacyPolicyModel.findOne().sort({ createdAt: -1 });
+  const { role } = req.query;
+  const privacyPolicy = await PrivacyPolicyModel.findOne({ role }).sort({ createdAt: -1 });
   return res.status(200).json({
     success: true,
     privacyPolicy

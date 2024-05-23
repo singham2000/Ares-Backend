@@ -78,12 +78,12 @@ router
 router
   .route('/terms_and_conditions')
   .post(auth, isAdmin, AddtermsAndConditions)
-  .get(auth, isAdmin, getTermsAndConditions)
+  .get(auth, getTermsAndConditions)
 
 router
   .route('/privacy_policy')
   .post(auth, isAdmin, AddPrivacyPolicy)
-  .get(auth, isAdmin, getPrivacyPolicy)
+  .get(auth, getPrivacyPolicy)
 
 router
   .route('/shipment')
