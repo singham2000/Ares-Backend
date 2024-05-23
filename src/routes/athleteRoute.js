@@ -23,13 +23,13 @@ router.get("/get-profile", auth, getProfile);
 router.route('/transaction').get(auth, getTransactions);
 router.get("/get-bookings", auth, getBookings);
 router.get("/upcoming-appointments", auth, getUpcomingAppointments);
-router.get("/recent-bookings",auth, recentBookings);
+router.get("/recent-bookings", auth, recentBookings);
 
 router.route('/prescription').get(auth, getPrescription);
 
 router.put("/reset-password", auth, resetPassword);
 router.put("/edit-profile", auth, editProfile);
-router.route('/dashboard').get( dashboard);
+router.route('/dashboard').get(auth, dashboard);
 
 router.route('/shipment').get(auth, shipment);
 

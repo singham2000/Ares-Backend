@@ -1249,10 +1249,25 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const limit = parseInt(req.query.per_page_count) || 10;
   const startDate = req.query.start_date;
   const endDate = req.query.end_date;
-
-  const transactions = await TransactionalModel.find({
+  const searchQuery = req.query.searchQuery;
+  let query = {
     date: { $gte: new Date(startDate), $lte: new Date(endDate) }
-  }).populate('clientId').sort({ createdAt: "desc" })
+  };
+  if (searchQuery) {
+    const regex = new RegExp(`^${searchQuery}`, 'i');
+    const q = {};
+    q.$or = [
+      { 'firstName': regex },
+      { 'lastName': regex },
+      { 'first_name': regex },
+      { 'last_name': regex },
+      { 'email': regex }
+    ];
+    const users = await userModel.find(q);
+    const ids = users.map(user => user._id.toString());
+    query.clientId = { $in: ids };
+  }
+  const transactions = await TransactionalModel.find(query).populate('clientId').sort({ createdAt: "desc" })
     .skip((page - 1) * limit)
     .limit(limit)
     .exec();
@@ -1292,18 +1307,34 @@ exports.getBookings = catchAsyncError(async (req, res, next) => {
   const endDate = req.query.end_date;
   const end = new Date(endDate);
   end.setDate(end.getDate() + 1);
+  const searchQuery = req.query.searchQuery;
+  let query = {};
+  if (searchQuery) {
+    const regex = new RegExp(`^${searchQuery}`, 'i');
+    const q = {};
+    q.$or = [
+      { 'firstName': regex },
+      { 'lastName': regex },
+      { 'first_name': regex },
+      { 'last_name': regex },
+      { 'email': regex }
+    ];
+    const users = await userModel.find(q);
+    const ids = users.map(user => user._id.toString());
+    query.client = { $in: ids };
+  }
   try {
     if (id) {
-      const appointment = await appointmentModel.findById(id);
+      query._id = mongoose.Types.ObjectId(id);
+      const appointment = await appointmentModel.find(query);
       return res.status(200).json({
         success: true,
         bookings: appointment
       })
     }
     if (startDate && endDate) {
-      const appointments = await appointmentModel.find({
-        app_date: { $gte: new Date(startDate).toISOString(), $lte: new Date(end).toISOString() }
-      }).sort({ createdAt: "desc" })
+      query.app_date = { $gte: new Date(startDate).toISOString(), $lte: new Date(end).toISOString() }
+      const appointments = await appointmentModel.find(query).sort({ createdAt: "desc" })
         .skip((page - 1) * limit)
         .limit(limit)
         .exec();
