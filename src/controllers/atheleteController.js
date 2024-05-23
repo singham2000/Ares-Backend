@@ -88,6 +88,9 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please enter your email and password", 400));
 
   const user = await userModel.findOne({ email: { $regex: new RegExp(email, "i") } }).select("+password");
+  if (user.role !== 'athlete') {
+    return next(new ErrorHandler('Unauthorized! Access Denied ', 400))
+  }
 
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
@@ -292,7 +295,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   );
 
   const isDrill = await DrillFormModel.find({ clientId: userId })
-  const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) });
+  const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) }).select("+trackingId +productName +shipmentStatus");
   if (isDrill.length > 0) {
     const calcPipe = [
       {
@@ -410,6 +413,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       completedDrills: 0,
       drillProgress: 0
     },
+    shipment,
     isShipment: Boolean(shipment)
   });
 

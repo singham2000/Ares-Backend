@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const statusEnum = ['order placed', 'order dispatched', 'shipped', 'out for delivery', 'delivered'];
 
 const ShipmentStatus = new mongoose.Schema({
     status: {
         type: String,
+        enum: statusEnum
     },
     startDate: {
         type: Date,
