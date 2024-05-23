@@ -317,8 +317,12 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location
     } = req.body;
     let query = {
-        app_date: app_date,
-        doctor_trainer: doctor_trainer
+        service_type,
+        app_date: `${app_date.split('T')[0]}T00:00:00.000`,
+        app_time,
+        end_time,
+        doctor_trainer,
+        location
     };
     const app_id = generateAppointmentId();
 
@@ -329,17 +333,14 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     if (!client) {
         return next(new ErrorHandler("Client does not exist", 400));
     }
+    if (client.role !== 'athlete') {
+        return next(new ErrorHandler('Unauthorized! Access denied', 400));
+    }
 
-    // const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
-    // if (dayAppointments) {
-    //     dayAppointments.forEach(appointment => {
-    //         if (timeValidate(appointment.service_type, appointment.app_time, app_time)) {
-    //             appointmentOnDate = appointmentOnDate + 1;
-    //         }
-    //     })
-    // }
-    // if (appointmentOnDate)
-    //     return next(new ErrorHandler("Another Appointment is overlapping", 400));
+    const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
+    if (dayAppointments.length > 0) {
+        return next(new ErrorHandler('Already booked a appointment on this timeline', 400));
+    }
     const service = await ServiceTypeModel.findOne({ alias: service_type })
     const appointment = await appointmentModel.create({
         appointment_id: app_id,
@@ -612,6 +613,9 @@ exports.selectPlan = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Please provide a user id", 400));
     }
     const user = await userModel.findById(userId);
+    if (user.role !== 'athlete') {
+        return next(new ErrorHandler('Unauthorized! Access denied', 400));
+    }
 
     const DrillFormUser = await DrillForm.find(
         {
