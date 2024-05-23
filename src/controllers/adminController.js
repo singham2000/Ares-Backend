@@ -116,7 +116,7 @@ exports.registerDoctor = catchAsyncError(async (req, res, next) => {
     password: `${firstName}${phone}`,
     role: "doctor",
   });
-  newAccount(email, `${firstName}${lastName}`, password);
+  newAccount(email, `${firstName}${lastName}`, `${firstName}${phone}`);
   await user.save();
   const users = await userModel.find({ role: ["doctor", "athlete"] });
   res.status(200).json({
