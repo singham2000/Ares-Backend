@@ -400,6 +400,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       userDetails,
       drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : { week: 1, day: 1 },
       drillDetails: runner(drill),
+      shipment,
       isShipment: Boolean(shipment)
     });
   }
