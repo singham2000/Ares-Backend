@@ -295,7 +295,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
   );
 
   const isDrill = await DrillFormModel.find({ clientId: userId })
-  const shipment = await ShipmentModel.findOne({ ClientId: new mongoose.Types.ObjectId(userId) }).select("+trackingId +productName +shipmentStatus");
+  const shipment = await ShipmentModel.find({ ClientId: new mongoose.Types.ObjectId(userId) }).select("-shippingAddress -productDescription -productImages -ClientId -plan -phase");
   if (isDrill.length > 0) {
     const calcPipe = [
       {
