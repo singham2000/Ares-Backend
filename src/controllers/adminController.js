@@ -1250,6 +1250,14 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const startDate = req.query.start_date;
   const endDate = req.query.end_date;
   const searchQuery = req.query.searchQuery;
+  const id = req.query.clientId;
+  if (id) {
+    const transactions = await TransactionalModel.find({ clientId: new mongoose.Types.ObjectId(id) })
+    res.status(200).json({
+      success: true,
+      transactions: transactions
+    });
+  }
   let query = {
     date: { $gte: new Date(startDate), $lte: new Date(endDate) }
   };
