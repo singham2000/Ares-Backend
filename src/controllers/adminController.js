@@ -1421,7 +1421,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
         date: {
           $gte: new Date(startOfMonth),
           $lte: new Date(endOfMonth)
-        }
+        },
+        payment_status: 'paid'
       }
     },
     {
