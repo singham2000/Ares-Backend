@@ -31,7 +31,7 @@ const ShipmentModel = require("../models/shipment");
 const TermsAndConditionsModel = require("../models/termsAndConditions");
 const PrivacyPolicyModel = require("../models/privacyPolicy");
 
-const { s3Uploadv2, s3UploadMultiv2 } = require("../utils/aws");
+const { s3Uploadv2, s3UploadMultiv2, s3Delete } = require("../utils/aws");
 
 const mongoose = require("mongoose");
 
@@ -1104,6 +1104,11 @@ exports.uploadXFile = catchAsyncError(async (req, res, next) => {
 
 exports.deleteXFile = catchAsyncError(async (req, res, next) => {
   const { link } = req.query;
+  const message = await s3Delete(link);
+  console.log(message);
+  return res.status(200).json(
+    message
+  )
 });
 
 exports.shipmentDetailer = catchAsyncError(async (req, res, next) => {

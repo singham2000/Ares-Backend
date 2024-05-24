@@ -70,22 +70,31 @@ exports.s3Delete = async (file) => {
         region: process.env.AWS_BUCKET_REGION,
     });
 
-    const key1 = file.split("/")[5];
-    const fileType = file.split("/")[4];
-    if (fileType === 'videos') {
-        const param = {
+    try {
+        const fileParts = file.split("/");
+        const key1 = fileParts[5];
+        const fileType = fileParts[4];
+
+        let keyPrefix = '';
+        if (fileType === 'videos') {
+            keyPrefix = 'uploads/videos/';
+        } else if (fileType === 'images') {
+            keyPrefix = 'uploads/images/';
+        } else {
+            throw new Error('Unsupported file type');
+        }
+
+        const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `uploads/images/${key1}`,
+            Key: `${keyPrefix}${key1}`,
         };
 
-        return await s3.deleteObject(param).promise();
-    } else if (fileType === 'images') {
-        const param = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `uploads/images/${key1}`,
-        };
-
-        return await s3.deleteObject(param).promise();
+        const result = await s3.deleteObject(params).promise();
+        console.log(`Successfully deleted ${fileType} from S3:`, result);
+        return result;
+    } catch (error) {
+        console.error("Error deleting file from S3:", error);
+        throw error;
     }
 };
 

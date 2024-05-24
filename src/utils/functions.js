@@ -3,25 +3,30 @@ const ServiceModel = require('../models/ServiceTypeModel');
 const notificationModel = require("../models/notificationModel");
 const catchAsyncError = require("./catchAsyncError");
 
+const serviceDurations = {
+    MedicalOfficeVisit: 30,
+    Consultation: 15,
+    SportsVision: 90,
+    ConcussionEval: 60,
+    null: 0
+};
+
+const timeCache = new Map();
+
 const timeForService = async (alias) => {
-    const serviceDurations = {
-        MedicalOfficeVisit: 30,
-        Consultation: 15,
-        SportsVision: 90,
-        ConcussionEval: 60,
-        null: 0
-    };
+    if (timeCache.has(alias)) {
+        return timeCache.get(alias);
+    }
 
     let time = serviceDurations[alias];
 
     if (typeof time === 'undefined') {
         const service = await ServiceModel.findOne({ alias }).select('+duration');
-        if (service) {
-            time = service.duration;
-        }
+        time = service ? service.duration : 0;
+        timeCache.set(alias, time); // Cache the result
     }
 
-    return time || 0;
+    return time;
 };
 
 const convertTo24HourFormat = (time12Hour) => {

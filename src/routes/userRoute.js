@@ -47,7 +47,7 @@ router.post("/submit-eval-form", auth, submitEvaluation);
 router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);
 
-router.get("/get-slots", auth, getSlots);
+router.get("/get-slots", getSlots);
 router.get("/get-Drills", auth, getDrillDetails);
 router.get("/get-prescriptions", auth, getPrescription);
 router.get("/get-evaluations", auth, getEvaluation);

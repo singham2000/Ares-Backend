@@ -38,6 +38,7 @@ const {
   updateClinic,
   getClinicStatus,
   uploadXFile,
+  deleteXFile,
   shipmentDetailer,
   getShipments,
   updateShipment,
@@ -70,6 +71,7 @@ router.post("/set_eval_form", auth, isAdmin, evaluationFormMake);
 router.post("/add_slot", auth, isAdmin, addSlot);
 router.post('/set_drillform_form', auth, isAdmin, createDrillForm);
 router.post('/upload_file', upload.any(), auth, isAdmin, uploadXFile);
+router.delete('/delete_file', deleteXFile);
 
 router
   .route('/dashboard')
