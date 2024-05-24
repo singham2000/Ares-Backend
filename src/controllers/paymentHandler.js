@@ -91,7 +91,7 @@ exports.updatePayment = catchAsyncError(async (req, res) => {
                 return res.status(404).json({ success: false, message: 'User not found' });
             }
 
-            const transaction = await TransactionModel.findOne({ clientId: new mongoose.Types.ObjectId(userId) }).sort('desc');
+            const transaction = await TransactionModel.findOne({ clientId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 });
             if (!transaction) {
                 return res.status(404).json({ success: false, message: 'Transaction not found' });
             }
@@ -113,7 +113,7 @@ exports.updatePayment = catchAsyncError(async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Booking not found' });
             }
 
-            const transaction = await TransactionModel.findOne({ bookingId: new mongoose.Types.ObjectId(bookingId) });
+            const transaction = await TransactionModel.findOne({ bookingId: new mongoose.Types.ObjectId(bookingId) }).sort({ createdAt: -1 });;
             if (!transaction) {
                 return res.status(404).json({ success: false, message: 'Transaction not found' });
             }
