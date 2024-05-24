@@ -1287,8 +1287,11 @@ exports.updateTransaction = catchAsyncError(async (req, res, next) => {
 
   try {
     const transaction = await TransactionalModel.findById(id);
+    const user = await userModel.findById(transaction.clientId);
+    user.status = status;
     transaction.payment_status = status;
     await transaction.save();
+    await user.save();
     return res.status(200).json({
       success: true,
       transaction
