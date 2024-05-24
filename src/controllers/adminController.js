@@ -1253,7 +1253,7 @@ exports.getTransactions = catchAsyncError(async (req, res, next) => {
   const id = req.query.clientId;
   if (id) {
     const transactions = await TransactionalModel.find({ clientId: new mongoose.Types.ObjectId(id) })
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       transactions: transactions
     });
