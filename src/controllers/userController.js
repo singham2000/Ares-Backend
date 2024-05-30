@@ -20,6 +20,7 @@ const DrillForm = require('../models/DrillFormModel.js');
 const DrillFormModel = require("../models/DrillModel.js");
 const { createNotification, timeForService } = require('../utils/functions');
 const transactionModel = require("../models/transactionModel.js");
+const TrainingSessionModel = require("../models/trainingSessionModel.js");
 
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
@@ -1353,6 +1354,45 @@ exports.drillUpdate = catchAsyncError(async (req, res, next) => {
     } catch (error) {
         console.error("Error updating activity:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+exports.createTrainigSessionModel = catchAsyncError(async (req, req, next) => {
+    const { type, cost, session_per_month } = req.body;
+
+    const session = await TrainingSessionModel.find({ type, cost, session_per_month });
+    if (session)
+        return next(new ErrorHandler('This is already created', 400));
+    try {
+        const newSession = await TrainingSessionModel.create({
+            session_type: type, cost, session_per_month
+        });
+        await newSession.save();
+        return res.status(200).json({
+            success: true, message: "Training session Added successfully"
+        });
+    } catch (error) {
+        return next(new ErrorHandler('Internal server error' + error, 400));
+    }
+});
+
+exports.updateTrainingSessionModel = catchAsyncErrorAsync(async (req, res, next) => {
+    const { type, cost, session_per_month } = req.body;
+    const { id } = req.query;
+    try {
+        const session = await TrainingSessionModel.findByIdAndUpdate(id, { type, cost, session_per_month }, { new: true, runValidators: true });
+
+        if (!session) {
+            return next(new ErrorHandler('Training session not found', 404));
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Successfully updated",
+            data: session
+        });
+    } catch (error) {
+        return next(new ErrorHandler('Internal server error: ' + error.message, 500));
     }
 });
 
