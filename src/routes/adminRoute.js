@@ -57,7 +57,20 @@ const {
   dashboard
 } = require("../controllers/adminController");
 
+const {
+  getTrainigSessionModel,
+  createTrainigSessionModel,
+  updateTrainingSessionModel,
+  deleteTrainingSessionModel
+} = require('../controllers/userController');
+
 const router = express.Router();
+
+router.route('/training-session')
+  .get(auth, isAdmin, getTrainigSessionModel)
+  .post(auth, isAdmin, createTrainigSessionModel)
+  .put(auth, isAdmin, updateTrainingSessionModel)
+  .delete(auth, isAdmin, deleteTrainingSessionModel)
 
 router.post("/login", login);
 router.post("/save_form", auth, isAdmin, saveForm);

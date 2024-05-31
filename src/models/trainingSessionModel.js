@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const trainingSessionSchema = new mongoose.Schema({
-    type: {
+    session_type: {
         type: String,
         required: true
     },
@@ -17,4 +17,4 @@ const trainingSessionSchema = new mongoose.Schema({
     }
 });
 
-const TrainingSessionModel = mongoose.model('TrainingSessionModel', trainingSessionSchema);
+module.exports = mongoose.model('TrainingSessionModel', trainingSessionSchema);

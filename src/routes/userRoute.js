@@ -32,10 +32,14 @@ const {
   getPrescription,
   getEvaluation,
   getDrillDetails,
-  drillUpdate
+  drillUpdate,
+  getTrainigSessionModel
 } = require("../controllers/userController");
 
 const router = express.Router();
+
+router.route('/trainig-session')
+  .get(auth, getTrainigSessionModel)
 
 router.post("/login", login);
 router.post("/send-forgot-password-code", sendForgotPasswordCode);

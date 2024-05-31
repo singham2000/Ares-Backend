@@ -1357,15 +1357,33 @@ exports.drillUpdate = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.createTrainigSessionModel = catchAsyncError(async (req, req, next) => {
-    const { type, cost, session_per_month } = req.body;
+exports.getTrainigSessionModel = catchAsyncError(async (req, res, next) => {
+    const { session_type } = req.query;
+    if (session_type) {
+        const trainigSessionModel = await TrainingSessionModel.find({ session_type });
+        return res.status(200).json({
+            success: true,
+            message: 'Fetched trainig session models',
+            trainigSessionModel
+        });
+    }
+    const trainigSessionModel = await TrainingSessionModel.find();
+    return res.status(200).json({
+        success: true,
+        message: 'Fetched trainig session models',
+        trainigSessionModel
+    });
+});
 
-    const session = await TrainingSessionModel.find({ type, cost, session_per_month });
+exports.createTrainigSessionModel = catchAsyncError(async (req, res, next) => {
+    const { session_type, cost, session_per_month } = req.body;
+
+    const session = await TrainingSessionModel.findOne({ session_type, cost, session_per_month });
     if (session)
         return next(new ErrorHandler('This is already created', 400));
     try {
         const newSession = await TrainingSessionModel.create({
-            session_type: type, cost, session_per_month
+            session_type, cost, session_per_month
         });
         await newSession.save();
         return res.status(200).json({
@@ -1376,11 +1394,11 @@ exports.createTrainigSessionModel = catchAsyncError(async (req, req, next) => {
     }
 });
 
-exports.updateTrainingSessionModel = catchAsyncErrorAsync(async (req, res, next) => {
-    const { type, cost, session_per_month } = req.body;
+exports.updateTrainingSessionModel = catchAsyncError(async (req, res, next) => {
+    const { session_type, cost, session_per_month } = req.body;
     const { id } = req.query;
     try {
-        const session = await TrainingSessionModel.findByIdAndUpdate(id, { type, cost, session_per_month }, { new: true, runValidators: true });
+        const session = await TrainingSessionModel.findByIdAndUpdate(id, { session_type, cost, session_per_month }, { new: true, runValidators: true });
 
         if (!session) {
             return next(new ErrorHandler('Training session not found', 404));
@@ -1396,8 +1414,25 @@ exports.updateTrainingSessionModel = catchAsyncErrorAsync(async (req, res, next)
     }
 });
 
+exports.deleteTrainingSessionModel = catchAsyncError(async (req, res, next) => {
+    const { id } = req.query;
 
+    if (!id) {
+        return next(new ErrorHandler('Training session not found or id not sent', 404));
+    }
 
+    try {
+        const result = await TrainingSessionModel.findByIdAndDelete(id);
 
+        if (!result) {
+            return next(new ErrorHandler('Training session not found', 404));
+        }
 
-
+        return res.status(200).json({
+            success: true,
+            message: "Training session is deleted successfully"
+        });
+    } catch (error) {
+        return next(new ErrorHandler('Internal server error: ' + error.message, 500));
+    }
+});
