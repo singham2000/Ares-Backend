@@ -38,7 +38,7 @@ const {
 
 const router = express.Router();
 
-router.route('/trainig-session')
+router.route('/training-session')
   .get(auth, getTrainigSessionModel)
 
 router.post("/login", login);
