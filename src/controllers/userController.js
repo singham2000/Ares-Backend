@@ -21,6 +21,7 @@ const DrillFormModel = require("../models/DrillModel.js");
 const { createNotification, timeForService } = require('../utils/functions');
 const transactionModel = require("../models/transactionModel.js");
 const TrainingSessionModel = require("../models/trainingSessionModel.js");
+const OfflineDrill = require('../models/offlineDrillModel.js');
 
 
 exports.getProfile = catchAsyncError(async (req, res, next) => {
@@ -1435,4 +1436,48 @@ exports.deleteTrainingSessionModel = catchAsyncError(async (req, res, next) => {
     } catch (error) {
         return next(new ErrorHandler('Internal server error: ' + error.message, 500));
     }
+});
+
+exports.buyTrainingSession = catchAsyncError(async (req, res, next) => {
+    const { clientId, sessionId } = req.query;
+
+    if (!clientId || !sessionId) {
+        return res.status(400).json({
+            success: false,
+            message: "Client ID and Session ID are required"
+        });
+    }
+
+    const [client, TrainingSession] = await Promise.all([
+        userModel.findById(clientId),
+        TrainingSessionModel.findById(sessionId)
+    ]);
+
+    if (!TrainingSession) {
+        return res.status(404).json({
+            success: false,
+            message: "Training session not found"
+        });
+    }
+
+    const sessions = Array.from({ length: TrainingSession.session_per_month }, () => ({}));
+
+    const SessionForUser = await OfflineDrill.create({
+        clientId,
+        sessions
+    });
+    SessionForUser.save();
+    const dater = new Date();
+    const fdate = dater.setUTCHours(0, 0, 0, 0);
+    const transaction = await transactionModel.create({
+        payment_status: 'pending',
+        date: fdate,
+        clientId,
+        amount: TrainingSession.cost
+    })
+    transaction.save();
+    res.status(200).json({
+        success: true,
+        SessionForUser
+    });
 });

@@ -33,7 +33,8 @@ const {
   getEvaluation,
   getDrillDetails,
   drillUpdate,
-  getTrainigSessionModel
+  getTrainigSessionModel,
+  buyTrainingSession
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -50,6 +51,7 @@ router.post("/book-appointment/:id", auth, bookAppointment);
 router.post("/submit-eval-form", auth, submitEvaluation);
 router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);
+router.post('/buy-training-session', auth, buyTrainingSession);
 
 router.get("/get-slots", getSlots);
 router.get("/get-Drills", auth, getDrillDetails);
