@@ -5,7 +5,7 @@ const formModel = new mongoose.Schema({
         type: String,
         required: true,
     },
-    type: {
+    type_of_field: {
         type: String,
         required: true,
     },
@@ -36,8 +36,10 @@ const drillModel = new mongoose.Schema({
 }, { timestamps: true });
 
 const session = new mongoose.Schema({
-    type: Array,
-    of: drillModel,
+    drills: {
+        type: Array,
+        of: drillModel,
+    }
 });
 
 const offlineDrillSchema = new mongoose.Schema({
