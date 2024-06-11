@@ -15,7 +15,10 @@ const drillModel = new mongoose.Schema({
 }, { timestamps: true });
 
 const sessionSchema = new mongoose.Schema({
-    drills: { type: [drillModel] }
+    drills: { type: [drillModel] },
+    isBooked: {
+        type: Boolean, required: true, default: false
+    }
 });
 
 const offlineDrillSchema = new mongoose.Schema({
