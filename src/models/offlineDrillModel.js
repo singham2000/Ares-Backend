@@ -1,57 +1,28 @@
 const mongoose = require('mongoose');
 
+// Schema definitions
 const formModel = new mongoose.Schema({
-    label: {
-        type: String,
-        required: true,
-    },
-    type_of_field: {
-        type: String,
-        required: true,
-    },
-    options: {
-        type: Array,
-        required: true,
-    },
-    value: {
-        type: String,
-        required: true,
-    }
+    label: { type: String, required: true },
+    type_of_field: { type: String, required: true },
+    options: { type: Array, required: true },
+    value: { type: String, required: true }
 });
 
 const drillModel = new mongoose.Schema({
-    label: {
-        type: String,
-        required: true,
-    },
-    isComplete: {
-        type: Boolean,
-        required: true,
-        default: false
-    },
-    form: {
-        type: Array,
-        of: formModel
-    },
+    label: { type: String, required: true },
+    isComplete: { type: Boolean, required: true, default: false },
+    form: { type: [formModel] }
 }, { timestamps: true });
 
-const session = new mongoose.Schema({
-    drills: {
-        type: Array,
-        of: drillModel,
-    }
+const sessionSchema = new mongoose.Schema({
+    drills: { type: [drillModel] }
 });
 
 const offlineDrillSchema = new mongoose.Schema({
-    clientId: {
-        type: mongoose.Types.ObjectId,
-        required: true
-    },
-    sessions: {
-        type: Array,
-        of: session,
-        required: true
-    }
+    clientId: { type: mongoose.Types.ObjectId, required: true },
+    sessions: { type: [sessionSchema], required: true }
 });
 
-module.exports = mongoose.model('OfflineDrill', offlineDrillSchema);
+const OfflineDrill = mongoose.model('OfflineDrill', offlineDrillSchema);
+
+module.exports = OfflineDrill;

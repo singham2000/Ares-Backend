@@ -1359,9 +1359,9 @@ exports.drillUpdate = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTrainigSessionModel = catchAsyncError(async (req, res, next) => {
-    const { session_type } = req.query;
+    const { session_type, frequencyType } = req.query;
     if (session_type) {
-        const trainigSessionModel = await TrainingSessionModel.find({ session_type });
+        const trainigSessionModel = await TrainingSessionModel.find({ session_type, frequency: frequencyType });
         return res.status(200).json({
             success: true,
             message: 'Fetched trainig session models',
@@ -1377,14 +1377,14 @@ exports.getTrainigSessionModel = catchAsyncError(async (req, res, next) => {
 });
 
 exports.createTrainigSessionModel = catchAsyncError(async (req, res, next) => {
-    const { session_type, cost, session_per_month } = req.body;
+    const { session_type, cost, sessions, frequency } = req.body;
 
-    const session = await TrainingSessionModel.findOne({ session_type, cost, session_per_month });
-    if (session)
+    const Tsession = await TrainingSessionModel.findOne({ session_type, cost, sessions, frequency });
+    if (Tsession)
         return next(new ErrorHandler('This is already created', 400));
     try {
         const newSession = await TrainingSessionModel.create({
-            session_type, cost, session_per_month
+            session_type, cost, sessions, frequency
         });
         await newSession.save();
         return res.status(200).json({
@@ -1396,10 +1396,10 @@ exports.createTrainigSessionModel = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateTrainingSessionModel = catchAsyncError(async (req, res, next) => {
-    const { session_type, cost, session_per_month } = req.body;
+    const { session_type, cost, sessions, frequency } = req.body;
     const { id } = req.query;
     try {
-        const session = await TrainingSessionModel.findByIdAndUpdate(id, { session_type, cost, session_per_month }, { new: true, runValidators: true });
+        const session = await TrainingSessionModel.findByIdAndUpdate(id, { session_type, cost, sessions, frequency }, { new: true, runValidators: true });
 
         if (!session) {
             return next(new ErrorHandler('Training session not found', 404));
@@ -1460,7 +1460,7 @@ exports.buyTrainingSession = catchAsyncError(async (req, res, next) => {
         });
     }
 
-    const sessions = Array.from({ length: TrainingSession.session_per_month }, () => ({}));
+    const sessions = Array.from({ length: TrainingSession.sessions }, () => ({}));
 
     const SessionForUser = await OfflineDrill.create({
         clientId,
@@ -1480,4 +1480,28 @@ exports.buyTrainingSession = catchAsyncError(async (req, res, next) => {
         success: true,
         SessionForUser
     });
+});
+
+exports.createDrill = catchAsyncError(async (req, res, next) => {
+    const { clientId, drillId, form } = req.query;
+    if (!clientId || !drillId || !form) return next(new ErrorHandler('Empty Fields', 400));
+
+    const result = await OfflineDrill.updateOne(
+        {
+            "sessions.drills._id": new mongoose.Types.ObjectId(drillId),
+            "clientId": new mongoose.Types.ObjectId(clientId)
+        },
+        {
+            $set: {
+                "sessions.$[].drills.$[elem].form": form,
+                "sessions.$[].drills.$[elem].isComplete": true
+            }
+        },
+        { arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(drillId) }] }
+    );
+
+    if (result.nModified === 0) {
+        return next(new ErrorHandler('Update Failed', 400));
+    }
+    res.status(200).json({ success: true, data: result });
 });

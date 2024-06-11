@@ -10,10 +10,14 @@ const trainingSessionSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
-    session_per_month: {
+    sessions: {
         type: Number,
         required: true,
         min: 1
+    },
+    frequency: {
+        type: String,
+        required: true
     }
 });
 
