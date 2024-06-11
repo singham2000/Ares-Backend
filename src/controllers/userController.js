@@ -1483,8 +1483,9 @@ exports.buyTrainingSession = catchAsyncError(async (req, res, next) => {
 });
 
 exports.createDrill = catchAsyncError(async (req, res, next) => {
-    const { clientId, drillId, form } = req.query;
-    if (!clientId || !drillId || !form) return next(new ErrorHandler('Empty Fields', 400));
+    const { clientId, drillId, drillLabel } = req.query;
+    const { form } = req.body;
+    if (!clientId || !drillId || !form || !drillLabel) return next(new ErrorHandler('Empty Fields', 400));
 
     const result = await OfflineDrill.updateOne(
         {
@@ -1494,6 +1495,7 @@ exports.createDrill = catchAsyncError(async (req, res, next) => {
         {
             $set: {
                 "sessions.$[].drills.$[elem].form": form,
+                "sessions.$[].drills.$[elem].label": label,
                 "sessions.$[].drills.$[elem].isComplete": true
             }
         },
