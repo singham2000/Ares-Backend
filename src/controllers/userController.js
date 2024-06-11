@@ -1495,7 +1495,7 @@ exports.createDrill = catchAsyncError(async (req, res, next) => {
         {
             $set: {
                 "sessions.$[].drills.$[elem].form": form,
-                "sessions.$[].drills.$[elem].label": label,
+                "sessions.$[].drills.$[elem].label": drillLabel,
                 "sessions.$[].drills.$[elem].isComplete": true
             }
         },
