@@ -449,7 +449,6 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       }
     ];
     const sessionResult = await OfflineDrill.aggregate(lineForTotalIsBooked);
-    console.log(sessionResult);
     return res.status(200).json({
       success: true,
       userDetails,
