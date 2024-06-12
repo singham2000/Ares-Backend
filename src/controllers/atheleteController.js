@@ -14,6 +14,7 @@ const ShipmentModel = require("../models/shipment.js");
 const DrillForm = require('../models/DrillModel.js');
 const PrescriptionsForm = require('../models/PrescriptionForm.js');
 const EvaluationForm = require('../models/EvaluationForms.js');
+const OfflineDrill = require("../models/offlineDrillModel.js");
 
 exports.register = catchAsyncError(async (req, res, next) => {
   const {
@@ -294,31 +295,147 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
     process.env.JWT_SECRET
   );
 
-  const isDrill = await DrillFormModel.find({ clientId: userId })
-  const shipment = await ShipmentModel.find({ ClientId: new mongoose.Types.ObjectId(userId) }).select("-shippingAddress -productDescription -productImages -ClientId -plan -phase");
-  if (isDrill.length > 0) {
-    const calcPipe = [
+  const userDetails = await userModel.findById(userId);
+  if (userDetails.is_online) {
+    const isDrill = await DrillFormModel.find({ clientId: userId })
+    const shipment = await ShipmentModel.find({ ClientId: new mongoose.Types.ObjectId(userId) }).select("-shippingAddress -productDescription -productImages -ClientId -plan -phase");
+    if (isDrill.length > 0) {
+      const calcPipe = [
+        {
+          "$match": {
+            "clientId": new mongoose.Types.ObjectId(userId)
+          }
+        },
+        {
+          "$unwind": "$drill"
+        },
+        {
+          "$group": {
+            "_id": "$_id",
+            "totalActivities": { "$sum": { "$size": "$drill.activities" } },
+            "completedActivities": {
+              "$sum": {
+                "$size": {
+                  "$filter": {
+                    "input": "$drill.activities",
+                    "as": "activity",
+                    "cond": { "$eq": ["$$activity.isComplete", true] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$project": {
+            "_id": 0,
+            "totalActivities": 1,
+            "completedActivities": 1
+          }
+        }
+      ]
+
+      const pipelineForActiveDay = [
+        {
+          $match: {
+            $or: [
+              {
+                clientId: new mongoose.Types.ObjectId(userId)
+              },
+              {
+                clientId: new mongoose.Types.ObjectId(userId),
+              }
+            ]
+          }
+        },
+        {
+          $unwind: "$drill"
+        },
+        {
+          $unwind: "$drill.activities"
+        },
+        {
+          $group: {
+            _id: null,
+            activeDay: {
+              $push: {
+                $cond: {
+                  if: "$drill.activities.isComplete",
+                  // then: {  $concat: [{ $toInt: "$drill.week" }, "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] },
+                  then: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } },
+                  // then: 'd',
+                  else: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } }
+                }
+              }
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            activeDay: { $push: "$activeDay" },
+          }
+        }
+      ];
+
+      const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
+      const drill = await DrillFormModel.aggregate(calcPipe);
+
+      const runner = (drill) => {
+        return {
+          totalDrills: drill[0].totalActivities,
+          completedDrills: drill[0].completedActivities,
+          drillProgress: (drill[0].completedActivities / drill[0].totalActivities) * 100
+        }
+      }
+
+      function findFalseStatus(activities) {
+        for (const activity of activities) {
+          if (activity.status === "false") {
+            return { week: parseInt(activity.week), day: parseInt(activity.day) };
+          }
+        }
+        return null;
+      }
+
+      return res.status(200).json({
+        success: true,
+        userDetails,
+        drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : { week: 1, day: 1 },
+        drillDetails: runner(drill),
+        shipment,
+        isShipment: Boolean(shipment)
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      userDetails,
+      drillActiveStatus: { week: 0, day: 0 },
+      drillDetails: {
+        totalDrills: 0,
+        completedDrills: 0,
+        drillProgress: 0
+      },
+      shipment,
+      isShipment: Boolean(shipment)
+    });
+  } else {
+    const lineForTotalIsBooked = [
       {
         "$match": {
           "clientId": new mongoose.Types.ObjectId(userId)
         }
       },
       {
-        "$unwind": "$drill"
+        "$unwind": "$sessions"
       },
       {
         "$group": {
-          "_id": "$_id",
-          "totalActivities": { "$sum": { "$size": "$drill.activities" } },
-          "completedActivities": {
+          "_id": null,
+          "totalSessions": { "$sum": 1 },
+          "bookedSessions": {
             "$sum": {
-              "$size": {
-                "$filter": {
-                  "input": "$drill.activities",
-                  "as": "activity",
-                  "cond": { "$eq": ["$$activity.isComplete", true] }
-                }
-              }
+              "$cond": ["$sessions.isBooked", 1, 0]
             }
           }
         }
@@ -326,97 +443,24 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       {
         "$project": {
           "_id": 0,
-          "totalActivities": 1,
-          "completedActivities": 1
-        }
-      }
-    ]
-
-    const pipelineForActiveDay = [
-      {
-        $match: {
-          $or: [
-            {
-              clientId: new mongoose.Types.ObjectId(userId)
-            },
-            {
-              clientId: new mongoose.Types.ObjectId(userId),
-            }
-          ]
-        }
-      },
-      {
-        $unwind: "$drill"
-      },
-      {
-        $unwind: "$drill.activities"
-      },
-      {
-        $group: {
-          _id: null,
-          activeDay: {
-            $push: {
-              $cond: {
-                if: "$drill.activities.isComplete",
-                // then: {  $concat: [{ $toInt: "$drill.week" }, "-", "$drill.day", " for ", { $toString: "$drill.activities.isComplete" }] },
-                then: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } },
-                // then: 'd',
-                else: { week: "$drill.week", day: "$drill.day", status: { $toString: "$drill.activities.isComplete" } }
-              }
-            }
-          }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          activeDay: { $push: "$activeDay" },
+          "totalSessions": 1,
+          "bookedSessions": 1
         }
       }
     ];
-
-    const drillday = await DrillFormModel.aggregate(pipelineForActiveDay);
-    const drill = await DrillFormModel.aggregate(calcPipe);
-
-    const runner = (drill) => {
-      return {
-        totalDrills: drill[0].totalActivities,
-        completedDrills: drill[0].completedActivities,
-        drillProgress: (drill[0].completedActivities / drill[0].totalActivities) * 100
-      }
-    }
-
-    function findFalseStatus(activities) {
-      for (const activity of activities) {
-        if (activity.status === "false") {
-          return { week: parseInt(activity.week), day: parseInt(activity.day) };
-        }
-      }
-      return null;
-    }
-    const userDetails = await userModel.findById(userId);
+    const sessionResult = await OfflineDrill.aggregate(lineForTotalIsBooked);
+    console.log(sessionResult);
     return res.status(200).json({
       success: true,
       userDetails,
-      drillActiveStatus: drillday[0] !== undefined ? findFalseStatus(drillday[0].activeDay[0]) : { week: 1, day: 1 },
-      drillDetails: runner(drill),
-      shipment,
-      isShipment: Boolean(shipment)
+      sessionDetails: {
+        totalSessions: sessionResult[0].totalSessions,
+        completedSessions: sessionResult[0].bookedSessions,
+        sessionProgress: (sessionResult[0].bookedSessions / sessionResult[0].totalSessions) * 100
+      },
+      isShipment: false
     });
   }
-  const userDetails = await userModel.findById(userId);
-  return res.status(200).json({
-    success: true,
-    userDetails,
-    drillActiveStatus: { week: 0, day: 0 },
-    drillDetails: {
-      totalDrills: 0,
-      completedDrills: 0,
-      drillProgress: 0
-    },
-    shipment,
-    isShipment: Boolean(shipment)
-  });
 
 });
 

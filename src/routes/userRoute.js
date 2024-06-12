@@ -35,7 +35,7 @@ const {
   drillUpdate,
   getTrainigSessionModel,
   buyTrainingSession,
-  createDrill
+  updateDrill
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -54,7 +54,7 @@ router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);
 router.post('/buy-training-session', auth, buyTrainingSession);
 
-router.get("/get-slots", getSlots);
+router.get("/get-slots", auth, getSlots);
 router.get("/get-Drills", auth, getDrillDetails);
 router.get("/get-prescriptions", auth, getPrescription);
 router.get("/get-evaluations", auth, getEvaluation);
@@ -71,7 +71,7 @@ router.get('/get-all-doctors', auth, getAllDoc);
 router.get('/getServiceTypes', auth, getServiceTypes);
 router.get('/get-all-appointments', auth, getAllAppointments);
 
-router.put('/create-offline-drill', auth, createDrill);
+router.put('/update-offline-drill', updateDrill);
 router.put("/reset-password", resetPassword);
 router.put('/update-drill', auth, drillUpdate);
 router.put("/select-plan", auth, selectPlan);

@@ -1482,7 +1482,7 @@ exports.buyTrainingSession = catchAsyncError(async (req, res, next) => {
     });
 });
 
-exports.createDrill = catchAsyncError(async (req, res, next) => {
+exports.updateDrill = catchAsyncError(async (req, res, next) => {
     const { clientId, drillId, drillLabel } = req.query;
     const { form } = req.body;
     if (!clientId || !drillId || !form || !drillLabel) return next(new ErrorHandler('Empty Fields', 400));
@@ -1506,4 +1506,8 @@ exports.createDrill = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler('Update Failed', 400));
     }
     res.status(200).json({ success: true, data: result });
+});
+
+exports.createDrill = catchAsyncError(async (req, res, next) => {
+
 });
