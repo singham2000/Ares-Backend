@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Schema definitions
 const formModel = new mongoose.Schema({
     label: { type: String, required: true },
     type_of_field: { type: String, required: true },
