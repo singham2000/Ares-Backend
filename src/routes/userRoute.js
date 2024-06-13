@@ -48,7 +48,7 @@ router.post("/send-forgot-password-code", sendForgotPasswordCode);
 router.post("/validate-code", validateForgotPasswordCode);
 router.post("/new-client-registration", auth, registerClient);
 router.post("/existing-client-verification", auth, checkClient);
-router.post("/book-appointment/:id", auth, bookAppointment);
+router.post("/book-appointment/:id", bookAppointment); //authorization removed
 router.post("/submit-eval-form", auth, submitEvaluation);
 router.post("/submit-pres-form", auth, submitPrescription);
 router.post("/submit-diagnosis-form", auth, submitDiagnosis);

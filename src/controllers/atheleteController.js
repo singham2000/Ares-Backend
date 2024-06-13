@@ -449,6 +449,7 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
       }
     ];
     const sessionResult = await OfflineDrill.aggregate(lineForTotalIsBooked);
+    const shipment = await ShipmentModel.find({ ClientId: new mongoose.Types.ObjectId(userId) }).select("-shippingAddress -productDescription -productImages -ClientId -plan -phase");
     return res.status(200).json({
       success: true,
       userDetails,
@@ -457,7 +458,8 @@ exports.dashboard = catchAsyncError(async (req, res, next) => {
         completedSessions: sessionResult[0].bookedSessions,
         sessionProgress: (sessionResult[0].bookedSessions / sessionResult[0].totalSessions) * 100
       },
-      isShipment: false
+      shipment,
+      isShipment: Boolean(shipment)
     });
   }
 

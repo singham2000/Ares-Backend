@@ -1,9 +1,6 @@
 const mongoose = require("mongoose");
 const paymentStatus = ["paid", "pending", "failed"];
 const appointmentStatus = ["completed", "upcoming", "cancelled"];
-
-
-
 const appointmentSchema = new mongoose.Schema(
   {
     appointment_id: {

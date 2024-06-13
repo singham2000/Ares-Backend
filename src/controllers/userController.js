@@ -23,7 +23,6 @@ const transactionModel = require("../models/transactionModel.js");
 const TrainingSessionModel = require("../models/trainingSessionModel.js");
 const OfflineDrill = require('../models/offlineDrillModel.js');
 
-
 exports.getProfile = catchAsyncError(async (req, res, next) => {
     const email = req.query.email;
     const user = await userModel.findOne({ email: email, role: 'doctor' });
@@ -318,6 +317,85 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         doctor_trainer,
         location
     } = req.body;
+    if (service_type === 'TrainingSessions') {
+
+        // For managing TrainingSessions
+
+        let query = {
+            service_type,
+            app_date: `${app_date.split('T')[0]}T00:00:00.000`,
+            app_time,
+            end_time,
+            doctor_trainer,
+            location
+        };
+        const app_id = generateAppointmentId();
+        if (!client_id) {
+            return next(new ErrorHandler("Please provide a client_id", 400));
+        }
+        const client = await userModel.findById(client_id);
+        if (!client) {
+            return next(new ErrorHandler("Client does not exist", 400));
+        }
+        if (client.role !== 'athlete') {
+            return next(new ErrorHandler('Unauthorized! Access denied', 400));
+        }
+        const result = await OfflineDrill.aggregate([
+            { $match: { "clientId": new mongoose.Types.ObjectId(client_id) } },
+            { $unwind: "$sessions" },
+            { $match: { "sessions.isBooked": false } },
+            { $count: "nonBookedCount" }
+        ]);
+        const nonBookedCount = result.length > 0 ? result[0].nonBookedCount : 0;
+        if (!nonBookedCount) {
+            return result.status(400).json({
+                success: false,
+                message: 'Cannot find non-booked session'
+            });
+        }
+        const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
+        if (dayAppointments.length > 0) {
+            return next(new ErrorHandler('Already booked a appointment on this timeline', 400));
+        }
+        const service = await ServiceTypeModel.findOne({ alias: service_type })
+        const appointment = await appointmentModel.create({
+            appointment_id: app_id,
+            client: client_id,
+            service_type,
+            app_date: `${app_date.split('T')[0]}T00:00:00.000`,
+            app_time,
+            end_time,
+            doctor_trainer,
+            location,
+            amount: service.cost,
+            status: (service_type === 'Consultation' || service_type === 'ConsultationCall' || service_type === 'TrainingSessions') ? "paid" : 'pending'
+        });
+        const date = new Date(app_date);
+        date.setUTCHours(0, 0, 0, 0);
+        await appointment.save();
+        const offlineDrillupdate = await OfflineDrill.findOneAndUpdate(
+            { "clientId": new mongoose.Types.ObjectId(client_id), "sessions.isBooked": false },
+            { "$set": { "sessions.$.isBooked": true } },
+            { new: true }
+        );
+        const transaction = await transactionModel.create({
+            doctor: doctor_trainer,
+            service_type,
+            date,
+            payment_status: (service_type === 'Consultation' || service_type === 'ConsultationCall' || service_type === 'TrainingSessions') ? "paid" : 'pending',
+            bookingId: appointment._id,
+            clientId: client_id,
+            amount: service.cost
+        });
+        await transaction.save();
+        await offlineDrillupdate.save();
+        return res.status(200).json({
+            success: true,
+            message: `Appointment booked. Your Appointment ID: ${app_id}.`,
+            appointment: appointment,
+        });
+        // यह ख़त्म है ट्रेनिंग सेशन 
+    }
     let query = {
         service_type,
         app_date: `${app_date.split('T')[0]}T00:00:00.000`,
@@ -327,7 +405,6 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         location
     };
     const app_id = generateAppointmentId();
-
     if (!client_id) {
         return next(new ErrorHandler("Please provide a client_id", 400));
     }
@@ -338,7 +415,6 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
     if (client.role !== 'athlete') {
         return next(new ErrorHandler('Unauthorized! Access denied', 400));
     }
-
     const dayAppointments = await appointmentModel.find(query).sort({ createdAt: 'desc' });
     if (dayAppointments.length > 0) {
         return next(new ErrorHandler('Already booked a appointment on this timeline', 400));
@@ -354,13 +430,10 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         doctor_trainer,
         location,
         amount: service.cost,
-        status: (service_type === 'Consultation' || service_type === 'ConsultationCall') ? "paid" : 'pending'
+        status: (service_type === 'Consultation' || service_type === 'ConsultationCall' || service_type === 'TrainingSessions') ? "paid" : 'pending'
     });
-
     const date = new Date(app_date);
     date.setUTCHours(0, 0, 0, 0);
-
-
     await appointment.save();
     const transaction = await transactionModel.create({
         doctor: doctor_trainer,
@@ -371,10 +444,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         clientId: client_id,
         amount: service.cost
     });
-
-
     await transaction.save();
-
     res.status(200).json({
         success: true,
         message: `Appointment booked. Your Appointment ID: ${app_id}.`,
