@@ -348,7 +348,7 @@ exports.bookAppointment = catchAsyncError(async (req, res, next) => {
         ]);
         const nonBookedCount = result.length > 0 ? result[0].nonBookedCount : 0;
         if (!nonBookedCount) {
-            return result.status(400).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Cannot find non-booked session'
             });
